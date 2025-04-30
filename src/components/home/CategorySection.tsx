@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { ArrowRight, Design, BarChart, MessagesSquare, Wallet, Monitor, Code, Briefcase, Users } from "lucide-react";
+import { ArrowRight, Palette, BarChart, MessagesSquare, Wallet, Monitor, Code, Briefcase, Users } from "lucide-react";
 
 interface CategoryCardProps {
   icon: React.ReactNode;
@@ -28,7 +28,7 @@ const CategoryCard = ({ icon, title, jobCount, path }: CategoryCardProps) => {
 const CategorySection = () => {
   const categories = [
     {
-      icon: <Design size={28} />,
+      icon: <Palette size={28} />,
       title: "Design",
       jobCount: 235,
       path: "/jobs/category/design"
