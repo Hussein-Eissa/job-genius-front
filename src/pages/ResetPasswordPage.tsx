@@ -1,0 +1,36 @@
+
+import { Link } from "react-router-dom";
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+import LogoIcon from "@/components/common/LogoIcon";
+
+const ResetPasswordPage = () => {
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <Link to="/" className="block mb-8">
+            <div className="flex items-center">
+              <LogoIcon className="h-10 w-10" />
+              <span className="ml-2 text-xl font-bold">JobGenius</span>
+            </div>
+          </Link>
+          
+          <ResetPasswordForm />
+        </div>
+      </div>
+      
+      <div className="hidden md:block md:w-1/2 bg-jobblue relative overflow-hidden">
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <img 
+            src="/lovable-uploads/fce6240c-d575-44a1-aa6f-0b5f8aa5d072.png" 
+            alt="Reset password illustration" 
+            className="w-3/4 max-w-lg"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-jobblue-dark to-jobblue opacity-80"></div>
+      </div>
+    </div>
+  );
+};
+
+export default ResetPasswordPage;

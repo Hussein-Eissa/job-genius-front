@@ -1,0 +1,36 @@
+
+import { Link } from "react-router-dom";
+import SignupForm from "@/components/auth/SignupForm";
+import LogoIcon from "@/components/common/LogoIcon";
+
+const SignupPage = () => {
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <Link to="/" className="block mb-8">
+            <div className="flex items-center">
+              <LogoIcon className="h-10 w-10" />
+              <span className="ml-2 text-xl font-bold">JobGenius</span>
+            </div>
+          </Link>
+          
+          <SignupForm />
+        </div>
+      </div>
+      
+      <div className="hidden md:block md:w-1/2 bg-jobblue relative overflow-hidden">
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <img 
+            src="/lovable-uploads/20d8aaa5-2fa3-4481-a3bb-826b51c24771.png" 
+            alt="Signup illustration" 
+            className="w-3/4 max-w-lg"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-jobblue-dark to-jobblue opacity-80"></div>
+      </div>
+    </div>
+  );
+};
+
+export default SignupPage;
