@@ -15,6 +15,16 @@ import JobListingPage from "./pages/jobs/JobListingPage";
 import JobDetailPage from "./pages/jobs/JobDetailPage";
 import JobSearchPage from "./pages/jobs/JobSearchPage";
 import JobFinancePage from "./pages/jobs/JobFinancePage";
+import ResumeUploadPage from "./pages/resume/ResumeUploadPage";
+import ResumePage from "./pages/resume/ResumePage";
+import ResumeHowItWorksPage from "./pages/resume/ResumeHowItWorksPage";
+import InterviewPage from "./pages/interview/InterviewPage";
+import InterviewQuestionsPage from "./pages/interview/InterviewQuestionsPage";
+import InterviewTipsPage from "./pages/interview/InterviewTipsPage";
+import HelpPage from "./pages/help/HelpPage";
+import HelpFaqsPage from "./pages/help/HelpFaqsPage";
+import HelpContactPage from "./pages/help/HelpContactPage";
+import HelpTutorialsPage from "./pages/help/HelpTutorialsPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +46,16 @@ const App = () => (
           <Route path="/jobs/search" element={<JobSearchPage />} />
           <Route path="/jobs/finance" element={<JobFinancePage />} />
           <Route path="/jobs/category/:categoryName" element={<JobListingPage />} />
+          <Route path="/resume" element={<ResumePage />} />
+          <Route path="/resume/upload" element={<ResumeUploadPage />} />
+          <Route path="/resume/how-it-works" element={<ResumeHowItWorksPage />} />
+          <Route path="/interview" element={<InterviewPage />} />
+          <Route path="/interview/questions" element={<InterviewQuestionsPage />} />
+          <Route path="/interview/tips" element={<InterviewTipsPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/help/faqs" element={<HelpFaqsPage />} />
+          <Route path="/help/contact" element={<HelpContactPage />} />
+          <Route path="/help/tutorials" element={<HelpTutorialsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
