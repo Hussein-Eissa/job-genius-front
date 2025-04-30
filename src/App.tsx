@@ -11,6 +11,10 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import NotFound from "./pages/NotFound";
+import JobListingPage from "./pages/jobs/JobListingPage";
+import JobDetailPage from "./pages/jobs/JobDetailPage";
+import JobSearchPage from "./pages/jobs/JobSearchPage";
+import JobFinancePage from "./pages/jobs/JobFinancePage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +31,11 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/jobs" element={<JobListingPage />} />
+          <Route path="/jobs/:id" element={<JobDetailPage />} />
+          <Route path="/jobs/search" element={<JobSearchPage />} />
+          <Route path="/jobs/finance" element={<JobFinancePage />} />
+          <Route path="/jobs/category/:categoryName" element={<JobListingPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

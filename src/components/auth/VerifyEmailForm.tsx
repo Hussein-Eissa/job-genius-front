@@ -1,65 +1,79 @@
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
-const VerifyEmailForm = () => {
-  const [otp, setOtp] = useState("");
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle verification logic here
-    console.log("Verification code submitted:", otp);
-  };
+const FormSchema = z.object({
+  otp: z.string().min(6, {
+    message: "Your one-time password must be 6 characters.",
+  }),
+});
+
+export default function VerifyEmailForm() {
+  const { toast } = useToast();
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      otp: "",
+    },
+  });
+
+  function onSubmit(data: z.infer<typeof FormSchema>) {
+    toast({
+      title: "Email verified",
+      description: "You have successfully verified your email.",
+    });
+    console.log(data);
+  }
 
   return (
-    <div className="max-w-md w-full">
-      <h2 className="text-3xl font-bold text-gray-800 text-center mb-2">
-        Forgot your password?
-      </h2>
-      <h3 className="text-3xl font-bold text-gray-800 text-center mb-2">
-        Let's help you
-      </h3>
-      <p className="text-3xl font-bold text-jobblue text-center mb-8">
-        get back on track!
-      </p>
-
-      <form onSubmit={handleSubmit} className="text-center">
-        <p className="mb-6">Enter the 5-digit code sent to your email</p>
-        
-        <div className="flex justify-center mb-8">
-          <InputOTP 
-            maxLength={5}
-            value={otp}
-            onChange={setOtp}
-            render={({ slots }) => (
-              <InputOTPGroup>
-                {slots.map((slot, index) => (
-                  <InputOTPSlot 
-                    key={index} 
-                    {...slot} 
-                    className="w-14 h-14 text-xl border-2 border-gray-300" 
-                  />
-                ))}
-              </InputOTPGroup>
-            )}
-          />
-        </div>
-
-        <Button
-          type="submit"
-          className="w-full bg-jobblue hover:bg-jobblue-dark text-white py-6"
-        >
-          Verify Code
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="otp"
+          render={({ field }) => (
+            <FormItem className="mx-auto space-y-3">
+              <FormLabel className="text-center">Enter verification code</FormLabel>
+              <FormDescription className="text-center">
+                We&apos;ve sent a code to your email. Please enter it below to verify your account.
+              </FormDescription>
+              <FormControl>
+                <InputOTP maxLength={6} {...field}>
+                  <InputOTPGroup>
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <InputOTPSlot key={index} index={index} />
+                    ))}
+                  </InputOTPGroup>
+                </InputOTP>
+              </FormControl>
+              <FormDescription className="text-center">
+                Didn&apos;t receive a code?{" "}
+                <Link to="#" className="text-primary hover:underline">
+                  Resend
+                </Link>
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full">
+          Verify Email
         </Button>
-        
-        <p className="mt-6 text-gray-600">
-          Haven't got the email yet? <Link to="#" className="text-jobblue hover:underline">Resend email</Link>
-        </p>
       </form>
-    </div>
+    </Form>
   );
-};
-
-export default VerifyEmailForm;
+}
