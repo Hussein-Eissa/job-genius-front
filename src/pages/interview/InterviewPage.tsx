@@ -113,7 +113,7 @@ const InterviewPage = () => {
             </div>
             <div className="flex items-center justify-center">
               <img 
-                src="/lovable-uploads/fa2a8727-4998-459c-a896-dcd1da4f0b9a.png" 
+                src="/lovable-uploads/Images/vector 1.png" 
                 alt="Interview Preparation" 
                 className="max-w-full"
               />

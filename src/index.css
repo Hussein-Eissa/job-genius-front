@@ -84,6 +84,13 @@
   --jobblue-light: #8AB4F8;
 }
 
+main {
+  margin: 0px 10px;
+  padding: 0;
+  min-height: 100vh;
+  min-width: 100%;
+}
+
 .text-jobblue {
   color: var(--jobblue);
 }
