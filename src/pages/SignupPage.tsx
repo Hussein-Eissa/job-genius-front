@@ -22,7 +22,7 @@ const SignupPage = () => {
       <div className="hidden md:block md:w-1/2 bg-jobblue relative overflow-hidden">
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <img 
-            src="/lovable-uploads/20d8aaa5-2fa3-4481-a3bb-826b51c24771.png" 
+            src="/lovable-uploads/Images/image 5.png" 
             alt="Signup illustration" 
             className="w-3/4 max-w-lg"
           />

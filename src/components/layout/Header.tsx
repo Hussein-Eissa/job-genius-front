@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import LogoIcon from "../common/LogoIcon";
+import { LogOutIcon } from "lucide-react";
 
 interface HeaderProps {
   isAuthenticated?: boolean;
@@ -36,6 +37,7 @@ const Header = ({ isAuthenticated = false }: HeaderProps) => {
                 />
               </Link>
               <Button variant="outline" size="sm" className="ml-4">
+                <LogOutIcon/>
                 Logout
               </Button>
             </div>
