@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import LogoIcon from "../common/LogoIcon";
 import { LogOutIcon } from "lucide-react";
 
-interface HeaderProps {
-  isAuthenticated?: boolean;
-}
-
-const Header = ({ isAuthenticated = false }: HeaderProps) => {
+const Header = ({ isAuthenticated = false }) => {
   return (
     <header className="bg-white border-b border-gray-200 py-4">
       <div className="container mx-auto flex items-center justify-between px-4">
@@ -37,7 +33,7 @@ const Header = ({ isAuthenticated = false }: HeaderProps) => {
                 />
               </Link>
               <Button variant="outline" size="sm" className="ml-4">
-                <LogOutIcon/>
+                <LogOutIcon />
                 Logout
               </Button>
             </div>

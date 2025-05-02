@@ -10,11 +10,11 @@ import ResumeRecommendations from "@/components/resume/ResumeRecommendations";
 
 const ResumePage = () => {
   const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeFileName, setResumeFileName] = useState("");
   const [open, setOpen] = useState(false);
 
-  const handleUpload = (file: File) => {
-    setResumeFile(file);
+  const handleUpload = (fileName) => {
+    setResumeFileName(fileName);
     setUploadSuccess(true);
     setOpen(true);
   };
@@ -46,11 +46,11 @@ const ResumePage = () => {
                   <h2 className="text-xl font-semibold">Resume Successfully Uploaded</h2>
                 </div>
                 <p className="text-gray-600 mb-4">
-                  {resumeFile?.name} has been uploaded and analyzed.
+                  {resumeFileName} has been uploaded and analyzed.
                 </p>
                 <Button 
                   className="bg-jobblue hover:bg-jobblue-dark"
-                  onClick={() => setResumeFile(null)}
+                  onClick={() => setUploadSuccess(false)}
                 >
                   Upload Another Resume
                 </Button>

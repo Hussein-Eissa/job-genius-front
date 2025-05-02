@@ -3,12 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import LogoIcon from "../common/LogoIcon";
 
-interface DeleteAccountModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-const DeleteAccountModal = ({ open, onOpenChange }: DeleteAccountModalProps) => {
+const DeleteAccountModal = ({ open, onOpenChange }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
