@@ -84,7 +84,7 @@ const CategorySection = () => {
           <h2 className="text-3xl font-bold text-gray-800">
             Explore by <span className="text-jobblue">categories</span>
           </h2>
-          <Link to="/jobs" className="text-jobblue flex items-center text-sm hover:underline">
+          <Link to="/jobs/categories" className="text-jobblue flex items-center text-sm hover:underline">
             Show all jobs <ArrowRight size={16} className="ml-1" />
           </Link>
         </div>

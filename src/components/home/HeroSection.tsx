@@ -64,7 +64,7 @@ const HeroSection = () => {
           
           <div className="hidden md:block">
             <img 
-              src="/lovable-uploads/Images/image_1.png" 
+              src="/lovable-uploads/765c0a81-b40b-48c7-a075-956aad70d353.png" 
               alt="Job seeker illustration" 
               className="max-w-full"
             />

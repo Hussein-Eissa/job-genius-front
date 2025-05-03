@@ -24,7 +24,7 @@ const ResumeSection = () => {
           </div>
           <div className="flex justify-center">
             <img
-              src="/lovable-uploads/Images/image 3.png"
+              src="/lovable-uploads/37758951-22b0-43ca-a131-f73c8a7c958a.png"
               alt="Resume Analysis Tool"
               className="max-w-full"
             />

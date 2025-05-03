@@ -7,14 +7,14 @@ const InterviewSection = () => {
     <section className="py-16 bg-gray-50 border-t border-gray-200">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-10 items-center">
-          <div className="order-1 md:order-2 flex justify-center">
+          <div className="order-2 md:order-1 flex justify-center">
             <img
-              src="/lovable-uploads/Images/image 4.png"
+              src="/lovable-uploads/fa2a8727-4998-459c-a896-dcd1da4f0b9a.png"
               alt="Interview Simulation"
               className="max-w-full"
             />
           </div>
-          <div className="order-2 md:order-1">
+          <div className="order-1 md:order-2">
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
               Simulate Your <span className="text-jobblue">Interview</span>
             </h2>

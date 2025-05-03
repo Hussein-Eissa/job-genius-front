@@ -22,7 +22,7 @@ const ForgotPasswordPage = () => {
       <div className="hidden md:block md:w-1/2 bg-jobblue relative overflow-hidden">
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <img 
-            src="/lovable-uploads/Images/image 7.png" 
+            src="/lovable-uploads/fce6240c-d575-44a1-aa6f-0b5f8aa5d072.png" 
             alt="Forgot password illustration" 
             className="w-3/4 max-w-lg"
           />
