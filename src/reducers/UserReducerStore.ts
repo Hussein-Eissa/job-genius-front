@@ -16,6 +16,7 @@ interface UserState {
   logout: () => void;
   checkAuth: () => boolean;
   register: (userData: { fullName: string; email: string; password: string }) => Promise<void>;
+  forgetPassword: (email: string) => Promise<void>;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -65,9 +66,22 @@ export const useUserStore = create<UserState>((set) => ({
   checkAuth: () => {
     return !!localStorage.getItem("token");
   },
-
+  forgetPassword: async (email) => {
+    try {
+      const res = await axios.post(`https://jobgenius.bsite.net/api/auth/forgot-password?email=${email}`);
+      if (res.data.success) {
+        alert(res.data.message);
+      } else {
+        throw new Error(res.data.message);
+      }
+    } catch (error: any) {
+      console.log("Password reset error:", error.response?.data || error.message);
+      throw new Error(error?.response?.data?.message || "Password reset failed");
+    }
+  }
+  
+  ,
   register: async (userData) => {
-    console.log("Registering user:", userData);
     try {
       const res = await axios.post("https://jobgenius.bsite.net/api/auth/register", {
         fullName: userData.fullName,
@@ -84,6 +98,6 @@ export const useUserStore = create<UserState>((set) => ({
       console.log("Registration error:", error.response?.data || error.message);
       throw new Error(error?.response?.data?.message || "Registration failed");
     }
-  }
+  },
   
 }));

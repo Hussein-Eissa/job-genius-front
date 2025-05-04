@@ -2,15 +2,17 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUserStore } from "@/reducers/UserReducerStore";
+
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
-
+  const { forgetPassword } = useUserStore();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle forgot password logic here
-    console.log("Password reset requested for:", email);
+    forgetPassword(email);
+    // console.log("Password reset requested for:", email);
     setIsSubmitted(true);
   };
 
