@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { useUserStore } from "@/reducers/UserReducerStore";
 
+import axios from "axios";
 const SignupForm = () => {
+  const { register } = useUserStore();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +15,8 @@ const SignupForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle signup logic here
+    // handle signup logic here
+    register({ fullName, email, password }); 
     console.log("Signup attempt with:", { fullName, email, password });
   };
 
