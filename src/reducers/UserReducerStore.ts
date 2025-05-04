@@ -2,8 +2,10 @@ import { create } from "zustand";
 import axios from "axios";
 
 interface User {
-  fullName: string;
+  fullName?: string ;
   email: string;
+  token?: string;
+  isAuthenticated?: boolean;
 }
 
 interface UserState {
@@ -27,28 +29,31 @@ export const useUserStore = create<UserState>((set) => ({
         email,
         password,
       });
-
-      const token = res.data.token;
-      const user = res.data.user;
+  
+      const { token, fullname, email: returnedEmail } = res.data;
+  
+      if (!token || !returnedEmail) {
+        throw new Error("Invalid login response");
+      }
+  
       localStorage.setItem("token", token);
-
+  
       set({
         user: {
-          fullName: user.fullName,
-          email: user.email,
+          fullName: fullname || "",
+          email: returnedEmail,
         },
         token,
         isAuthenticated: true,
       });
-
+  
       console.log("Login successful");
     } catch (err: any) {
       console.error("Login failed:", err);
       throw new Error(err?.response?.data?.message || "Login failed");
     }
   },
-
-  logout: () => {
+    logout: () => {
     localStorage.removeItem("token");
     set({
       user: { fullName: "", email: "" },
@@ -69,11 +74,16 @@ export const useUserStore = create<UserState>((set) => ({
         email: userData.email,
         password: userData.password,
       });
-      console.log("Registration success:", res.data.message);
-      await useUserStore.getState().loginAsync(userData.email, userData.password);
-    } catch (err: any) {
-      console.error("Registration error:", err);
-      throw new Error(err?.response?.data?.message || "Registration failed");
+      if (res.data.success) {
+        console.log("Registration success:", res.data.message);
+        alert(res.data.message); 
+      } else {
+        throw new Error(res.data.message);
+      }
+    } catch (error: any) {
+      console.log("Registration error:", error.response?.data || error.message);
+      throw new Error(error?.response?.data?.message || "Registration failed");
     }
-  },
+  }
+  
 }));
