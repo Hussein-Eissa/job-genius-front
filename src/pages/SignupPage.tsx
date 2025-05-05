@@ -23,7 +23,7 @@ const SignupPage = () => {
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <img 
             src="/lovable-uploads/20d8aaa5-2fa3-4481-a3bb-826b51c24771.png" 
-            alt="Signup illustration" 
+            alt="Signup illustration"
             className="w-3/4 max-w-lg"
           />
         </div>

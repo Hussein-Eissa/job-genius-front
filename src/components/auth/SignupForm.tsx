@@ -81,6 +81,7 @@ const SignupForm = () => {
         <Button
           type="submit"
           className="w-full bg-jobblue hover:bg-jobblue-dark text-white py-6"
+          onClick={handleSubmit}
         >
           Continue
         </Button>

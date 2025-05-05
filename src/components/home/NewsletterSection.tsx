@@ -24,7 +24,7 @@ const NewsletterSection = () => {
             </div>
           ) : (
             <form onSubmit={handleSubscribe} className="w-full max-w-lg">
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="rounded-md bg-white p-0 m-0 flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
                   placeholder="Your email"
@@ -35,9 +35,13 @@ const NewsletterSection = () => {
                 />
                 <Button 
                   type="submit" 
-                  className="bg-white text-jobblue hover:bg-gray-100 font-medium"
+                  className="m-2 p-0 bg-white text-jobblue hover:bg-gray-100 font-medium"
                 >
-                  Subscribe
+                  <img
+                    src="/lovable-uploads/Images/Frame 89.png"
+                    alt="Subscribe"
+                    className="max-w-full"
+                  />
                 </Button>
               </div>
             </form>
