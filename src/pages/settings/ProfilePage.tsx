@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pencil, Plus } from "lucide-react";
@@ -7,8 +7,13 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import LogoIcon from "@/components/common/LogoIcon";
-
+import { useJobStore } from "@/reducers/JobListingReducerStore";
 const ProfilePage = () => {
+  const { savedJobs  , fetchSavedJobs} = useJobStore();
+  useEffect(() => {
+    fetchSavedJobs();
+  }, [])
+  
   const [showProfileSetupModal, setShowProfileSetupModal] = useState(false);
   const [experiences, setExperiences] = useState([
     {

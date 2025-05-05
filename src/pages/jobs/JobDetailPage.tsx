@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -10,12 +10,18 @@ import SimilarJobs from "@/components/jobs/SimilarJobs";
 import JobApplicationForm from "@/components/jobs/JobApplicationForm";
 import SuccessModal from "@/components/jobs/SuccessModal";
 import { Dialog } from "@/components/ui/dialog";
-
+import { useJobStore } from "@/reducers/JobListingReducerStore";
 const JobDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const { getJobById } = useJobStore();
   const [isApplicationOpen, setIsApplicationOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
-
+  const[jobData, setJobData] = useState<any>(null);
+   // getJobById(3);
+  useEffect(() => {
+  setJobData(getJobById(id ? parseInt(id) : 1));
+  }, []);
+  // const job = getJobById(id ? parseInt(id) : 1);
   // In a real app, you would fetch job details based on the id
   const job = {
     id: id || "1",

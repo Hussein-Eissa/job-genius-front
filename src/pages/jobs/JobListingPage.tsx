@@ -3,7 +3,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import JobList from "@/components/jobs/JobList";
 import { CheckSquare } from "lucide-react";
-
+import {useJobStore} from '@/reducers/JobListingReducerStore';
+import { useState } from "react";
 const JobListingPage = () => {
   const employmentTypes = [
     { id: 'ft', label: 'Full-Time', count: 3 },
@@ -39,6 +40,16 @@ const JobListingPage = () => {
     { id: 'range4', label: '$3000 or above', count: 4 },
   ];
 
+  const {searchJobs } = useJobStore();
+  const [searchTerm, setSearchTerm] = useState({keyword: "", location: ""});
+  const SearchHandler = () => {
+    const [city, country] = searchTerm.location.split(',').map(str => str.trim());
+    searchJobs(searchTerm.keyword, country, city);
+  }
+
+  const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm({ ...searchTerm, [e.target.name]: e.target.value });
+  }
   const FilterGroup = ({ title, items }: { title: string, items: { id: string, label: string, count: number }[] }) => (
     <div className="mb-6">
       <h3 className="font-medium text-gray-800 mb-3 flex items-center justify-between">
@@ -77,9 +88,11 @@ const JobListingPage = () => {
             <div className="bg-white p-3 rounded-lg shadow-sm flex items-center space-x-4">
               <div className="relative flex-1">
                 <input
+                  name="keyword"
                   type="text"
                   placeholder="Job title or keyword"
                   className="w-full pl-10 pr-4 py-2.5 rounded-md border-gray-200 focus:border-jobblue focus:ring-jobblue"
+                  onChange={inputChangeHandler}
                 />
                 <span className="absolute left-3 top-3 text-gray-400">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -91,9 +104,11 @@ const JobListingPage = () => {
               
               <div className="relative flex-1">
                 <input
+                  name="location"
                   type="text"
                   placeholder="Cairo, Egypt"
                   className="w-full pl-10 pr-4 py-2.5 rounded-md border-gray-200 focus:border-jobblue focus:ring-jobblue"
+                  onChange={inputChangeHandler}
                 />
                 <span className="absolute left-3 top-3 text-gray-400">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -108,7 +123,7 @@ const JobListingPage = () => {
                 </span>
               </div>
               
-              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition">
+              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition" onClick={SearchHandler}>
                 Search
               </button>
             </div>
