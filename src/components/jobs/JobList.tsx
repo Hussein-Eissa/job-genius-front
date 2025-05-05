@@ -1,8 +1,9 @@
 
-import { useState } from 'react';
+import { useState  , useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import JobCard from './JobCard';
 import { Grid, List, ArrowLeft, ArrowRight, Search } from 'lucide-react';
+import {useJobStore} from '@/reducers/JobListingReducerStore';
 import { 
   Select,
   SelectContent,
@@ -185,10 +186,16 @@ interface JobListProps {
 const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobListProps) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [currentPage, setCurrentPage] = useState(1);
-  
-  // Get jobs based on type
-  const jobsToShow = type === 'finance' ? financeJobs : 
-                     type === 'ai' ? jobs.slice(0, 2) : jobs;
+  const { jobs: fetchedJobs, fetchJobs } = useJobStore();
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const jobsToShow =
+    type === 'finance' ? financeJobs :
+    type === 'ai' ? jobs.slice(0, 2) :
+    fetchedJobs.length ? fetchedJobs : jobs;
 
   return (
     <section className="py-8">
