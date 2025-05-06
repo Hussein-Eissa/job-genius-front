@@ -52,9 +52,9 @@ interface UpdateProfilePayload {
 interface ProfileState {
   profiles: Profile[] | null;
   profile: Profile | null;
-  fetchMeProfile: (token: string) => Promise<void>;
+  fetchMeProfile: () => Promise<void>;
   fetchProfileById: (id: number) => Promise<void>;
-  fetchAllProfiles: (token: string) => Promise<void>;
+  fetchAllProfiles: () => Promise<void>;
   updateProfile: (payload: UpdateProfilePayload) => Promise<void>;
   addLanguage: (languageName: string) => Promise<void>;
   deleteLanguage: (languageName: string) => Promise<void>;
@@ -69,7 +69,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   profiles: null,
   profile: null,
 
-  fetchMeProfile: async (token: string) => {
+  fetchMeProfile: async () => {
+    const token = localStorage.getItem("token");
     try {
       const res = await axios.get("https://jobgenius.bsite.net/api/Profile/me", {
         headers: {
@@ -99,7 +100,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     }
   },
 
-  fetchAllProfiles: async (token: string) => {
+  fetchAllProfiles: async () => {
+    const token = localStorage.getItem("token");
     try {
       const res = await axios.get("https://jobgenius.bsite.net/api/Profile", {
         headers: {
@@ -180,7 +182,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
           },
         }
       );
-      await get().fetchMeProfile(token);
+      await get().fetchMeProfile();
     } catch (error: any) {
       console.error("Error adding language:", error);
       throw new Error(error.response?.data?.message || "Failed to add language");
@@ -203,7 +205,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         }
       );
 
-      await get().fetchMeProfile(token);
+      await get().fetchMeProfile();
     } catch (error: any) {
       console.error("Error deleting language:", error);
       throw new Error(error.response?.data?.message || "Failed to delete language");
@@ -227,7 +229,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         }
       );
 
-      await get().fetchMeProfile(token);
+      await get().fetchMeProfile();
     } catch (error: any) {
       console.error("Error adding skill:", error);
       throw new Error(error.response?.data?.message || "Failed to add skill");
@@ -250,7 +252,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         }
       );
 
-      await get().fetchMeProfile(token);
+      await get().fetchMeProfile();
     } catch (error: any) {
       console.error("Error deleting skill:", error);
       throw new Error(error.response?.data?.message || "Failed to delete skill");
@@ -275,7 +277,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         }
       );
 
-      await get().fetchMeProfile(token);
+      await get().fetchMeProfile();
       return res.data;
     } catch (error: any) {
       console.error("Error adding social link:", error);
@@ -299,7 +301,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         }
       );
 
-      await get().fetchMeProfile(token);
+      await get().fetchMeProfile();
       return res.data;
     } catch (error: any) {
       console.error("Error deleting social link:", error);
@@ -325,7 +327,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         }
       );
 
-      await get().fetchMeProfile(token);
+      await get().fetchMeProfile();
       return res.data;
     } catch (error: any) {
       console.error("Error updating social link:", error);
