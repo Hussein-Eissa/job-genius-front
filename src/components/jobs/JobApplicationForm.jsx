@@ -75,7 +75,12 @@ const JobApplicationForm = ({ jobTitle, companyName, location, type, onSubmit })
       <DialogHeader>
         <DialogTitle>Apply for {jobTitle}</DialogTitle>
       </DialogHeader>
-      
+      <div className="mt-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <p className="text-lg font-medium mb-2">
+              Are you a stakeholder or employer? <span className="text-jobblue">Post your job now!</span>
+            </p>
+            <Button className="mt-2">Add Your Job</Button>
+          </div>
       <div className="flex items-center gap-2 text-sm mb-6">
         <span className="font-medium">{companyName}</span>
         <span className="text-gray-500">·</span>

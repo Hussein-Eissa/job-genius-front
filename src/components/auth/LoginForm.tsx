@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useUserStore } from "@/reducers/UserReducerStore";
 
@@ -12,12 +12,23 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { loginAsync } = useUserStore();
-
+  const navigate = useNavigate();
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    loginAsync(email, password);
-    console.log("Login attempt with:", { email, password, rememberMe });
+    try {
+      await loginAsync(email, password);
+  
+      const isAuthenticated = useUserStore.getState().isAuthenticated;
+  
+      if (isAuthenticated) {
+        navigate("/");
+      } else {
+        alert("Login failed. Please check your credentials.");
+      }
+    } catch (error: any) {
+      alert(error.message || "Login error occurred.");
+    }
   };
 
   return (

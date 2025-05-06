@@ -272,14 +272,6 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
           </div>
         )}
 
-        {type === 'ai' && (
-          <div className="mt-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <p className="text-lg font-medium mb-2">
-              Are you a stakeholder or employer? <span className="text-jobblue">Post your job now!</span>
-            </p>
-            <Button className="mt-2">Add Your Job</Button>
-          </div>
-        )}
       </div>
     </section>
   );

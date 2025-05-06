@@ -30,11 +30,15 @@ const JobCard = ({
   return (
     <div className="border-b py-4 flex flex-col sm:flex-row justify-between items-start gap-4">
       <div className="flex gap-4">
-        <div className="w-12 h-12 flex items-center justify-center rounded-md overflow-hidden">
-          {logo}
-        </div>
+        <Link to={`/jobs/${id}`}>
+          <div className="w-12 h-12 flex items-center justify-center rounded-md overflow-hidden">
+            {logo}
+          </div>
+        </Link>
         <div className="space-y-1">
-          <h3 className="font-medium text-lg">{title}</h3>
+          <Link to={`/jobs/${id}`}>
+            <h3 className="font-medium text-lg">{title}</h3>
+          </Link>
           <p className="text-gray-500 text-sm">
             {company} • {location}
           </p>

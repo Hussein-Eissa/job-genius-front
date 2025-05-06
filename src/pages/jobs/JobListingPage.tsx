@@ -5,6 +5,7 @@ import JobList from "@/components/jobs/JobList";
 import { CheckSquare } from "lucide-react";
 import {useJobStore} from '@/reducers/JobListingReducerStore';
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 const JobListingPage = () => {
   const employmentTypes = [
     { id: 'ft', label: 'Full-Time', count: 3 },
@@ -151,6 +152,12 @@ const JobListingPage = () => {
                 <FilterGroup title="Categories" items={categories} />
                 <FilterGroup title="Job Level" items={jobLevels} />
                 <FilterGroup title="Salary Range" items={salaryRanges} />
+              </div>
+              <div className="mt-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <p className="text-lg font-medium mb-2">
+                  Are you a stakeholder or employer? <span className="text-jobblue">Post your job now!</span>
+                </p>
+                <Button className="mt-2">Add Your Job</Button>
               </div>
             </div>
             

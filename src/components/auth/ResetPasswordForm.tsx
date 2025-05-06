@@ -13,7 +13,10 @@ const ResetPasswordForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle reset password logic here
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
     console.log("Password reset:", { password, confirmPassword });
     setIsSubmitted(true);
   };

@@ -15,9 +15,10 @@ import {
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { useNavigate } from "react-router-dom";
 
 const FormSchema = z.object({
-  otp: z.string().min(6, {
+  otp: z.string().min(5, {
     message: "Your one-time password must be 6 characters.",
   }),
 });
@@ -31,11 +32,14 @@ export default function VerifyEmailForm() {
     },
   });
 
+  const navigate = useNavigate();
+
   function onSubmit(data: z.infer<typeof FormSchema>) {
     toast({
       title: "Email verified",
       description: "You have successfully verified your email.",
     });
+    navigate("/reset-password");
     console.log(data);
   }
 
@@ -46,26 +50,20 @@ export default function VerifyEmailForm() {
           control={form.control}
           name="otp"
           render={({ field }) => (
-            <FormItem className="mx-auto space-y-3">
+            <FormItem className="mx-auto space-y-3 flex flex-col justify-center">
               <FormLabel className="text-center">Enter verification code</FormLabel>
               <FormDescription className="text-center">
                 We&apos;ve sent a code to your email. Please enter it below to verify your account.
               </FormDescription>
               <FormControl>
-                <InputOTP maxLength={6} {...field}>
-                  <InputOTPGroup>
-                    {Array.from({ length: 6 }).map((_, index) => (
+                <InputOTP maxLength={5} {...field}>
+                  <InputOTPGroup className="w-full flex items-center justify-center gap-3">
+                    {Array.from({ length: 5 }).map((_, index) => (
                       <InputOTPSlot key={index} index={index} />
                     ))}
                   </InputOTPGroup>
                 </InputOTP>
               </FormControl>
-              <FormDescription className="text-center">
-                Didn&apos;t receive a code?{" "}
-                <Link to="#" className="text-primary hover:underline">
-                  Resend
-                </Link>
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -73,6 +71,12 @@ export default function VerifyEmailForm() {
         <Button type="submit" className="w-full">
           Verify Email
         </Button>
+        <FormDescription className="text-center">
+          Didn&apos;t receive a code?{" "}
+          <Link to="#" className="text-jobblue hover:underline">
+            Resend
+          </Link>
+        </FormDescription>
       </form>
     </Form>
   );

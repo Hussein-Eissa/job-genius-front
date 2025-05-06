@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useUserStore } from "@/reducers/UserReducerStore";
 
 
@@ -30,13 +30,7 @@ const ForgotPasswordForm = () => {
 
       {isSubmitted ? (
         <div className="text-center">
-          <p className="text-xl font-semibold mb-3">Your password has been successfully reset.</p>
-          <p className="mb-6">click confirm to set a new password</p>
-          <Link to="/reset-password">
-            <Button className="bg-jobblue hover:bg-jobblue-dark text-white px-10">
-              Confirm
-            </Button>
-          </Link>
+          <Navigate to="/verify-email" replace={true} />
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
