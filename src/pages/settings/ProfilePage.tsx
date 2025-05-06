@@ -8,12 +8,12 @@ import Footer from "@/components/layout/Footer";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import LogoIcon from "@/components/common/LogoIcon";
 import { useJobStore } from "@/reducers/JobListingReducerStore";
+// import {useEducationStore} from '@/reducers/EducationReducerStore';
 const ProfilePage = () => {
   const { savedJobs  , fetchSavedJobs} = useJobStore();
   useEffect(() => {
     fetchSavedJobs();
   }, [])
-  
   const [showProfileSetupModal, setShowProfileSetupModal] = useState(false);
   const [experiences, setExperiences] = useState([
     {

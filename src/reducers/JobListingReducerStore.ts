@@ -115,9 +115,7 @@ export const useJobStore = create<JobListingState>((set) => ({
   
   deleteJob: async (jobId) => {
     try {
-      const token = localStorage.getItem("token");
-      // console.log("Fetched Token:", token); 
-  
+      const token = localStorage.getItem("token");  
       const res = await axios.delete(`https://jobgenius.bsite.net/api/JobListing/${jobId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -135,15 +133,14 @@ export const useJobStore = create<JobListingState>((set) => ({
       if (!token) {
         throw new Error("Token not found in localStorage");
       }
-  
       const response = await axios.get(`https://jobgenius.bsite.net/api/JobListing/search?keyword=${keyword}&country=${country}&city=${city}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         params: {
           keyword,
-          country,
           city,
+          country,
         },
       });
   
