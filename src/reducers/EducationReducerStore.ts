@@ -18,15 +18,13 @@ export interface Education {
     description: string;
   }
   
-  
-
 interface EducationState {
     educations: Education[];
     fetchEducations: () => Promise<void>;
     fetchEducationById: (id: number) => Promise<void>;
     addEducation: (data: EducationPayload) => Promise<void>;
-  updateEducation: (id: number, data: EducationPayload) => Promise<void>;
-  deleteEducation: (id: number) => Promise<void>;
+    updateEducation: (id: number, data: EducationPayload) => Promise<void>;
+    deleteEducation: (id: number) => Promise<void>;
 }
 
 export const useEducationStore = create<EducationState>((set) => ({
