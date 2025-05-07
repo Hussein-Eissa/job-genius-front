@@ -300,7 +300,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
           },
         }
       );
-
+      
       await get().fetchMeProfile();
       return res.data;
     } catch (error: any) {
@@ -326,7 +326,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
           },
         }
       );
-
+      console.log("Updated social link:", res.data);
       await get().fetchMeProfile();
       return res.data;
     } catch (error: any) {

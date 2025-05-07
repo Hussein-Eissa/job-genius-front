@@ -26,6 +26,7 @@ interface ExperiencePayload {
 interface ExperienceState {
   experiences: Experience[];
   fetchExperiences: (userId: number) => Promise<void>;
+  getExperienceById: (id: number) => Promise<Experience | undefined>;
   addExperience: (data: ExperiencePayload) => Promise<void>;
   updateExperience: (id: number, data: ExperiencePayload) => Promise<void>;
   deleteExperience: (id: number) => Promise<void>;
@@ -41,8 +42,22 @@ export const useExperienceStore = create<ExperienceState>((set) => ({
         headers: { Authorization: `Bearer ${token}` },
       });
       set({ experiences: res.data.$values });
+      console.log('Fetched experiences:', res.data.$values);
     } catch (err) {
       console.error('Error fetching experiences:', err);
+    }
+  },
+
+  getExperienceById: async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`https://jobgenius.bsite.net/api/Experience/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(res.data);
+      return res.data;
+    } catch (err) {
+      console.error('Error fetching experience by ID:', err);
     }
   },
 
@@ -55,6 +70,7 @@ export const useExperienceStore = create<ExperienceState>((set) => ({
           'Content-Type': 'application/json',
         },
       });
+      console.log("Experiance Added Successfully");
     } catch (err) {
       console.error('Error adding experience:', err);
     }
@@ -69,6 +85,7 @@ export const useExperienceStore = create<ExperienceState>((set) => ({
           'Content-Type': 'application/json',
         },
       });
+      console.log("Experiance Updated Successfully");
     } catch (err) {
       console.error('Error updating experience:', err);
     }
@@ -82,6 +99,7 @@ export const useExperienceStore = create<ExperienceState>((set) => ({
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log("Experiance Deleted Successfully");
     } catch (err) {
       console.error('Error deleting experience:', err);
     }
