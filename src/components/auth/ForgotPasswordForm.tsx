@@ -1,19 +1,28 @@
 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate , useNavigate } from "react-router-dom";
 import { useUserStore } from "@/reducers/UserReducerStore";
 
 
 const ForgotPasswordForm = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { forgetPassword } = useUserStore();
-  const handleSubmit = (e: React.FormEvent) => {
+  const { forgetPassword , resetPasswordRequest} = useUserStore();
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    forgetPassword(email);
-    // console.log("Password reset requested for:", email);
-    setIsSubmitted(true);
+    try {
+      useUserStore.setState({
+        resetPasswordRequest: { email : email , resetCode: '', newPassword: '' },
+      });
+      console.log("Password reset:", { resetPasswordRequest });
+      await forgetPassword(email);
+      setIsSubmitted(true);
+      navigate('/verify-email', { state: { email } });
+    } catch (err) {
+      // Error is handled via the store's error state
+    }
   };
 
   return (

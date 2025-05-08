@@ -24,6 +24,7 @@ interface UserState {
   token: string;
   isAuthenticated: boolean;
   success: boolean | null; 
+  resetPasswordRequest: ResetPasswordRequest | null;
   error?: string; 
   loginAsync: (email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -35,6 +36,7 @@ interface UserState {
 }
 
 export const useUserStore = create<UserState>((set) => ({
+  resetPasswordRequest: { email: "", resetCode: "", newPassword: "" },
   user: { fullName: "", email: "" },
   token: localStorage.getItem("token") || "",
   isAuthenticated: !!localStorage.getItem("token"),
@@ -132,9 +134,11 @@ export const useUserStore = create<UserState>((set) => ({
           },
         }
       );
+      console.log(response.data);
 
       if (response.data.success) {
         set({ success: true, error: undefined });
+        console.log('Password reset successful');
       } else {
         throw new Error(response.data.message || 'Reset password failed');
       }

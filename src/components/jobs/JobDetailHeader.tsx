@@ -1,8 +1,9 @@
 
 import { Share, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import {useJobStore} from '@/reducers/JobListingReducerStore';
 interface JobDetailHeaderProps {
+  Jobid: number
   title: string;
   company: string;
   location: string;
@@ -10,7 +11,14 @@ interface JobDetailHeaderProps {
   onApply: () => void;
 }
 
-const JobDetailHeader = ({ title, company, location, type, onApply }: JobDetailHeaderProps) => {
+
+const JobDetailHeader = ({ Jobid ,title, company, location, type }: JobDetailHeaderProps) => {
+const {saveJobByID} = useJobStore();
+  const handleSaveJob = () => {
+    saveJobByID(Jobid);
+
+    console.log("button clicked");
+  }
   return (
     <header className="py-4 border-b">
       <div className="container mx-auto px-4">
@@ -30,7 +38,7 @@ const JobDetailHeader = ({ title, company, location, type, onApply }: JobDetailH
             <Button variant="outline" size="sm" className="gap-2">
               <Share size={16} /> Share
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleSaveJob} >
               <Bookmark size={16} /> Save
             </Button>
             <Button size="sm" onClick={onApply}>Apply</Button>

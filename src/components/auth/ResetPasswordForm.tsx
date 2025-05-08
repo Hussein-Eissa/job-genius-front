@@ -3,20 +3,23 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-
+import { useUserStore } from "@/reducers/UserReducerStore";
 const ResetPasswordForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-
+const { resetPassword  , resetPasswordRequest} = useUserStore();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    useUserStore.setState({ resetPasswordRequest: { email: resetPasswordRequest.email, resetCode: resetPasswordRequest.resetCode, newPassword: password } });
     if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
     }
+    resetPassword({ email: resetPasswordRequest.email, resetCode: resetPasswordRequest.resetCode, newPassword: password });
+    console.log("Password reset Request:", { resetPasswordRequest });
     console.log("Password reset:", { password, confirmPassword });
     setIsSubmitted(true);
   };
