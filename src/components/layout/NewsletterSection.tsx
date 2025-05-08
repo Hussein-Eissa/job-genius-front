@@ -14,7 +14,7 @@ const NewsletterSection = () => {
 
   return (
       <div className="container mx-auto px-4">
-        <div className="flex gap-0 items-center justify-between rounded-lg">
+        <div className="flex flex-col gap-0 items-center justify-between rounded-lg sm:flex-row">
           <h2 className="text-2xl font-bold text-white">Get job notifications</h2>
           
           {isSubscribed ? (
