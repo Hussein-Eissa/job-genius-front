@@ -2,11 +2,15 @@
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useState } from "react";
-
+import { useJobStore } from "@/reducers/JobListingReducerStore";
 const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("Cairo, Egypt");
-
+  const {searchJobs} = useJobStore();
+  const handleSearch = () => {
+    const [city, country] = location.split(',').map(str => str.trim());
+    searchJobs(searchQuery, country, city);
+  };
   return (
     <section className="hero-gradient pt-14 pb-20">
       <div className="container mx-auto px-4">
@@ -55,7 +59,7 @@ const HeroSection = () => {
                     </div>
                   </div>
                 </div>
-                <Button className="bg-jobblue hover:bg-jobblue-dark text-white font-medium px-6">
+                <Button className="bg-jobblue hover:bg-jobblue-dark text-white font-medium px-6" onClick={handleSearch}>
                   Search
                 </Button>
               </div>
