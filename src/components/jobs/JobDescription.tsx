@@ -14,6 +14,8 @@ interface JobDescriptionProps {
   salary?: string;
   jobType?: string;
   skills?: string[];
+  applyBefore?: string;
+  catigories?: string[];
 }
 
 const JobDescription = ({
@@ -22,12 +24,14 @@ const JobDescription = ({
   requirements,
   niceTohaves,
   companyInfo,
+  applyBefore,
   appliedCount,
   capacity,
   datePosted,
   salary,
   jobType,
   skills,
+  catigories,
 }: JobDescriptionProps) => {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -88,7 +92,7 @@ const JobDescription = ({
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-500">Apply Before</span>
-                <span className="font-medium">July 31, 2021</span>
+                <span className="font-medium">{applyBefore || "July 1, 2021"}</span>
               </div>
               
               <div className="flex justify-between">
@@ -113,7 +117,7 @@ const JobDescription = ({
               <>
                 <h4 className="text-lg font-semibold mt-6 mb-3">Categories</h4>
                 <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, index) => (
+                  {catigories.map((skill, index) => (
                     <Badge
                       key={index}
                       variant="outline"
@@ -134,11 +138,23 @@ const JobDescription = ({
             
             <h4 className="text-lg font-semibold mt-6 mb-3">Required Skills</h4>
             <div className="flex flex-wrap gap-2">
-              <Badge className="bg-blue-100 text-blue-600 hover:bg-blue-100 border-none">Project Management</Badge>
-              <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100 border-none">Copywriting</Badge>
-              <Badge className="bg-blue-100 text-blue-600 hover:bg-blue-100 border-none">Social Media Marketing</Badge>
-              <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100 border-none">English</Badge>
-              <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100 border-none">Copy Editing</Badge>
+              {skills.map((skill, index) => (
+                <Badge
+                  key={index}
+                  variant="outline"
+                  className={`${
+                    skill === "Marketing"
+                      ? "bg-orange-100 text-orange-600 hover:bg-orange-100"
+                      : skill === "Design"
+                      ? "bg-purple-100 text-purple-600 hover:bg-purple-100"
+                      : "bg-blue-100 text-blue-600 hover:bg-blue-100"
+                  } border-none text-xs`}
+                >
+                  {skill}
+                </Badge>
+              ))}
+
+              
             </div>
           </div>
         </div>

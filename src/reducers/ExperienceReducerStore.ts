@@ -25,7 +25,7 @@ interface ExperiencePayload {
   }
 interface ExperienceState {
   experiences: Experience[];
-  fetchExperiences: (userId: number) => Promise<void>;
+  fetchExperiences: () => Promise<void>;
   getExperienceById: (id: number) => Promise<Experience | undefined>;
   addExperience: (data: ExperiencePayload) => Promise<void>;
   updateExperience: (id: number, data: ExperiencePayload) => Promise<void>;
@@ -35,10 +35,10 @@ interface ExperienceState {
 export const useExperienceStore = create<ExperienceState>((set) => ({
   experiences: [],
 
-  fetchExperiences: async (userId) => {
+  fetchExperiences: async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`https://jobgenius.bsite.net/api/Experience/${userId}`, {
+      const res = await axios.get(`https://jobgenius.bsite.net/api/Experience`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       set({ experiences: res.data.$values });

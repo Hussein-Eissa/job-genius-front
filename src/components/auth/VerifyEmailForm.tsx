@@ -1,8 +1,8 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { useUserStore } from "@/reducers/UserReducerStore";
 import {
   Form,
   FormControl,
@@ -12,19 +12,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { useNavigate } from "react-router-dom";
 
 const FormSchema = z.object({
-  otp: z.string().min(5, {
-    message: "Your one-time password must be 6 characters.",
+  otp: z.string().length(5, {
+    message: "Your one-time password must be exactly 6 characters.",
   }),
 });
 
 export default function VerifyEmailForm() {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const { resetPasswordRequest } = useUserStore();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -32,15 +35,52 @@ export default function VerifyEmailForm() {
     },
   });
 
-  const navigate = useNavigate();
-
   function onSubmit(data: z.infer<typeof FormSchema>) {
+    console.log("VerifyEmailForm: Initial resetPasswordRequest:", resetPasswordRequest);
+    console.log("VerifyEmailForm: Location state:", state);
+
+    const email = state?.email || resetPasswordRequest?.email;
+
+    if (!email) {
+      console.error("VerifyEmailForm: Email is missing");
+      toast({
+        title: "Error",
+        description: "Email is missing. Please start the process again.",
+        variant: "destructive",
+      });
+      navigate("/forgot-password");
+      return;
+    }
+    try {
+      useUserStore.setState({
+        resetPasswordRequest: {
+          email,
+          resetCode: data.otp,
+          newPassword: resetPasswordRequest?.newPassword || "",
+        },
+      });
+
+      const updatedResetPasswordRequest = useUserStore.getState().resetPasswordRequest;
+      console.log("VerifyEmailForm: Updated resetPasswordRequest:", updatedResetPasswordRequest);
+    } catch (err) {
+      console.error("Error setting resetPasswordRequest:", err);
+      toast({
+        title: "Error",
+        description: "Failed to process OTP. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
     toast({
-      title: "Email verified",
+      title: "Email Verified",
       description: "You have successfully verified your email.",
     });
-    navigate("/reset-password");
-    console.log(data);
+
+    navigate("/reset-password", {
+      state: { email, resetCode: data.otp },
+    });
+
+    console.log("VerifyEmailForm: Submitted OTP:", data.otp);
   }
 
   return (

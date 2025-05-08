@@ -13,60 +13,46 @@ interface CategoryJobCount {
 
 interface JobListing {
   jobID: number;
-  title: string;
-  company: string;
-  city: string;
-  country: string;
-  type: string;
-  description: string;
-  responsibilities: string;
-  whoYouAre: string;
-  niceToHaves: string;
-  capacity: number;
-  applyBefore: string;
-  salaryFrom: number;
-  salaryTo: number;
-  companyWebsite: string;
-  keywords: string;
-  additionalInformation: string;
-  companyPapers: string;
-  categories: string[];
-  skills: string[];
-  jobBenefits: JobBenefit[];
+  title?: string;
+  company?: string;
+  city?: string;
+  country?: string;
+  type?: string;
+  description?: string;
+  responsibilities?: string;
+  whoYouAre?: string;
+  niceToHaves?: string;
+  capacity?: number;
+  applyBefore?: string;
+  salaryFrom?: number;
+  salaryTo?: number;
+  companyWebsite?: string;
+  keywords?: string;
+  additionalInformation?: string;
+  companyPapers?: string;
+  categories?: { $values: string[] };
+  skills?: { $values: string[] };
+  jobBenefits?: JobBenefit[];
 }
-
-interface SavedJob extends JobListing {}
 
 interface JobListingState {
   jobs: JobListing[];
   userJobs: JobListing[];
   categoriesWithCount: CategoryJobCount[];
-  savedJobs: SavedJob[];
+  savedJobs: JobListing[];
   success: boolean | null;
   error?: string;
-  // fetch jobs
   fetchJobs: () => Promise<void>;
-  // fetch job by id
-  getJobById: (jobId: number) => Promise<any>;
-  // create job
+  getJobById: (jobId: number) => Promise<JobListing>;
   createJob: (jobData: JobListing) => Promise<void>;
-  // update job
   updateJob: (jobId: number, jobData: JobListing) => Promise<void>;
-  // delete job
   deleteJob: (jobId: number) => Promise<void>;
-  // search jobs
   searchJobs: (keyword: string, country: string, city: string) => Promise<void>;
-  // fetch categories
   fetchCategoriesWithCount: () => Promise<void>;
-  // fetch saved jobs
   fetchSavedJobs: () => Promise<void>;
-  // save job
   saveJobByID: (jobId: number) => Promise<void>;
-  // delete saved job
   deleteSavedJob: (jobId: number) => Promise<void>;
-  // fetch user jobs
   fetchUserJobs: () => Promise<void>;
-  // filter jobs
   filterJobs: (filters: {
     keyword?: string;
     country?: string;
@@ -77,7 +63,7 @@ interface JobListingState {
   }) => Promise<void>;
 }
 
-export const useJobStore = create<JobListingState>((set , get) => ({
+export const useJobStore = create<JobListingState>((set, get) => ({
   jobs: [],
   userJobs: [],
   categoriesWithCount: [],
@@ -96,10 +82,33 @@ export const useJobStore = create<JobListingState>((set , get) => ({
 
       set({ jobs: res.data, success: true, error: undefined });
       console.log("Fetched jobs:", res.data);
-      return res.data;
     } catch (error: any) {
       console.error("Error fetching jobs:", error.response?.data || error.message);
       set({ success: false, error: error.response?.data?.message || "Failed to fetch jobs." });
+    }
+  },
+
+  getJobById: async (jobId: number) => {
+    if (!Number.isInteger(jobId) || jobId <= 0) {
+      throw new Error("Invalid job ID");
+    }
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      const res = await axios.get(`https://jobgenius.bsite.net/api/JobListing/${jobId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      set({ success: true, error: undefined });
+      console.log("Fetched job by ID:", res.data);
+      return res.data;
+    } catch (error: any) {
+      console.error("Error fetching job by ID:", error.response?.data || error.message);
+      set({ success: false, error: error.response?.data?.message || "Failed to fetch job by ID." });
+      throw error;
     }
   },
 
@@ -123,7 +132,7 @@ export const useJobStore = create<JobListingState>((set , get) => ({
     }
   },
 
-  updateJob: async (jobId : number , jobData) => {
+  updateJob: async (jobId: number, jobData) => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(`https://jobgenius.bsite.net/api/JobListing/${jobId}`, jobData, {
@@ -168,19 +177,12 @@ export const useJobStore = create<JobListingState>((set , get) => ({
   searchJobs: async (keyword, country, city) => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token not found in localStorage");
-      }
+      if (!token) throw new Error("Token not found");
       const response = await axios.get(
         `https://jobgenius.bsite.net/api/JobListing/search?keyword=${keyword}&country=${country}&city=${city}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-          },
-          params: {
-            keyword,
-            city,
-            country,
           },
         }
       );
@@ -214,7 +216,7 @@ export const useJobStore = create<JobListingState>((set , get) => ({
         },
       });
 
-      set({ savedJobs: response.data, success: true, error: undefined });
+      set({ savedJobs: response.data.$values || response.data, success: true, error: undefined });
       console.log("Fetched saved jobs:", response.data);
     } catch (error: any) {
       console.error("Error fetching saved jobs:", error.response?.data || error.message);
@@ -223,11 +225,15 @@ export const useJobStore = create<JobListingState>((set , get) => ({
   },
 
   saveJobByID: async (jobId) => {
+    if (!Number.isInteger(jobId) || jobId <= 0) {
+      throw new Error("Invalid job ID");
+    }
+
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
-      const res = await axios.post(
+      await axios.post(
         `https://jobgenius.bsite.net/api/JobListing/saved?jobId=${jobId}`,
         {},
         {
@@ -237,66 +243,43 @@ export const useJobStore = create<JobListingState>((set , get) => ({
         }
       );
 
-      if (res.data.success) {
-        const job = await get().getJobById(jobId);
-        set((state) => ({
-          savedJobs: [...state.savedJobs, job],
-          success: true,
-          error: undefined,
-        }));
-        console.log("Saved job successfully:", res.data);
-      } else {
-        throw new Error(res.data.message || "Failed to save job.");
-      }
+      const job = await get().getJobById(jobId);
+      set((state) => ({
+        savedJobs: [...state.savedJobs.filter((j) => j.jobID !== jobId), job],
+        success: true,
+        error: undefined,
+      }));
+      console.log("Saved job:", job);
     } catch (error: any) {
       console.error("Error saving job:", error.response?.data || error.message);
       set({ success: false, error: error.response?.data?.message || "Failed to save job." });
+      throw error;
     }
   },
 
   deleteSavedJob: async (jobId) => {
+    if (!Number.isInteger(jobId) || jobId <= 0) {
+      throw new Error("Invalid job ID");
+    }
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found!");
+      if (!token) throw new Error("No token found");
 
-      const res = await axios.delete(
-        `https://jobgenius.bsite.net/api/JobListing/saved?jobId=${jobId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axios.delete(`https://jobgenius.bsite.net/api/JobListing/saved?jobId=${jobId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       set((state) => ({
         savedJobs: state.savedJobs.filter((job) => job.jobID !== jobId),
         success: true,
         error: undefined,
       }));
-      console.log("Deleted saved job:", res.data);
+      console.log("Deleted saved job:", jobId);
     } catch (error: any) {
       console.error("Error deleting saved job:", error.response?.data || error.message);
       set({ success: false, error: error.response?.data?.message || "Failed to delete saved job." });
-    }
-  },
-
-  getJobById: async (jobId: number) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found!");
-
-      const res = await axios.get(`https://jobgenius.bsite.net/api/JobListing/${jobId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      set({ success: true, error: undefined });
-      console.log("Fetched job by ID:", res.data);
-      return res.data;
-    } catch (error: any) {
-      console.error("Error fetching job by ID:", error.response?.data || error.message);
-      set({ success: false, error: error.response?.data?.message || "Failed to fetch job by ID." });
       throw error;
     }
   },

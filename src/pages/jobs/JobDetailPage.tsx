@@ -11,16 +11,55 @@ import JobApplicationForm from "@/components/jobs/JobApplicationForm";
 import SuccessModal from "@/components/jobs/SuccessModal";
 import { Dialog } from "@/components/ui/dialog";
 import { useJobStore } from "@/reducers/JobListingReducerStore";
+import { format } from "date-fns";
+import { parse } from "path";
+
 const JobDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { getJobById } = useJobStore();
+  const { getJobById ,fetchJobs } = useJobStore();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isApplicationOpen, setIsApplicationOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
-  const[jobData, setJobData] = useState<any>(null);
+  const[jobData, setJobData] = useState<any>({});
    // getJobById(3);
-  useEffect(() => {
-  setJobData(getJobById(id ? parseInt(id) : 1));
-  }, []);
+   useEffect(() => {
+    const fetchJobData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const jobId = id ? parseInt(id, 10) : 1; 
+        if (isNaN(jobId)) {
+          throw new Error("Invalid job ID");
+        }
+        const data = await getJobById(jobId);
+        setJobData(data);
+        console.log("JobDetails: Fetched jobData:", data);
+      } catch (err) {
+        const errorMessage = err.message || "Failed to load job data";
+        setError(errorMessage);
+        console.error("JobDetails: Error:", errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobData();
+    
+  }, [id]); // Re-run if id changes
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!jobData) {
+    return <div>No job data found</div>;
+  }
   // const job = getJobById(id ? parseInt(id) : 1);
   // In a real app, you would fetch job details based on the id
   const job = {
@@ -68,35 +107,37 @@ const JobDetailPage = () => {
       <Header />
       <main className="flex-grow">
         <JobDetailHeader 
-          title={job.title}
-          company={job.company}
-          location={job.location}
-          type={job.type}
+          Jobid={parseInt(jobData.jobId)}
+          title={jobData.title}
+          company={jobData.company}
+          location={`${jobData.city}, ${jobData.country}`}
+          type={jobData.type}
         />
         
         <JobDescription 
-          description={job.description}
+          description={jobData.description}
           responsibilities={job.responsibilities}
-          requirements={job.requirements}
+          requirements={job.requirements} // jobData.whoyouare isn't an array  so do nice to have and responsibilites
           niceTohaves={job.niceTohaves}
-          datePosted={job.datePosted}
-          salary={job.salary}
-          jobType={job.type}
-          skills={job.skills}
-          appliedCount={5}
-          capacity={10}
+          datePosted={format(new Date(jobData.jobPostedOn), "MMMM d, yyyy")}
+          salary={` from ${jobData.salaryFrom} to ${jobData.salaryTo}`}
+          jobType={jobData.type}
+          catigories={jobData.categories.$values}
+          skills={jobData.skills.$values}
+          appliedCount={jobData.applicationSent}
+          capacity={jobData.capacity}
         />
         
-        <JobBenefits />
+        <JobBenefits   />
         
         <SimilarJobs />
 
         <Dialog open={isApplicationOpen} onOpenChange={setIsApplicationOpen}>
           <JobApplicationForm 
-            jobTitle={job.title}
-            companyName={job.company}
-            location={job.location}
-            type={job.type}
+            jobTitle={jobData.title}
+            companyName={jobData.company}
+            location={`${jobData.city}, ${jobData.country}`}
+            type={jobData.type}
             onSubmit={handleApplicationSubmit}
           />
         </Dialog>
