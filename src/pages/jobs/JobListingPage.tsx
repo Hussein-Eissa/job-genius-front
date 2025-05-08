@@ -6,7 +6,15 @@ import { CheckSquare } from "lucide-react";
 import {useJobStore} from '@/reducers/JobListingReducerStore';
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+
 const JobListingPage = () => {
+  const navigate = useNavigate();
+
+  const handleTryNow = () => {
+    navigate("/jobs/search", { state: { triggerAI: true } });
+  };
+
   const employmentTypes = [
     { id: 'ft', label: 'Full-Time', count: 3 },
     { id: 'pt', label: 'Part-Time', count: 5 },
@@ -137,7 +145,7 @@ const JobListingPage = () => {
             <div className="mt-8 text-center">
               <p className="text-gray-600 mb-4">or</p>
               <h2 className="text-2xl font-bold mb-4">Let <span className="text-jobblue">JobGenius</span> AI Find Your Perfect Job Fit</h2>
-              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition">
+              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition" onClick={handleTryNow}>
                 Try Now
               </button>
             </div>

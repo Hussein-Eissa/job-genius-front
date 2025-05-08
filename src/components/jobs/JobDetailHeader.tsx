@@ -7,9 +7,10 @@ interface JobDetailHeaderProps {
   company: string;
   location: string;
   type: string;
+  onApply: () => void;
 }
 
-const JobDetailHeader = ({ title, company, location, type }: JobDetailHeaderProps) => {
+const JobDetailHeader = ({ title, company, location, type, onApply }: JobDetailHeaderProps) => {
   return (
     <header className="py-4 border-b">
       <div className="container mx-auto px-4">
@@ -32,7 +33,7 @@ const JobDetailHeader = ({ title, company, location, type }: JobDetailHeaderProp
             <Button variant="outline" size="sm" className="gap-2">
               <Bookmark size={16} /> Save
             </Button>
-            <Button size="sm">Apply</Button>
+            <Button size="sm" onClick={onApply}>Apply</Button>
           </div>
         </div>
       </div>

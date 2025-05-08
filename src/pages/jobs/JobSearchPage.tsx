@@ -1,13 +1,17 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import JobList from "@/components/jobs/JobList";
 import { Dialog } from "@/components/ui/dialog";
 import { AIInfoModal, AILoadingModal } from "@/components/jobs/AIModal";
 import SuccessModal from "@/components/jobs/SuccessModal";
+import { useLocation } from "react-router-dom";
 
 const JobSearchPage = () => {
+  const location = useLocation();
+  const triggerAI = location.state?.triggerAI;
+
   const [isAIInfoOpen, setIsAIInfoOpen] = useState(false);
   const [isAILoadingOpen, setIsAILoadingOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
@@ -27,6 +31,12 @@ const JobSearchPage = () => {
       setShowAIResults(true);
     }, 2000);
   };
+
+  useEffect(() => {
+    if (triggerAI) {
+      handleTryNow();
+    }
+  }, [triggerAI]);
 
   return (
     <div className="min-h-screen flex flex-col">

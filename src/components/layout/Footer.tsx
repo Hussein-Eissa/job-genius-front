@@ -8,7 +8,7 @@ const Footer = () => {
   return (
     <footer className="footer-background text-white py-10">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between mb-8">
+        <div className="flex flex-col md:flex-row justify-evenly mb-8">
           <div className="mb-6 md:mb-0">
             <Link to="/" className="flex items-center mb-4">
               <LogoIcon className="h-8 w-8" />
@@ -22,7 +22,7 @@ const Footer = () => {
 
           <div className="flex flex-col items-center space-x-4 gap-5">
             <NewsletterSection />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <h3 className="text-sm font-bold mb-4">Jobs</h3>
                 <ul className="space-y-2 text-sm text-gray-300">

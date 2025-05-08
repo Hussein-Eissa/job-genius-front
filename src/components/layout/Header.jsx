@@ -2,8 +2,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import LogoIcon from "../common/LogoIcon";
+import { useUserStore } from "@/reducers/UserReducerStore";
+import { LogOutIcon } from "lucide-react";
 
-const Header = ({ isAuthenticated = false }) => {
+const Header = () => {
+  const isAuthenticated = useUserStore.getState().isAuthenticated;
   return (
     <header className="bg-white border-b border-gray-200 py-4">
       <div className="container mx-auto flex items-center justify-between px-4">
@@ -32,6 +35,7 @@ const Header = ({ isAuthenticated = false }) => {
                 />
               </Link>
               <Button variant="outline" size="sm" className="ml-4">
+                <LogOutIcon></LogOutIcon>
                 Logout
               </Button>
             </div>
