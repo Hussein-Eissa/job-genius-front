@@ -19,13 +19,13 @@ import { useProfileStore } from "@/reducers/ProfileReducerStore";
 import { useExperienceStore } from "@/reducers/ExperienceReducerStore";
 import { useEducationStore } from "@/reducers/EducationReducerStore";
 import { usePortfolioStore } from "@/reducers/PortfolioReducerStore";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 
 const ProfilePage = () => {
   const { id } = useParams();
   const { experiences, fetchExperiences } = useExperienceStore();
   const { portfolios, fetchAllPortfolios, fetchPortfolioImage , addPortfolio } = usePortfolioStore();
-  const { savedJobs, fetchSavedJobs } = useJobStore();
+  // const { savedJobs, fetchSavedJobs } = useJobStore();
   const { educations, fetchEducations } = useEducationStore();
   const { profile, fetchProfileById, fetchMeProfile } = useProfileStore();
   const [showProfileSetupModal, setShowProfileSetupModal] = useState(false);
@@ -44,16 +44,22 @@ const ProfilePage = () => {
     "Wire Frames",
     "User Experience",
   ]);
-
   useEffect(() => {
-    fetchMeProfile();
-    if (id && !isNaN(Number(id))) {
-      fetchProfileById(Number(id));
-    }
-    fetchExperiences();
-    fetchEducations();
-    fetchAllPortfolios();
-  }, [id]);
+  fetchMeProfile();
+  if (id && !isNaN(Number(id))) {
+    fetchProfileById(Number(id));
+  }
+  fetchExperiences();
+  fetchEducations();
+  fetchAllPortfolios();
+}, [id]);
+
+useEffect(() => {
+  if (profile?.userSkills?.$values) {
+    setSkills(profile.userSkills.$values);
+  }
+}, [profile]);
+
 
   useEffect(() => {
     portfolios.forEach((portfolio) => {
@@ -61,6 +67,7 @@ const ProfilePage = () => {
         fetchPortfolioImage(portfolio.portfolioID, portfolio.image);
       }
     });
+    
   }, [portfolios, fetchPortfolioImage]);
 
   const handleAddPortfolio = async (e) => {
@@ -257,14 +264,11 @@ const ProfilePage = () => {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    { profile.userSkills.$values.length> 0 ? profile.userSkills.$values?.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 bg-blue-50 text-blue-700 rounded-md"
-                      >
-                        {skill}
-                      </span>
-                    )) : <p>No skills found.</p>}
+                  {skills.length !== 0 ? skills.map((skill , index) => (
+                      <p key={index}>{skill}</p>
+                  )):
+                    <p>No skills found.</p>
+                    } 
                   </div>
                 </div>
               </div>
