@@ -18,6 +18,7 @@ interface NotificationState {
 
 export const useNotificationStore = create<NotificationState>((set) => ({
   notifications: [],
+  NotificationSettings: null,
   settings: null,
   error: undefined,
 
@@ -69,6 +70,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
           },
         }
       );
+      console.log('Notification settings updated successfully');
       set({ settings, error: undefined });
     } catch (err) {
       console.error('Error updating notification settings:', err);

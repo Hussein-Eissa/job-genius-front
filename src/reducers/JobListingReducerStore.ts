@@ -64,7 +64,7 @@ export interface JobListingState {
   createJob: (jobData: JobListing) => Promise<void>;
   updateJob: (jobId: number, jobData: JobListing) => Promise<void>;
   deleteJob: (jobId: number) => Promise<void>;
-  searchJobs: (keyword: string, country: string, city: string) => Promise<void>;
+  searchJobs: (keyword: string | null, country: string | null, city: string | null) => Promise<void>;
   fetchCategoriesWithCount: () => Promise<void>;
   fetchSavedJobs: () => Promise<void>;
   saveJobByID: (jobId: number) => Promise<void>;
@@ -191,26 +191,33 @@ export const useJobStore = create<JobListingState>((set, get) => ({
     }
   },
 
-  searchJobs: async (keyword, country, city) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("Token not found");
-      const response = await axios.get(
-        `https://jobgenius.bsite.net/api/JobListing/search?keyword=${keyword}&country=${country}&city=${city}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+ searchJobs: async (keyword?: string, country?: string, city?: string) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Token not found");
 
-      set({ jobs: response.data, success: true, error: undefined });
-      console.log("Search results:", response.data);
-    } catch (error: any) {
-      console.error("Error searching jobs:", error.response?.data || error.message);
-      set({ success: false, error: error.response?.data?.message || "Failed to search jobs." });
-    }
-  },
+    const params = new URLSearchParams();
+    if (keyword) params.append("keyword", keyword);
+    if (country) params.append("country", country);
+    if (city) params.append("city", city);
+
+    const response = await axios.get(
+      `https://jobgenius.bsite.net/api/JobListing/search?${params.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    set({ jobs: response.data, success: true, error: undefined });
+    console.log("Search results:", response.data);
+  } catch (error: any) {
+    console.error("Error searching jobs:", error.response?.data || error.message);
+    set({ success: false, error: error.response?.data?.message || "Failed to search jobs." });
+  }
+}
+,
 
   fetchCategoriesWithCount: async () => {
     try {

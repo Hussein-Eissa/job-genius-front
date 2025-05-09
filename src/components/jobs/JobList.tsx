@@ -12,23 +12,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useParams } from 'react-router-dom';
 
-const companyLogos = {
-  nomad: <div className="w-full h-full bg-emerald-500 flex items-center justify-center text-white">N</div>,
-  dropbox: <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white">DB</div>,
-  terraform: <div className="w-full h-full bg-cyan-500 flex items-center justify-center text-white">TF</div>,
-  recruit: <div className="w-full h-full bg-gray-500 flex items-center justify-center text-white">RC</div>,
-  canva: <div className="w-full h-full bg-teal-500 flex items-center justify-center text-white">CA</div>,
-  classpass: <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white">CP</div>,
-  pitch: <div className="w-full h-full bg-black flex items-center justify-center text-white">PI</div>,
-  stripe: <div className="w-full h-full bg-purple-500 flex items-center justify-center text-white">S</div>,
-  truebill: <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white">TB</div>,
-  square: <div className="w-full h-full bg-black flex items-center justify-center text-white">SQ</div>,
-  coinbase: <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white">CB</div>,
-  robinhood: <div className="w-full h-full bg-gray-200 flex items-center justify-center text-black">RH</div>,
-  kraken: <div className="w-full h-full bg-purple-600 flex items-center justify-center text-white">KR</div>,
-};
+// const companyLogos = {
+//   nomad: <div className="w-full h-full bg-emerald-500 flex items-center justify-center text-white">N</div>,
+//   dropbox: <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white">DB</div>,
+//   terraform: <div className="w-full h-full bg-cyan-500 flex items-center justify-center text-white">TF</div>,
+//   recruit: <div className="w-full h-full bg-gray-500 flex items-center justify-center text-white">RC</div>,
+//   canva: <div className="w-full h-full bg-teal-500 flex items-center justify-center text-white">CA</div>,
+//   classpass: <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white">CP</div>,
+//   pitch: <div className="w-full h-full bg-black flex items-center justify-center text-white">PI</div>,
+//   stripe: <div className="w-full h-full bg-purple-500 flex items-center justify-center text-white">S</div>,
+//   truebill: <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white">TB</div>,
+//   square: <div className="w-full h-full bg-black flex items-center justify-center text-white">SQ</div>,
+//   coinbase: <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white">CB</div>,
+//   robinhood: <div className="w-full h-full bg-gray-200 flex items-center justify-center text-black">RH</div>,
+//   kraken: <div className="w-full h-full bg-purple-600 flex items-center justify-center text-white">KR</div>,
+// };
 
+// const {categoryName} = useParams();
 
 
 interface JobListProps {
@@ -50,12 +52,11 @@ useEffect(() => {
 
 useEffect(() => {
   const end = start + 10;
-
   if (Array.isArray(jobs)) {
     const sliced = jobs.slice(start, end);
     setSlicedJobs(sliced);
   } else if (jobs?.$values && Array.isArray(jobs.$values)) {
-    const sliced = jobs.$values.slice(start, end);
+    const sliced = jobs.$values.slice(start, end).sort(() => 0.5 - Math.random());
     setSlicedJobs(sliced);
   } else {
     console.warn("Jobs data is not valid array:", jobs);
@@ -63,6 +64,15 @@ useEffect(() => {
   }
 }, [jobs, start]);
 
+// useEffect(() => {
+//   if (categoryName) {
+//    const filteredJobs = jobs.filter((job: any) => 
+//   job.categories.$values.includes(categoryName)
+// );
+
+//     setSlicedJobs(filteredJobs);
+//   }
+// } , [categoryName]);
 
 useEffect(() => {
   console.log("Sliced jobs:", slicedJobs);
