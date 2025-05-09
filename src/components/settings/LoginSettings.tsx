@@ -3,10 +3,30 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check } from "lucide-react";
-
+import { useUserStore } from "@/reducers/UserReducerStore";
 const LoginSettings = () => {
   const [email, setEmail] = useState("a.safwat@gmail.com");
   const [emailVerified, setEmailVerified] = useState(true);
+  const { changePassword , ChangePasswordRequest ,setChangePasswordRequest} = useUserStore();
+  const [PasswordChange , setPasswordChange] = useState(ChangePasswordRequest)
+
+  const PasswordChangeHandler=(e)=>{
+    setChangePasswordRequest({
+      ...ChangePasswordRequest,
+      [e.target.name]: e.target.value
+    })
+    console.log(ChangePasswordRequest)
+   
+  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await changePassword(ChangePasswordRequest);
+      console.log("Password changed:", ChangePasswordRequest);
+    } catch (err) {
+      // Error is handled via the store's error state
+    }
+  }
   
   return (
     <div>
@@ -65,9 +85,11 @@ const LoginSettings = () => {
               Old Password
             </label>
             <Input 
+            name="oldPassword"
               id="oldPassword" 
               type="password"
               placeholder="Enter your old password"
+              onChange={PasswordChangeHandler}
             />
             <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
           </div>
@@ -80,16 +102,18 @@ const LoginSettings = () => {
               New Password
             </label>
             <Input 
+             name="newPassword"
               id="newPassword" 
               type="password"
               placeholder="Enter your new password"
+              onChange={PasswordChangeHandler}
             />
             <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
           </div>
         </div>
         
         <div className="flex justify-end mt-6">
-          <Button className="bg-jobblue hover:bg-jobblue-dark">
+          <Button className="bg-jobblue hover:bg-jobblue-dark" onClick={handleSubmit}>
             Change Password
           </Button>
         </div>

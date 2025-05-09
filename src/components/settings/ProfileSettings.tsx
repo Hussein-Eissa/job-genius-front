@@ -46,6 +46,7 @@ const ProfileSettings = () => {
           <div>
             <Label htmlFor="fullName">Full Name (required)</Label>
             <Input 
+            name="fullname"
               id="fullName" 
               defaultValue="Ahmed Safwat" 
               className="mt-1" 

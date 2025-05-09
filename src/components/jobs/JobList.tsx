@@ -29,153 +29,7 @@ const companyLogos = {
   kraken: <div className="w-full h-full bg-purple-600 flex items-center justify-center text-white">KR</div>,
 };
 
-const jobs = [
-  {
-    id: '1',
-    logo: companyLogos.nomad,
-    title: 'Social Media Assistant',
-    company: 'Nomad',
-    location: 'Paris, France',
-    type: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-    applied: 5,
-    capacity: 10
-  },
-  {
-    id: '2',
-    logo: companyLogos.dropbox,
-    title: 'Brand Designer',
-    company: 'Dropbox',
-    location: 'San Francisco, USA',
-    type: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-    applied: 5,
-    capacity: 10
-  },
-  {
-    id: '3',
-    logo: companyLogos.terraform,
-    title: 'Interactive Developer',
-    company: 'Terraform',
-    location: 'Hamburg, Germany',
-    type: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-    applied: 2,
-    capacity: 10
-  },
-  {
-    id: '4',
-    logo: companyLogos.recruit,
-    title: 'Email Marketing',
-    company: 'Recruit',
-    location: 'Madrid, Spain',
-    type: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-    applied: 5,
-    capacity: 10
-  },
-  {
-    id: '5',
-    logo: companyLogos.canva,
-    title: 'Lead Engineer',
-    company: 'Canva',
-    location: 'Ankara, Turkey',
-    type: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-    applied: 5,
-    capacity: 10
-  },
-  {
-    id: '6',
-    logo: companyLogos.classpass,
-    title: 'Product Designer',
-    company: 'ClassPass',
-    location: 'Berlin, Germany',
-    type: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-    applied: 5,
-    capacity: 10
-  },
-  {
-    id: '7',
-    logo: companyLogos.pitch,
-    title: 'Customer Manager',
-    company: 'Pitch',
-    location: 'Berlin, Germany',
-    type: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-    applied: 5,
-    capacity: 10
-  },
-  {
-    id: '8',
-    logo: companyLogos.stripe,
-    title: 'Social Media Assistant',
-    company: 'Stripe',
-    location: 'Paris, France',
-    type: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-    applied: 5,
-    capacity: 10
-  },
-];
 
-const financeJobs = [
-  {
-    id: '9',
-    logo: companyLogos.stripe,
-    title: 'Finance Manager',
-    company: 'Stripe',
-    location: 'San Francisco, USA',
-    type: 'Full-Time',
-    categories: ['Business', 'Payment gateway'],
-  },
-  {
-    id: '10',
-    logo: companyLogos.truebill,
-    title: 'Financial Analyst',
-    company: 'Truebill',
-    location: 'New York, USA',
-    type: 'Full-Time',
-    categories: ['Business'],
-  },
-  {
-    id: '11',
-    logo: companyLogos.square,
-    title: 'Payments Specialist',
-    company: 'Square',
-    location: 'San Francisco, USA',
-    type: 'Full-Time',
-    categories: ['Business', 'Blockchain'],
-  },
-  {
-    id: '12',
-    logo: companyLogos.coinbase,
-    title: 'Crypto Analyst',
-    company: 'Coinbase',
-    location: 'Remote',
-    type: 'Full-Time',
-    categories: ['Business', 'Blockchain'],
-  },
-  {
-    id: '13',
-    logo: companyLogos.robinhood,
-    title: 'Investment Specialist',
-    company: 'Robinhood',
-    location: 'San Francisco, USA',
-    type: 'Full-Time',
-    categories: ['Business'],
-  },
-  {
-    id: '14',
-    logo: companyLogos.kraken,
-    title: 'Trading Analyst',
-    company: 'Kraken',
-    location: 'San Francisco, USA',
-    type: 'Full-Time',
-    categories: ['Business', 'Blockchain'],
-  },
-];
 
 interface JobListProps {
   type?: 'all' | 'ai' | 'finance';
@@ -186,16 +40,51 @@ interface JobListProps {
 const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobListProps) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [currentPage, setCurrentPage] = useState(1);
-  const { jobs: fetchedJobs, fetchJobs } = useJobStore();
+  const {  fetchJobs , jobs} = useJobStore();
+  const [start, setStart] = useState(0);
+  const [slicedJobs, setSlicedJobs] = useState<any>([]); 
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
+useEffect(() => {
+  fetchJobs();
+}, []);
 
-  const jobsToShow =
-    type === 'finance' ? financeJobs :
-    type === 'ai' ? jobs.slice(0, 2) :
-    fetchedJobs.length ? fetchedJobs : jobs;
+useEffect(() => {
+  const end = start + 10;
+
+  if (Array.isArray(jobs)) {
+    const sliced = jobs.slice(start, end);
+    setSlicedJobs(sliced);
+  } else if (jobs?.$values && Array.isArray(jobs.$values)) {
+    const sliced = jobs.$values.slice(start, end);
+    setSlicedJobs(sliced);
+  } else {
+    console.warn("Jobs data is not valid array:", jobs);
+    setSlicedJobs([]);
+  }
+}, [jobs, start]);
+
+
+useEffect(() => {
+  console.log("Sliced jobs:", slicedJobs);
+}, [slicedJobs]);
+
+const jobsForward10 = () => {
+  const totalLength = Array.isArray(jobs) ? jobs.length : jobs?.$values?.length || 0;
+
+  if (start + 10 < totalLength) {
+    setStart(prev => prev + 10);
+    setCurrentPage(prev => prev + 1);
+  }
+};
+
+const jobsBack10 = () => {
+  if (start - 10 >= 0) {
+    setStart(prev => prev - 10);
+    setCurrentPage(prev => prev - 1);
+  }
+};
+
+
 
   return (
     <section className="py-8">
@@ -205,7 +94,7 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
             {title}
             {type !== 'ai' && (
               <span className="text-sm font-normal text-gray-500 ml-2">
-                Showing {jobsToShow.length} results
+                Showing {slicedJobs.length} results
               </span>
             )}
           </h2>
@@ -247,15 +136,20 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
         </div>
 
         <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-1'}`}>
-          {jobsToShow.map((job) => (
-            <JobCard key={job.id} {...job} />
+          {
+          slicedJobs.map((job) => (
+            <JobCard key={job.jobID}  {...job} id={job.jobID} categories={job.categories.$values}/>
           ))}
+          
+          {/* {slicedJobs.map((job) => (
+            <JobCard key={job.jobID} {...job} />
+          ))} */}
         </div>
 
         {type === 'all' && (
           <div className="flex justify-center mt-10">
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="icon" disabled={currentPage === 1}>
+             <Button variant="outline" size="icon" onClick={jobsBack10} disabled={currentPage === 1}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <Button variant={currentPage === 1 ? "default" : "outline"} size="sm" className="w-8 h-8 p-0">1</Button>
@@ -265,7 +159,7 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
               <Button variant={currentPage === 5 ? "default" : "outline"} size="sm" className="w-8 h-8 p-0">5</Button>
               <span className="px-2">...</span>
               <Button variant="outline" size="sm" className="w-8 h-8 p-0">33</Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={jobsForward10} disabled={start + 10 >= jobs.length}>
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>

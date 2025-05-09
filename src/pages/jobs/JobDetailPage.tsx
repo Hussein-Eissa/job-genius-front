@@ -107,7 +107,7 @@ const JobDetailPage = () => {
       <Header />
       <main className="flex-grow">
         <JobDetailHeader 
-          Jobid={parseInt(jobData.jobId)}
+          Jobid={parseInt(jobData.jobID)}
           title={jobData.title}
           company={jobData.company}
           location={`${jobData.city}, ${jobData.country}`}

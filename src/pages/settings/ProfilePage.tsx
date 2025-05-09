@@ -24,7 +24,7 @@ import { format } from "date-fns";
 const ProfilePage = () => {
   const { id } = useParams();
   const { experiences, fetchExperiences } = useExperienceStore();
-  const { portfolios, fetchAllPortfolios, fetchPortfolioImage } = usePortfolioStore();
+  const { portfolios, fetchAllPortfolios, fetchPortfolioImage , addPortfolio } = usePortfolioStore();
   const { savedJobs, fetchSavedJobs } = useJobStore();
   const { educations, fetchEducations } = useEducationStore();
   const { profile, fetchProfileById, fetchMeProfile } = useProfileStore();
@@ -71,8 +71,9 @@ const ProfilePage = () => {
       date: newPortfolio.date || new Date().toISOString(),
       image: newPortfolio.image,
     });
-    setNewPortfolio({ title: "", description: "", date: "", image: null });
-    setShowAddPortfolioModal(false);
+
+    // setNewPortfolio({ title: "", description: "", date: "", image: null });
+    // setShowAddPortfolioModal(false);
   };
 
   return (
@@ -256,14 +257,14 @@ const ProfilePage = () => {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {skills.map((skill, index) => (
+                    { profile.userSkills.$values.length> 0 ? profile.userSkills.$values?.map((skill, index) => (
                       <span
                         key={index}
                         className="px-4 py-2 bg-blue-50 text-blue-700 rounded-md"
                       >
                         {skill}
                       </span>
-                    ))}
+                    )) : <p>No skills found.</p>}
                   </div>
                 </div>
               </div>
@@ -605,6 +606,7 @@ const ProfilePage = () => {
             </div>
             <DialogFooter className="sm:justify-center mt-4">
               <Button
+              onClick={handleAddPortfolio}
                 type="submit"
                 className="bg-jobblue hover:bg-jobblue-dark w-full sm:w-auto"
                 disabled={usePortfolioStore((state) => state.isLoading)}

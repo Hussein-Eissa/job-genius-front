@@ -6,36 +6,53 @@ interface JobBenefit {
   description: string;
 }
 
+interface Category {
+  name?: string; // Adjust if API provides more details
+}
+
+interface Skill {
+  name?: string; // Adjust if API provides more details
+}
+
+interface JobApplication {
+  id?: number; // Adjust if API provides more details
+}
+
+export interface JobListing {
+  jobID: number;
+  title: string;
+  company: string;
+  city: string;
+  country: string;
+  type: string;
+  description: string;
+  responsibilities: string;
+  whoYouAre: string;
+  niceToHaves: string;
+  capacity: number;
+  applyBefore: string;
+  salaryFrom: number;
+  salaryTo: number;
+  companyWebsite: string | null;
+  keywords: string;
+  additionalInformation: string | null;
+  companyPapers: string | null;
+  categories: { $values: Category[] };
+  skills: { $values: Skill[] };
+  jobBenefits: { $values: JobBenefit[] };
+  email: string;
+  fullname: string;
+  userID: number;
+  jobApplications: { $values: JobApplication[] };
+  applicationSent: number;
+}
+
 interface CategoryJobCount {
   categoryName: string;
   jobCount: number;
 }
 
-interface JobListing {
-  jobID: number;
-  title?: string;
-  company?: string;
-  city?: string;
-  country?: string;
-  type?: string;
-  description?: string;
-  responsibilities?: string;
-  whoYouAre?: string;
-  niceToHaves?: string;
-  capacity?: number;
-  applyBefore?: string;
-  salaryFrom?: number;
-  salaryTo?: number;
-  companyWebsite?: string;
-  keywords?: string;
-  additionalInformation?: string;
-  companyPapers?: string;
-  categories?: { $values: string[] };
-  skills?: { $values: string[] };
-  jobBenefits?: JobBenefit[];
-}
-
-interface JobListingState {
+export interface JobListingState {
   jobs: JobListing[];
   userJobs: JobListing[];
   categoriesWithCount: CategoryJobCount[];
@@ -79,9 +96,9 @@ export const useJobStore = create<JobListingState>((set, get) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-
       set({ jobs: res.data, success: true, error: undefined });
-      console.log("Fetched jobs:", res.data);
+      console.log("Fetched jobs:", res.data.$values);
+      return res.data.$values;
     } catch (error: any) {
       console.error("Error fetching jobs:", error.response?.data || error.message);
       set({ success: false, error: error.response?.data?.message || "Failed to fetch jobs." });
@@ -228,12 +245,11 @@ export const useJobStore = create<JobListingState>((set, get) => ({
     if (!Number.isInteger(jobId) || jobId <= 0) {
       throw new Error("Invalid job ID");
     }
-
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
-      await axios.post(
+      const res = await axios.post(
         `https://jobgenius.bsite.net/api/JobListing/saved?jobId=${jobId}`,
         {},
         {
@@ -243,13 +259,17 @@ export const useJobStore = create<JobListingState>((set, get) => ({
         }
       );
 
+      if (!res.data.success) {
+        throw new Error(res.data.message || "Failed to save job");
+      }
+
       const job = await get().getJobById(jobId);
       set((state) => ({
         savedJobs: [...state.savedJobs.filter((j) => j.jobID !== jobId), job],
         success: true,
         error: undefined,
       }));
-      console.log("Saved job:", job);
+      console.log("Saved job:", job, "API response:", res.data);
     } catch (error: any) {
       console.error("Error saving job:", error.response?.data || error.message);
       set({ success: false, error: error.response?.data?.message || "Failed to save job." });

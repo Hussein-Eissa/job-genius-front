@@ -36,13 +36,13 @@ interface Profile {
 }
 
 interface UpdateProfilePayload {
-  id: number;
-  token: string;
-  jobTitle: string;
-  aboutMe: string;
-  phone: string;
-  gender: string;
-  type: string;
+  // id: number;
+  // token?: string;
+  jobTitle?: string;
+  aboutMe?: string;
+  phone?: string;
+  gender?: string ;
+  type?: string ;
   image?: File | null;
   coverImage?: File | null;
   deleteImage?: boolean;

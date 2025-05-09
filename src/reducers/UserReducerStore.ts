@@ -20,6 +20,7 @@ export interface ChangePasswordRequest {
 }
 
 interface UserState {
+  ChangePasswordRequest: ChangePasswordRequest;
   user: User;
   token: string;
   isAuthenticated: boolean;
@@ -33,16 +34,19 @@ interface UserState {
   forgetPassword: (email: string) => Promise<void>;
   resetPassword: (data: ResetPasswordRequest) => Promise<void>;
   changePassword: (data: ChangePasswordRequest) => Promise<void>;
+  setChangePasswordRequest: (data: ChangePasswordRequest) => void;
+
 }
 
 export const useUserStore = create<UserState>((set) => ({
+  ChangePasswordRequest: { oldPassword: "", newPassword: "" },
   resetPasswordRequest: { email: "", resetCode: "", newPassword: "" },
   user: { fullName: "", email: "" },
   token: localStorage.getItem("token") || "",
   isAuthenticated: !!localStorage.getItem("token"),
   success: null,
   error: undefined,
-
+  setChangePasswordRequest: (data) => set({ ChangePasswordRequest: data }),
   loginAsync: async (email, password) => {
     try {
       const res = await axios.post("https://jobgenius.bsite.net/api/auth/login", {
@@ -162,8 +166,9 @@ export const useUserStore = create<UserState>((set) => ({
           },
         }
       );
-
+    
       if (response.data.success) {
+        console.log('Password changed successfully');
         set({ success: true, error: undefined });
       } else {
         throw new Error(response.data.message || 'Change password failed');
