@@ -12,7 +12,7 @@ interface JobDetailHeaderProps {
 }
 
 
-const JobDetailHeader = ({ Jobid ,title, company, location, type }: JobDetailHeaderProps) => {
+const JobDetailHeader = ({ Jobid ,title, company, location, type, onApply }: JobDetailHeaderProps) => {
 const {saveJobByID} = useJobStore();
   const handleSaveJob = () => {
     saveJobByID(Jobid);
@@ -41,7 +41,7 @@ const {saveJobByID} = useJobStore();
             <Button variant="outline" size="sm" className="gap-2" onClick={handleSaveJob} >
               <Bookmark size={16} /> Save
             </Button>
-            {/* <Button size="sm" onClick={onApply}>Apply</Button> */}
+            <Button size="sm" onClick={onApply}>Apply</Button>
           </div>
         </div>
       </div>

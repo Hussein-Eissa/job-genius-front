@@ -159,7 +159,7 @@ const jobsBack10 = () => {
         {type === 'all' && (
           <div className="flex justify-center mt-10">
             <div className="flex items-center space-x-2">
-             <Button variant="outline" size="icon" onClick={jobsBack10} disabled={currentPage === 1}>
+              <Button variant="outline" size="icon" onClick={jobsBack10} disabled={currentPage === 1}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <Button variant={currentPage === 1 ? "default" : "outline"} size="sm" className="w-8 h-8 p-0">1</Button>

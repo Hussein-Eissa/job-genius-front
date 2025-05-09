@@ -36,7 +36,7 @@ const ResumeRecommendations = () => {
         
         <div className="flex justify-center">
           <img 
-            src="/lovable-uploads/7566b5e3-9ff2-44eb-8c27-5cbf3103ecc6.png" 
+            src="/lovable-uploads/Images/vector 1.png" 
             alt="Resume Analysis Visualization" 
             className="max-h-64"
           />
