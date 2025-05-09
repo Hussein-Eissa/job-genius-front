@@ -23,6 +23,7 @@ import InterviewTipsPage from "./pages/interview/InterviewTipsPage";
 import HelpPage from "./pages/help/HelpPage";
 import HelpFaqsPage from "./pages/help/HelpFaqsPage";
 import HelpContactPage from "./pages/help/HelpContactPage";
+import TermsContent from "./pages/help/TermsContent";
 import HelpTutorialsPage from "./pages/help/HelpTutorialsPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import ProfilePage from "./pages/settings/ProfilePage";
@@ -68,6 +69,7 @@ const App = () => (
           <Route path="/help/faqs" element={<HelpFaqsPage />} />
           <Route path="/help/contact" element={<HelpContactPage />} />
           <Route path="/help/tutorials" element={<HelpTutorialsPage />} />
+          <Route path="/terms" element={<TermsContent />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/applications" element={<AccountPage />} />

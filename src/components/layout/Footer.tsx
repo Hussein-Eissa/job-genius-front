@@ -1,14 +1,14 @@
 
 import { Link } from "react-router-dom";
 import LogoIcon from "../common/LogoIcon";
-import { Facebook, Linkedin, Twitter, Instagram, Youtube } from "lucide-react";
+import { Facebook, Linkedin, Twitter, Instagram, Youtube, X, Dribbble, LucideTwitter } from "lucide-react";
 import NewsletterSection from "./NewsletterSection";
 
 const Footer = () => {
   return (
     <footer className="footer-background text-white py-10">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between mb-8">
+        <div className="flex flex-col md:flex-row justify-evenly mb-8">
           <div className="mb-6 md:mb-0">
             <Link to="/" className="flex items-center mb-4">
               <LogoIcon className="h-8 w-8" />
@@ -22,15 +22,15 @@ const Footer = () => {
 
           <div className="flex flex-col items-center space-x-4 gap-5">
             <NewsletterSection />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <h3 className="text-sm font-bold mb-4">Jobs</h3>
                 <ul className="space-y-2 text-sm text-gray-300">
                   <li><Link to="/jobs" className="hover:text-jobblue-light">Find Jobs</Link></li>
-                  <li><Link to="/jobs/trending" className="hover:text-jobblue-light">Trending</Link></li>
+                  {/* <li><Link to="/jobs/trending" className="hover:text-jobblue-light">Trending</Link></li>
                   <li><Link to="/jobs/terms" className="hover:text-jobblue-light">Terms</Link></li>
                   <li><Link to="/jobs/advice" className="hover:text-jobblue-light">Advice</Link></li>
-                  <li><Link to="/privacy" className="hover:text-jobblue-light">Privacy Policy</Link></li>
+                  <li><Link to="/privacy" className="hover:text-jobblue-light">Privacy Policy</Link></li> */}
                 </ul>
               </div>
 
@@ -46,7 +46,7 @@ const Footer = () => {
                 <h3 className="text-sm font-bold mb-4">Interview Preparation</h3>
                 <ul className="space-y-2 text-sm text-gray-300">
                   <li><Link to="/interview" className="hover:text-jobblue-light">Practice Questions Library</Link></li>
-                  <li><Link to="/interview/tips" className="hover:text-jobblue-light">Tips & Resources</Link></li>
+                  {/* <li><Link to="/interview/tips" className="hover:text-jobblue-light">Tips & Resources</Link></li> */}
                 </ul>
               </div>
 
@@ -54,7 +54,7 @@ const Footer = () => {
                 <h3 className="text-sm font-bold mb-4">Help & Support</h3>
                 <ul className="space-y-2 text-sm text-gray-300">
                   <li><Link to="/help/faqs" className="hover:text-jobblue-light">FAQs</Link></li>
-                  <li><Link to="/help/tutorials" className="hover:text-jobblue-light">Tutorials</Link></li>
+                  {/* <li><Link to="/help/tutorials" className="hover:text-jobblue-light">Tutorials</Link></li> */}
                   <li><Link to="/help/contact" className="hover:text-jobblue-light">Contact Support form</Link></li>
                   <li><Link to="/terms" className="hover:text-jobblue-light">Terms & Conditions</Link></li>
                 </ul>
@@ -70,17 +70,17 @@ const Footer = () => {
             <a target="blank" href="https://www.facebook.com" className="text-gray-400 hover:text-white">
               <Facebook size={20} />
             </a>
-            <a target="blank" href="https://x.com/" className="text-gray-400 hover:text-white">
-              <Twitter size={20} />
-            </a>
             <a target="blank" href="https://www.instagram.com/" className="text-gray-400 hover:text-white">
               <Instagram size={20} />
+            </a>
+            <a target="blank" href="https://dribbble.com/" className="text-gray-400 hover:text-white">
+              <Dribbble size={20} />
             </a>
             <a target="blank" href="https://www.linkedin.com/" className="text-gray-400 hover:text-white">
               <Linkedin size={20} />
             </a>
-            <a target="blank" href="https://www.youtube.com/" className="text-gray-400 hover:text-white">
-              <Youtube size={20} />
+            <a target="blank" href="https://x.com/" className="text-gray-400 hover:text-white">
+              <Twitter size={20} />
             </a>
           </div>
         </div>

@@ -13,6 +13,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { useJobStore } from "@/reducers/JobListingReducerStore";
 import { format } from "date-fns";
 import { parse } from "path";
+import { DialogContent } from "@radix-ui/react-dialog";
 
 const JobDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -112,6 +113,7 @@ const JobDetailPage = () => {
           company={jobData.company}
           location={`${jobData.city}, ${jobData.country}`}
           type={jobData.type}
+          onApply={handleApplyClick}
         />
         
         <JobDescription 
@@ -133,13 +135,15 @@ const JobDetailPage = () => {
         <SimilarJobs />
 
         <Dialog open={isApplicationOpen} onOpenChange={setIsApplicationOpen}>
-          <JobApplicationForm 
-            jobTitle={jobData.title}
-            companyName={jobData.company}
-            location={`${jobData.city}, ${jobData.country}`}
-            type={jobData.type}
-            onSubmit={handleApplicationSubmit}
-          />
+          <div className=" max-h-[90vh] overflow-y-auto">
+            <JobApplicationForm 
+              jobTitle={job.title}
+              companyName={job.company}
+              location={job.location}
+              type={job.type}
+              onSubmit={handleApplicationSubmit}
+            />
+          </div>
         </Dialog>
 
         <Dialog open={isSuccessOpen} onOpenChange={setIsSuccessOpen}>

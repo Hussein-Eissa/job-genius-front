@@ -72,22 +72,21 @@ const JobApplicationForm = ({ jobTitle, companyName, location, type, onSubmit })
   
   return (
     <DialogContent className="sm:max-w-[600px]">
-      <DialogHeader>
-        <DialogTitle>Apply for {jobTitle}</DialogTitle>
-      </DialogHeader>
-      <div className="mt-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <p className="text-lg font-medium mb-2">
-              Are you a stakeholder or employer? <span className="text-jobblue">Post your job now!</span>
-            </p>
-            <Button className="mt-2">Add Your Job</Button>
+      <DialogHeader className="flex flex-col gap-0">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white text-xl font-bold">
+            N
           </div>
-      <div className="flex items-center gap-2 text-sm mb-6">
-        <span className="font-medium">{companyName}</span>
-        <span className="text-gray-500">·</span>
-        <span>{location}</span>
-        <span className="text-gray-500">·</span>
-        <span>{type}</span>
-      </div>
+          <DialogTitle>Apply for {jobTitle}</DialogTitle>
+        </div>
+        <div className="flex items-center gap-2 p-2 pt-0 text-sm mb-6">
+          <span className="font-medium">{companyName}</span>
+          <span className="text-gray-500">·</span>
+          <span>{location}</span>
+          <span className="text-gray-500">·</span>
+          <span>{type}</span>
+        </div>
+      </DialogHeader>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -170,9 +169,13 @@ const JobApplicationForm = ({ jobTitle, companyName, location, type, onSubmit })
             <Input
               id="coverLetterFile"
               type="file"
+              required={true}
+              placeholder="Upload your cover letter"
               accept=".pdf,.doc,.docx"
               onChange={handleCoverLetterFileChange}
+              className="w-40 border-2 border-dashed border-jobblue rounded-sm shadow-sm focus:ring focus:ring-blue-500"
             />
+            
             {coverLetterFile && (
               <div className="bg-green-50 p-1 rounded-full">
                 <Check size={16} className="text-green-600" />
