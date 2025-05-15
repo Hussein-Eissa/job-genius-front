@@ -162,28 +162,13 @@ export const useUserStore = create<UserState>((set) => ({
         throw new Error("Please enter a valid email address");
       }
 
-      // Then check if email already exists
-      try {
-        const checkEmailRes = await axios.post("https://jobgenius.bsite.net/api/auth/check-email", {
-          email: userData.email,
-        });
-        
-        if (checkEmailRes.data.exists) {
-          throw new Error("This email is already registered. Would you like to login instead?");
-        }
-      } catch (error: any) {
-        if (error.message.includes("already registered")) {
-          throw error;
-        }
-        // If check-email endpoint is not available, continue with registration
-      }
-
-      // Finally validate password strength
+      // Validate password strength
       const passwordValidation = useUserStore.getState().validatePassword(userData.password);
       if (!passwordValidation.isValid) {
         throw new Error(passwordValidation.message);
       }
 
+      // Directly call the register endpoint
       const res = await axios.post("https://jobgenius.bsite.net/api/auth/register", {
         fullName: userData.fullName,
         email: userData.email,
@@ -200,7 +185,6 @@ export const useUserStore = create<UserState>((set) => ({
       }
     } catch (error: any) {
       let errorMessage = getApiErrorMessage(error, "Registration failed. Please try again.");
-      
       toast({
         title: "Registration Failed",
         description: errorMessage,

@@ -3,7 +3,7 @@ import Footer from "@/components/layout/Footer";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "https://jsonplaceholder.typicode.com/posts";
+const API_URL = "https://4055-196-134-66-41.ngrok-free.app/generate-questions";
 
 const jobTitles = [
   "Data Scientist",
@@ -19,7 +19,7 @@ const jobTitles = [
   "Graphic Designer",
 ];
 
-const experienceLevels = [
+const Levels = [
   "Junior",
   "Mid-Level",
   "Senior",
@@ -33,7 +33,7 @@ const focusAreas = [
 
 const icons = [
   "/lovable-uploads/Images/icon-park-outline_necktie.svg",
-  "/carbon_skill-level.svg",
+  "/lovable-uploads/Images/carbon_skill-level.svg",
   "/lovable-uploads/Images/mingcute_target-line.svg",
   "/lovable-uploads/Images/lsicon_number-filled.svg",
   "/lovable-uploads/Images/mingcute_ai-line.svg",
@@ -42,15 +42,15 @@ const icons = [
 const InterviewPage = () => {
   const navigate = useNavigate();
   const [jobTitle, setJobTitle] = useState("");
+  const [level, setlevel] = useState("");
   const [experience, setExperience] = useState("");
-  const [focusArea, setFocusArea] = useState("");
   const [numQuestions, setNumQuestions] = useState(5);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!jobTitle || !experience || !focusArea) {
+    if (!jobTitle || !level || !experience) {
       setError("Please fill all required fields.");
       return;
     }
@@ -61,17 +61,19 @@ const InterviewPage = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          jobTitle,
-          experience,
-          focusArea,
-          numQuestions,
+          role: jobTitle,
+          level: level,
+          experience: experience,
+          num_questions: numQuestions,
         }),
       });
       if (!res.ok) throw new Error("Failed to generate questions");
       const data = await res.json();
-      if (!Array.isArray(data)) throw new Error("Invalid response from API");
-      localStorage.setItem("interviewQuestions", JSON.stringify(data));
-      localStorage.setItem("interviewMeta", JSON.stringify({ jobTitle, experience, focusArea, numQuestions }));
+      console.log(data);
+      const questionsArray = Array.isArray(data) ? data : (Array.isArray(data.questions) ? data.questions : []);
+      if (!Array.isArray(questionsArray) || questionsArray.length === 0) throw new Error("Invalid response from API");
+      localStorage.setItem("interviewQuestions", JSON.stringify(questionsArray));
+      localStorage.setItem("interviewMeta", JSON.stringify({ jobTitle, level, experience, numQuestions }));
       setLoading(false);
       navigate("/interview-questions");
     } catch (err) {
@@ -104,10 +106,10 @@ const InterviewPage = () => {
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <img src={icons[2]} alt="Focus Area" className="w-7 h-7 mt-1" />
+                <img src={icons[2]} alt="Experience Area" className="w-7 h-7 mt-1" />
                 <div>
-                  <b>Select Interview Focus Area</b>
-                  <p className="text-gray-600">Specify whether the interview should assess technical skills, soft skills, or both.</p>
+                  <b>Describe Your Experience</b>
+                  <p className="text-gray-600">Briefly describe your experience relevant to this role (e.g., 'I have 1 year of experience working with Python and machine learning.').</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -145,10 +147,10 @@ const InterviewPage = () => {
                 </select>
               </div>
               <div className="flex-1">
-                <label className="block font-semibold mb-1">Experience Level (required)</label>
-                <select value={experience} onChange={e => setExperience(e.target.value)} className="w-full border rounded px-3 py-2">
+                <label className="block font-semibold mb-1">Level (required)</label>
+                <select value={level} onChange={e => setlevel(e.target.value)} className="w-full border rounded px-3 py-2">
                   <option value="">Please Choose</option>
-                  {experienceLevels.map((level) => (
+                  {Levels.map((level) => (
                     <option key={level} value={level}>{level}</option>
                   ))}
                 </select>
@@ -156,13 +158,15 @@ const InterviewPage = () => {
             </div>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
-                <label className="block font-semibold mb-1">Interview Focus Area (required)</label>
-                <select value={focusArea} onChange={e => setFocusArea(e.target.value)} className="w-full border rounded px-3 py-2">
-                  <option value="">Please Choose</option>
-                  {focusAreas.map((area) => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
+                <label className="block font-semibold mb-1">Experience Area (required)</label>
+                <input
+                  type="text"
+                  value={experience}
+                  onChange={e => setExperience(e.target.value)}
+                  placeholder="E.g. I have 1 year of experience working with Python and machine learning."
+                  className="w-full border rounded px-3 py-2"
+                  required
+                />
               </div>
               <div className="flex-1">
                 <label className="block font-semibold mb-1">Number of Questions (optional)</label>
@@ -181,9 +185,11 @@ const InterviewPage = () => {
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
           <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col items-center max-w-md w-full">
-            <img src="/logo.svg" alt="JobGenius Logo" className="h-10 mb-4" />
+            <img src="/lovable-uploads/Images/Logo.svg" alt="JobGenius Logo" className="h-10 mb-4" />
             <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
-              <span role="img" aria-label="sparkles">✨</span> Generating your Interview Questions
+              <span role="img" aria-label="sparkles">
+                <img src="/lovable-uploads/Images/mingcute_ai-line.svg" className="h-6" />
+              </span> Generating your Interview Questions
             </h2>
             <div className="my-6"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-jobblue"></div></div>
             <button
