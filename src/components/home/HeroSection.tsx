@@ -3,13 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { useJobStore } from "@/reducers/JobListingReducerStore";
+import { useNavigate } from "react-router-dom";
 const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("Cairo, Egypt");
-  const {searchJobs} = useJobStore();
+  const navigation = useNavigate();
   const handleSearch = () => {
-    const [city, country] = location.split(',').map(str => str.trim());
-    searchJobs(searchQuery, country, city);
+    navigation("/jobs/search", { state: { triggerAI: false } })
   };
   return (
     <section className="hero-gradient pt-14 pb-20">

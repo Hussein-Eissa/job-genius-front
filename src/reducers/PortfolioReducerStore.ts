@@ -170,7 +170,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       const response = await axios.get(
         `https://jobgenius.bsite.net/api/Portfolio/${portfolioID}/images/${encodedImageName}`,
         {
-           headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` },
           // responseType: 'blob',
         }
       );

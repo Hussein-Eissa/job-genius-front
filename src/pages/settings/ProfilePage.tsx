@@ -18,8 +18,8 @@ import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import LogoIcon from "@/components/common/LogoIcon";
 import { useJobStore } from "@/reducers/JobListingReducerStore";
 import { useProfileStore } from "@/reducers/ProfileReducerStore";
-import { useExperienceStore } from "@/reducers/ExperienceReducerStore";
-import { useEducationStore } from "@/reducers/EducationReducerStore";
+import { useExperienceStore, Experience, ExperiencePayload } from "@/reducers/ExperienceReducerStore";
+import { useEducationStore, Education, EducationPayload } from "@/reducers/EducationReducerStore";
 import { usePortfolioStore } from "@/reducers/PortfolioReducerStore";
 import { format, set } from "date-fns";
 
@@ -49,6 +49,10 @@ const ProfilePage = () => {
   const [showEditSkillsModal, setShowEditSkillsModal] = useState(false);
   const [showEditLanguagesModal, setShowEditLanguagesModal] = useState(false);
   const [showEditSocialLinksModal, setShowEditSocialLinksModal] = useState(false);
+  const [showEditEducationModal, setShowEditEducationModal] = useState(false);
+  const [showEditExperienceModal, setShowEditExperienceModal] = useState(false);
+  const [showAddEducationModal, setShowAddEducationModal] = useState(false);
+  const [showAddExperienceModal, setShowAddExperienceModal] = useState(false);
   const [basicInfo, setBasicInfo] = useState({
     jobTitle: "",
     phone: "",
@@ -69,6 +73,25 @@ const ProfilePage = () => {
     description: "",
     date: "",
     image: null as File | null,
+  });
+  const [editingEducation, setEditingEducation] = useState<Education | null>(null);
+  const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
+  const [newEducation, setNewEducation] = useState<EducationPayload>({
+    university: "",
+    degree: "",
+    dateFrom: "",
+    dateTo: "",
+    description: "",
+  });
+  const [newExperience, setNewExperience] = useState<ExperiencePayload>({
+    title: "",
+    company: "",
+    type: "",
+    dateFrom: "",
+    dateTo: "",
+    city: "",
+    country: "",
+    description: "",
   });
 
   const [skills, setSkills] = useState([
@@ -128,14 +151,16 @@ const ProfilePage = () => {
 
   const handleBasicInfoUpdate = async () => {
     try {
-      await updateProfile({
+      const payload: any = {
+        ...profile,
         jobTitle: basicInfo.jobTitle,
         phone: basicInfo.phone,
         gender: basicInfo.gender,
         type: basicInfo.type,
-        image: basicInfo.image,
-        coverImage: basicInfo.coverImage,
-      });
+      };
+      if (basicInfo.image instanceof File) payload.image = basicInfo.image;
+      if (basicInfo.coverImage instanceof File) payload.coverImage = basicInfo.coverImage;
+      await updateProfile(payload);
       setShowEditBasicInfoModal(false);
     } catch (error) {
       console.error("Error updating basic info:", error);
@@ -144,9 +169,13 @@ const ProfilePage = () => {
 
   const handleAboutMeUpdate = async () => {
     try {
-      await updateProfile({
+      const payload: any = {
+        ...profile,
         aboutMe: aboutMe,
-      });
+      };
+      if (basicInfo.image instanceof File) payload.image = basicInfo.image;
+      if (basicInfo.coverImage instanceof File) payload.coverImage = basicInfo.coverImage;
+      await updateProfile(payload);
       setShowEditAboutModal(false);
     } catch (error) {
       console.error("Error updating about me:", error);
@@ -183,6 +212,38 @@ const ProfilePage = () => {
       } catch (error) {
         console.error("Error adding social link:", error);
       }
+    }
+  };
+
+  const handleEditEducation = (education: Education) => {
+    setEditingEducation(education);
+    setShowEditEducationModal(true);
+  };
+
+  const handleEditExperience = (experience: Experience) => {
+    setEditingExperience(experience);
+    setShowEditExperienceModal(true);
+  };
+
+  const handleAddEducation = async () => {
+    try {
+      await useEducationStore.getState().addEducation(newEducation);
+      setShowAddEducationModal(false);
+      setNewEducation({ university: "", degree: "", dateFrom: "", dateTo: "", description: "" });
+      fetchEducations();
+    } catch (error) {
+      console.error("Error adding education:", error);
+    }
+  };
+
+  const handleAddExperience = async () => {
+    try {
+      await useExperienceStore.getState().addExperience(newExperience);
+      setShowAddExperienceModal(false);
+      setNewExperience({ title: "", company: "", type: "", dateFrom: "", dateTo: "", city: "", country: "", description: "" });
+      fetchExperiences();
+    } catch (error) {
+      console.error("Error adding experience:", error);
     }
   };
 
@@ -282,7 +343,7 @@ const ProfilePage = () => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-xl font-bold">Experiences</h3>
-                    <Button variant="ghost" size="sm" className="flex items-center">
+                    <Button variant="ghost" size="sm" className="flex items-center" onClick={() => setShowAddExperienceModal(true)}>
                       <Plus size={16} className="mr-1" />
                       Add
                     </Button>
@@ -295,9 +356,9 @@ const ProfilePage = () => {
                     >
                       <div className="flex justify-between">
                         <div className="flex">
-                          <div className="w-12 h-12 rounded-md bg-gray-100 mr-4 flex items-center justify-center overflow-hidden">
-                            {/* <img src={experience.companyLogo} alt={experience.company} className="w-8 h-8 object-contain" /> */}
-                          </div>
+                          {/* <div className="w-12 h-12 rounded-md bg-gray-100 mr-4 flex items-center justify-center overflow-hidden">
+                            <img src={experience.companyLogo} alt={experience.company} className="w-8 h-8 object-contain" />
+                          </div> */}
                           <div>
                             <h4 className="font-medium text-lg">{experience.title}</h4>
                             <p className="text-gray-600">
@@ -311,7 +372,7 @@ const ProfilePage = () => {
                             <p className="mt-2 text-gray-700">{experience.description}</p>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm" className="p-1 h-auto">
+                        <Button variant="ghost" size="sm" className="p-1 h-auto" onClick={() => handleEditExperience(experience)}>
                           <Pencil size={16} />
                         </Button>
                       </div>
@@ -325,7 +386,7 @@ const ProfilePage = () => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-xl font-bold">Educations</h3>
-                    <Button variant="ghost" size="sm" className="flex items-center">
+                    <Button variant="ghost" size="sm" className="flex items-center" onClick={() => setShowAddEducationModal(true)}>
                       <Plus size={16} className="mr-1" />
                       Add
                     </Button>
@@ -338,9 +399,9 @@ const ProfilePage = () => {
                     >
                       <div className="flex justify-between">
                         <div className="flex">
-                          <div className="w-12 h-12 rounded-md bg-gray-100 mr-4 flex items-center justify-center overflow-hidden">
-                            {/* <img src={edu.university} alt={edu.institution} className="w-8 h-8 object-contain" /> */}
-                          </div>
+                          {/* <div className="w-12 h-12 rounded-md bg-gray-100 mr-4 flex items-center justify-center overflow-hidden">
+                            <img src={edu.university} alt={edu.institution} className="w-8 h-8 object-contain" />
+                          </div> */}
                           <div>
                             <h4 className="font-medium text-lg">{edu.university}</h4>
                             <p className="text-gray-600">{edu.degree}</p>
@@ -351,7 +412,7 @@ const ProfilePage = () => {
                             <p className="mt-2 text-gray-700">{edu.description}</p>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm" className="p-1 h-auto">
+                        <Button variant="ghost" size="sm" className="p-1 h-auto" onClick={() => handleEditEducation(edu)}>
                           <Pencil size={16} />
                         </Button>
                       </div>
@@ -533,6 +594,14 @@ const ProfilePage = () => {
                           />
                         </svg>
                         <span className="text-gray-500 text-sm">Languages</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="p-1 h-auto"
+                          onClick={() => setShowEditLanguagesModal(true)}
+                        >
+                          <Pencil size={16} />
+                        </Button>
                       </div>
                       <p>
                         {profile?.userLanguages.$values.length
@@ -869,6 +938,220 @@ const ProfilePage = () => {
               ))}
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Education Modal */}
+      <Dialog open={showEditEducationModal} onOpenChange={setShowEditEducationModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Education</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">University</label>
+              <Input
+                value={editingEducation?.university || ""}
+                onChange={(e) => setEditingEducation({ ...editingEducation, university: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Degree</label>
+              <Input
+                value={editingEducation?.degree || ""}
+                onChange={(e) => setEditingEducation({ ...editingEducation, degree: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date From</label>
+              <Input
+                type="date"
+                value={editingEducation?.dateFrom || ""}
+                onChange={(e) => setEditingEducation({ ...editingEducation, dateFrom: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date To</label>
+              <Input
+                type="date"
+                value={editingEducation?.dateTo || ""}
+                onChange={(e) => setEditingEducation({ ...editingEducation, dateTo: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                value={editingEducation?.description || ""}
+                onChange={(e) => setEditingEducation({ ...editingEducation, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => {
+              if (editingEducation?.educationID) {
+                useEducationStore.getState().updateEducation(editingEducation.educationID, editingEducation);
+              }
+              setShowEditEducationModal(false);
+            }}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Experience Modal */}
+      <Dialog open={showEditExperienceModal} onOpenChange={setShowEditExperienceModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Experience</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Title</label>
+              <Input
+                value={editingExperience?.title || ""}
+                onChange={(e) => setEditingExperience({ ...editingExperience, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Company</label>
+              <Input
+                value={editingExperience?.company || ""}
+                onChange={(e) => setEditingExperience({ ...editingExperience, company: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Type</label>
+              <Input
+                value={editingExperience?.type || ""}
+                onChange={(e) => setEditingExperience({ ...editingExperience, type: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date From</label>
+              <Input
+                type="date"
+                value={editingExperience?.dateFrom || ""}
+                onChange={(e) => setEditingExperience({ ...editingExperience, dateFrom: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date To</label>
+              <Input
+                type="date"
+                value={editingExperience?.dateTo || ""}
+                onChange={(e) => setEditingExperience({ ...editingExperience, dateTo: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">City</label>
+              <Input
+                value={editingExperience?.city || ""}
+                onChange={(e) => setEditingExperience({ ...editingExperience, city: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Country</label>
+              <Input
+                value={editingExperience?.country || ""}
+                onChange={(e) => setEditingExperience({ ...editingExperience, country: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                value={editingExperience?.description || ""}
+                onChange={(e) => setEditingExperience({ ...editingExperience, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={async () => {
+              if (editingExperience?.experienceID) {
+                await useExperienceStore.getState().updateExperience(editingExperience.experienceID, editingExperience);
+                await fetchExperiences();
+              }
+              setShowEditExperienceModal(false);
+            }}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Education Modal */}
+      <Dialog open={showAddEducationModal} onOpenChange={setShowAddEducationModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Education</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">University</label>
+              <Input value={newEducation.university} onChange={e => setNewEducation({ ...newEducation, university: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Degree</label>
+              <Input value={newEducation.degree} onChange={e => setNewEducation({ ...newEducation, degree: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date From</label>
+              <Input type="date" value={newEducation.dateFrom} onChange={e => setNewEducation({ ...newEducation, dateFrom: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date To</label>
+              <Input type="date" value={newEducation.dateTo || ""} onChange={e => setNewEducation({ ...newEducation, dateTo: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <Textarea value={newEducation.description || ""} onChange={e => setNewEducation({ ...newEducation, description: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleAddEducation}>Add Education</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Experience Modal */}
+      <Dialog open={showAddExperienceModal} onOpenChange={setShowAddExperienceModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Experience</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Title</label>
+              <Input value={newExperience.title} onChange={e => setNewExperience({ ...newExperience, title: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Company</label>
+              <Input value={newExperience.company} onChange={e => setNewExperience({ ...newExperience, company: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Type</label>
+              <Input value={newExperience.type} onChange={e => setNewExperience({ ...newExperience, type: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date From</label>
+              <Input type="date" value={newExperience.dateFrom} onChange={e => setNewExperience({ ...newExperience, dateFrom: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date To</label>
+              <Input type="date" value={newExperience.dateTo} onChange={e => setNewExperience({ ...newExperience, dateTo: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">City</label>
+              <Input value={newExperience.city} onChange={e => setNewExperience({ ...newExperience, city: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Country</label>
+              <Input value={newExperience.country} onChange={e => setNewExperience({ ...newExperience, country: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <Textarea value={newExperience.description} onChange={e => setNewExperience({ ...newExperience, description: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleAddExperience}>Add Experience</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

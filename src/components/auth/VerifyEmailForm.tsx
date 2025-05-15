@@ -117,16 +117,16 @@ export default function VerifyEmailForm() {
     try {
       if (isPasswordReset) {
         // Handle password reset verification
-        useUserStore.setState({
-          resetPasswordRequest: {
-            email,
-            resetCode: data.otp,
-            newPassword: resetPasswordRequest?.newPassword || "",
-          },
-        });
-        navigate("/reset-password", {
-          state: { email, resetCode: data.otp },
-        });
+      useUserStore.setState({
+        resetPasswordRequest: {
+          email,
+          resetCode: data.otp,
+          newPassword: resetPasswordRequest?.newPassword || "",
+        },
+      });
+    navigate("/reset-password", {
+      state: { email, resetCode: data.otp },
+    });
       } else {
         // Handle signup verification
         const isVerified = await verifyEmail({ email, otp: data.otp });

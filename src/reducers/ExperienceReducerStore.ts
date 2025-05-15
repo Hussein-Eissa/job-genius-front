@@ -13,7 +13,7 @@ export interface Experience {
     description: string;
   }
 
-interface ExperiencePayload {
+export interface ExperiencePayload {
     title: string;
     company: string;
     type: string;
@@ -23,6 +23,7 @@ interface ExperiencePayload {
     country: string;
     description: string;
   }
+
 interface ExperienceState {
   experiences: Experience[];
   fetchExperiences: () => Promise<void>;

@@ -7,10 +7,17 @@ import { Dialog } from "@/components/ui/dialog";
 import { AIInfoModal, AILoadingModal } from "@/components/jobs/AIModal";
 import SuccessModal from "@/components/jobs/SuccessModal";
 import { useLocation } from "react-router-dom";
+import {useJobStore} from '@/reducers/JobListingReducerStore';
 
 const JobSearchPage = () => {
   const location = useLocation();
   const triggerAI = location.state?.triggerAI;
+
+  const {searchJobs } = useJobStore();
+  const [searchTerm, setSearchTerm] = useState({keyword: "", location: ""});
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+
 
   const [isAIInfoOpen, setIsAIInfoOpen] = useState(false);
   const [isAILoadingOpen, setIsAILoadingOpen] = useState(false);
@@ -31,6 +38,22 @@ const JobSearchPage = () => {
       setShowAIResults(true);
     }, 2000);
   };
+
+  const SearchHandler = async () => {
+    setSearchError("");
+    setSearchLoading(true);
+    const [city, country] = searchTerm.location.split(',').map(str => str.trim());
+    try {
+      await searchJobs(searchTerm.keyword, country, city);
+    } catch (err) {
+      setSearchError("Failed to search jobs. Please try again.");
+    }
+    setSearchLoading(false);
+  }
+
+  const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm({ ...searchTerm, [e.target.name]: e.target.value });
+  }
 
   useEffect(() => {
     if (triggerAI) {
@@ -55,6 +78,7 @@ const JobSearchPage = () => {
                   type="text"
                   placeholder="Job title or keyword"
                   className="w-full pl-10 pr-4 py-2.5 rounded-md border-gray-200 focus:border-jobblue focus:ring-jobblue"
+                  onChange={inputChangeHandler}
                 />
                 <span className="absolute left-3 top-3 text-gray-400">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -69,6 +93,7 @@ const JobSearchPage = () => {
                   type="text"
                   placeholder="Cairo, Egypt"
                   className="w-full pl-10 pr-4 py-2.5 rounded-md border-gray-200 focus:border-jobblue focus:ring-jobblue"
+                  onChange={inputChangeHandler}
                 />
                 <span className="absolute left-3 top-3 text-gray-400">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -83,11 +108,11 @@ const JobSearchPage = () => {
                 </span>
               </div>
               
-              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition">
-                Search
+              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition flex items-center justify-center min-w-[100px]" onClick={SearchHandler} disabled={searchLoading}>
+                {searchLoading ? <span className="animate-spin h-5 w-5 border-2 border-white border-t-jobblue rounded-full"></span> : "Search"}
               </button>
             </div>
-            
+            {searchError && <div className="text-red-500 mt-2">{searchError}</div>}
             <div className="mt-4 text-sm">
               <span className="text-gray-600">Popular: </span>
               <span className="text-gray-800">UI Designer, UX Researcher, Admin, Graphic Designer</span>

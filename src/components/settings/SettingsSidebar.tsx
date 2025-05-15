@@ -21,6 +21,9 @@ const SettingsSidebar = () => {
 
   useEffect(() => {
     fetchMeProfile();
+    console.log("profile?.image");
+    console.log(profile?.image);
+    
   }, [fetchMeProfile]);
 
   function HandelLogOut() {
