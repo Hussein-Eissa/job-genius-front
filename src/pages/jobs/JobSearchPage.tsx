@@ -7,16 +7,30 @@ import { Dialog } from "@/components/ui/dialog";
 import { AIInfoModal, AILoadingModal } from "@/components/jobs/AIModal";
 import SuccessModal from "@/components/jobs/SuccessModal";
 import { useLocation } from "react-router-dom";
-
+import { useJobStore  } from "@/reducers/JobListingReducerStore";
 const JobSearchPage = () => {
   const location = useLocation();
   const triggerAI = location.state?.triggerAI;
-
   const [isAIInfoOpen, setIsAIInfoOpen] = useState(false);
   const [isAILoadingOpen, setIsAILoadingOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [showAIResults, setShowAIResults] = useState(false);
+  const {searchJobs , jobs} = useJobStore();
+  const [searchTerm, setSearchTerm] = useState({keyword: "", location: ""});
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
+  const SearchHandler = async () => {
+    setSearchError("");
+    setSearchLoading(true);
+    const [city, country] = searchTerm.location.split(',').map(str => str.trim());
+    try {
+      await searchJobs(searchTerm.keyword, country, city);
+    } catch (err) {
+      setSearchError("Failed to search jobs. Please try again.");
+    }
+    setSearchLoading(false);
+  }
   const handleTryNow = () => {
     setIsAIInfoOpen(true);
   };
@@ -52,7 +66,9 @@ const JobSearchPage = () => {
             <div className="bg-white p-3 rounded-lg shadow-sm flex items-center space-x-4">
               <div className="relative flex-1">
                 <input
+                  name="keyword"
                   type="text"
+                  onChange={(e) => setSearchTerm({ ...searchTerm, keyword: e.target.value })}
                   placeholder="Job title or keyword"
                   className="w-full pl-10 pr-4 py-2.5 rounded-md border-gray-200 focus:border-jobblue focus:ring-jobblue"
                 />
@@ -66,6 +82,8 @@ const JobSearchPage = () => {
               
               <div className="relative flex-1">
                 <input
+                  name="location"
+                  onChange={(e) => setSearchTerm({ ...searchTerm, location: e.target.value })}
                   type="text"
                   placeholder="Cairo, Egypt"
                   className="w-full pl-10 pr-4 py-2.5 rounded-md border-gray-200 focus:border-jobblue focus:ring-jobblue"
@@ -83,8 +101,8 @@ const JobSearchPage = () => {
                 </span>
               </div>
               
-              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition">
-                Search
+              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition flex items-center justify-center min-w-[100px]" onClick={SearchHandler} disabled={searchLoading}>
+                {searchLoading ? <span className="animate-spin h-5 w-5 border-2 border-white border-t-jobblue rounded-full"></span> : "Search"}
               </button>
             </div>
             

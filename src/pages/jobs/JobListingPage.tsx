@@ -3,34 +3,41 @@ import Footer from "@/components/layout/Footer";
 import JobList from "@/components/jobs/JobList";
 import { CheckSquare } from "lucide-react";
 import {useJobStore} from '@/reducers/JobListingReducerStore';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const JobListingPage = () => {
   const navigate = useNavigate();
-
+  const [fiterProps , setFilterProps] = useState({
+    salaryTo: null,
+    salaryFrom: null,
+    city: '',
+    country: '',
+    type: '',
+    keyword: ''
+  })
   const handleTryNow = () => {
     navigate("/jobs/search", { state: { triggerAI: true } });
   };
 
   const employmentTypes = [
-    { id: 'ft', label: 'Full-Time', count: 3 },
-    { id: 'pt', label: 'Part-Time', count: 5 },
-    { id: 'remote', label: 'Remote', count: 2 },
-    { id: 'intern', label: 'Internship', count: 24 },
-    { id: 'contract', label: 'Contract', count: 3 },
+    { id: 'ft', label: 'Full-Time', count: 3  },
+    { id: 'pt', label: 'Part-Time', count: 5  },
+    { id: 'remote', label: 'Remote', count: 2  },
+    { id: 'intern', label: 'Internship', count: 24  },
+    { id: 'contract', label: 'Contract', count: 3  },
   ];
 
   const categories = [
-    { id: 'design', label: 'Design', count: 24 },
-    { id: 'sales', label: 'Sales', count: 3 },
-    { id: 'marketing', label: 'Marketing', count: 3 },
-    { id: 'business', label: 'Business', count: 3 },
-    { id: 'hr', label: 'Human Resource', count: 6 },
-    { id: 'finance', label: 'Finance', count: 4 },
-    { id: 'engineering', label: 'Engineering', count: 4 },
-    { id: 'technology', label: 'Technology', count: 5 },
+    { id: 'design', label: 'Design', count: 24 , val: 'Design' },
+    { id: 'sales', label: 'Sales', count: 3 , val: 'Sales' },
+    { id: 'marketing', label: 'Marketing', count: 3 , val: 'Marketing' },
+    { id: 'business', label: 'Business', count: 3 , val: 'Business' },
+    { id: 'hr', label: 'Human Resource', count: 6 , val: 'Human Resource' },
+    { id: 'finance', label: 'Finance', count: 4 , val: 'Finance' },
+    { id: 'engineering', label: 'Engineering', count: 4 , val: 'Engineering' },
+    { id: 'technology', label: 'Technology', count: 5 , val: 'Technology' },
   ];
 
   const salaryRanges = [
@@ -40,11 +47,14 @@ const JobListingPage = () => {
     { id: 'range4', label: '$3000 or above', count: 4 },
   ];
 
-  const {searchJobs } = useJobStore();
+  const {searchJobs , filterJobs , jobs , categoriesWithCount ,fetchCategoriesWithCount} = useJobStore();
   const [searchTerm, setSearchTerm] = useState({keyword: "", location: ""});
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
-
+  useEffect(() => {
+    fetchCategoriesWithCount();
+    console.log("Categories With Count :",categoriesWithCount);
+  }, [])
   const SearchHandler = async () => {
     setSearchError("");
     setSearchLoading(true);
@@ -60,7 +70,7 @@ const JobListingPage = () => {
   const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm({ ...searchTerm, [e.target.name]: e.target.value });
   }
-  const FilterGroup = ({ title, items }: { title: string, items: { id: string, label: string, count: number }[] }) => (
+  const FilterGroup = ({ title, items }: { title: string, items: { id: number | string, label: string, count: number  }}) => (
     <div className="mb-6">
       <h3 className="font-medium text-gray-800 mb-3 flex items-center justify-between">
         {title}
@@ -70,8 +80,10 @@ const JobListingPage = () => {
         {items.map((item) => (
           <div key={item.id} className="flex items-center">
             <input
+              onChange={(e) => setFilterProps({ ...fiterProps, type: e.target.value })}
               type="checkbox"
               id={item.id}
+              value={item.val}
               className="rounded border-gray-300 text-jobblue focus:ring-jobblue"
             />
             <label htmlFor={item.id} className="ml-2 text-gray-600 text-sm flex-1">
@@ -159,7 +171,7 @@ const JobListingPage = () => {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <FilterGroup title="Type of Employment" items={employmentTypes} />
                 <FilterGroup title="Categories" items={categories} />
-                <FilterGroup title="Salary Range" items={salaryRanges} />
+                <FilterGroup title="Salary Range" items ={salaryRanges} />
               </div>
               <div className="mt-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                 <p className="text-lg font-medium mb-2">
