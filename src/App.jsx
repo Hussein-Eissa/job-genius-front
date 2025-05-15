@@ -17,7 +17,6 @@ import JobDetailPage from "./pages/jobs/JobDetailPage";
 import JobSearchPage from "./pages/jobs/JobSearchPage";
 import JobFinancePage from "./pages/jobs/JobFinancePage";
 
-import ResumeUploadPage from "./pages/resume/ResumeUploadPage";
 import ResumePage from "./pages/resume/ResumePage";
 import ResumeHowItWorksPage from "./pages/resume/ResumeHowItWorksPage";
 
@@ -65,7 +64,6 @@ const App = () => (
             <Route path="/jobs/category/:categoryName" element={<JobListingPage />} />
 
             <Route path="/resume" element={<ResumePage />} />
-            <Route path="/resume/upload" element={<ResumeUploadPage />} />
             <Route path="/resume/how-it-works" element={<ResumeHowItWorksPage />} />
 
             <Route path="/interview-questions" element={<InterviewQuestionsPage />} />

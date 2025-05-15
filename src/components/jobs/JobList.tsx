@@ -23,51 +23,76 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
   const [currentPage, setCurrentPage] = useState(1);
   const { fetchJobs, jobs } = useJobStore();
   const [slicedJobs, setSlicedJobs] = useState<any>([]);
+  const [allAIJobs, setAllAIJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   const ITEMS_PER_PAGE = 10;
   const [totalPages, setTotalPages] = useState(1);
 
+  const token = localStorage.getItem("token");
+
+  const fetchAIJobs = async () => {
+    try {
+      const response = await fetch("https://jobgenius.bsite.net/api/JobListing/Recommend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({})
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch AI jobs");
+
+      const data = await response.json();
+      const jobs = data?.$values;
+
+      if (Array.isArray(jobs)) {
+        setAllAIJobs(jobs);
+      } else {
+        console.warn("Unexpected AI jobs response:", data);
+        setAllAIJobs([]);
+      }
+    } catch (error) {
+      console.error("Error fetching AI jobs:", error);
+      setAllAIJobs([]);
+    }
+  };
+
   useEffect(() => {
     const loadJobs = async () => {
       setIsLoading(true);
-      await fetchJobs();
+      if (type === 'ai') {
+        await fetchAIJobs();
+      } else {
+        await fetchJobs();
+      }
       setIsLoading(false);
     };
     loadJobs();
-  }, []);
+  }, [type]);
 
   useEffect(() => {
-    // Calculate total number of items
     let totalItems = 0;
-    if (Array.isArray(jobs)) {
-      totalItems = jobs.length;
+    let sourceJobs: any[] = [];
+
+    if (type === 'ai') {
+      sourceJobs = allAIJobs;
+    } else if (Array.isArray(jobs)) {
+      sourceJobs = jobs;
     } else if (jobs?.$values && Array.isArray(jobs.$values)) {
-      totalItems = jobs.$values.length;
+      sourceJobs = jobs.$values;
     }
-    
-    // Calculate total pages
+
+    totalItems = sourceJobs.length;
     const pages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     setTotalPages(pages > 0 ? pages : 1);
-    
-    // Calculate start and end indices
+
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    
-    // Slice the jobs based on pagination
-    if (Array.isArray(jobs)) {
-      setSlicedJobs(jobs.slice(startIndex, endIndex));
-    } else if (jobs?.$values && Array.isArray(jobs.$values)) {
-      setSlicedJobs(jobs.$values.slice(startIndex, endIndex));
-    } else {
-      console.warn("Jobs data is not valid array:", jobs);
-      setSlicedJobs([]);
-    }
-  }, [jobs, currentPage]);
 
-  useEffect(() => {
-    console.log("Sliced jobs:", slicedJobs);
-  }, [slicedJobs]);
+    setSlicedJobs(sourceJobs.slice(startIndex, endIndex));
+  }, [jobs, allAIJobs, currentPage, type]);
 
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -87,51 +112,42 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
     }
   };
 
-  // Generate an array of page numbers to display
   const getPageNumbers = () => {
     const pages = [];
-    const maxVisiblePages = 5; // Maximum number of page buttons to show
-    
+    const maxVisiblePages = 5;
+
     if (totalPages <= maxVisiblePages) {
-      // If we have fewer pages than the max, show all pages
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Always include the first page
       pages.push(1);
-      
+
       if (currentPage <= 3) {
-        // Near the start, show pages 1-5
         for (let i = 2; i <= 5; i++) {
           pages.push(i);
         }
-        // Add ellipsis and last page if we have more than 6 pages
         if (totalPages > 6) {
-          pages.push(-1); // -1 represents ellipsis
+          pages.push(-1);
           pages.push(totalPages);
         } else if (totalPages === 6) {
           pages.push(6);
         }
       } else if (currentPage >= totalPages - 2) {
-        // Near the end
-        pages.push(-1); // ellipsis
-        // Show the last 4 pages
+        pages.push(-1);
         for (let i = totalPages - 3; i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
-        // In the middle
-        pages.push(-1); // ellipsis
-        // Show current page and one page on each side
+        pages.push(-1);
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
           pages.push(i);
         }
-        pages.push(-1); // ellipsis
-        pages.push(totalPages); // last page
+        pages.push(-1);
+        pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
@@ -141,11 +157,9 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800">
             {title}
-            {type !== 'ai' && (
-              <span className="text-sm font-normal text-gray-500 ml-2">
-                Showing {slicedJobs.length} results
-              </span>
-            )}
+            <span className="text-sm font-normal text-gray-500 ml-2">
+              Showing {slicedJobs.length} results
+            </span>
           </h2>
           
           {showFilter && (
@@ -196,12 +210,12 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
         ) : (
           <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-1'}`}>
             {slicedJobs.map((job) => (
-              <JobCard key={job.jobID} {...job} id={job.jobID} categories={job.categories.$values} />
+              <JobCard key={job.jobID || job.id} {...job} id={job.jobID || job.id} categories={job.categories?.$values || job.categories || []} />
             ))}
           </div>
         )}
 
-        {type === 'all' && totalPages > 1 && !isLoading && (
+        {totalPages > 1 && !isLoading && (
           <div className="flex justify-center mt-10">
             <div className="flex items-center space-x-2">
               <Button 

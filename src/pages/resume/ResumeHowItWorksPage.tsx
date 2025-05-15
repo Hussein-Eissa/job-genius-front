@@ -133,7 +133,7 @@ const ResumeHowItWorksPage = () => {
 
             <div className="hidden md:block">
               <img
-                src="/lovable-uploads/858e9e1f-1814-4d51-bf15-67eaadc0b99a.png"
+                src="/lovable-uploads/Images/image 3.png"
                 alt="Resume Analysis Tool"
                 className="max-w-full h-auto"
               />

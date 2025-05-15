@@ -1,39 +1,40 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface ResumeUploaderProps {
   onUpload: (fileName: string) => void;
+  jobDescription: string;
+  setJobDescription: (value: string) => void;
 }
 
-const ResumeUploader = ({ onUpload }: ResumeUploaderProps) => {
+const ResumeUploader = ({ onUpload, jobDescription, setJobDescription }: ResumeUploaderProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState("");
   const [isUploaded, setIsUploaded] = useState(false);
-  
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
-  
+
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
-  
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       handleFile(files[0]);
     }
   };
-  
+
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -44,16 +45,21 @@ const ResumeUploader = ({ onUpload }: ResumeUploaderProps) => {
   const handleFile = (file: File) => {
     setFileName(file.name);
     setIsUploaded(true);
-    onUpload(file.name);
   };
-  
+
   const handleClickUpload = () => {
     document.getElementById("resume-upload")?.click();
   };
 
+  const handleTryItNow = () => {
+    if (isUploaded && jobDescription.trim().length >= 20) {
+      onUpload(fileName);
+    }
+  };
+
   return (
     <>
-      <div 
+      <div
         className={`border-2 border-dashed rounded-lg p-10 text-center mb-6 cursor-pointer transition-colors ${
           isDragging ? "border-jobblue bg-blue-50" : "border-gray-300 hover:border-jobblue"
         }`}
@@ -95,10 +101,23 @@ const ResumeUploader = ({ onUpload }: ResumeUploaderProps) => {
           )}
         </div>
       </div>
+
+      <div className="w-full flex align-center justify-center mb-6">
+        <textarea
+          className="border-2 border-dashed border-jobblue h-full min-w-full text-center overflow-show"
+          placeholder="Enter the job description"
+          value={jobDescription}
+          onChange={(e) => setJobDescription(e.target.value)}
+        />
+      </div>
+
       <div className="flex justify-center">
-        <Button 
-          className={`bg-jobblue hover:bg-jobblue-dark text-white px-10 ${!isUploaded && "opacity-50"}`}
-          disabled={!isUploaded}
+        <Button
+          className={`bg-jobblue hover:bg-jobblue-dark text-white px-10 ${
+            (!isUploaded || jobDescription.trim().length < 20) && "opacity-50"
+          }`}
+          disabled={!isUploaded || jobDescription.trim().length < 20}
+          onClick={handleTryItNow}
         >
           Try it Now
         </Button>

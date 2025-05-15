@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Check } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -12,11 +11,14 @@ const ResumePage = () => {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [resumeFileName, setResumeFileName] = useState("");
   const [open, setOpen] = useState(false);
+  const [jobDescription, setJobDescription] = useState("");
 
   const handleUpload = (fileName) => {
-    setResumeFileName(fileName);
-    setUploadSuccess(true);
-    setOpen(true);
+    if (jobDescription.trim().length >= 20) {
+      setResumeFileName(fileName);
+      setUploadSuccess(true);
+      setOpen(true);
+    }
   };
 
   return (
@@ -35,7 +37,11 @@ const ResumePage = () => {
             {!uploadSuccess ? (
               <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Upload Your Resume</h2>
-                <ResumeUploader onUpload={handleUpload} />
+                <ResumeUploader 
+                  onUpload={handleUpload} 
+                  jobDescription={jobDescription}
+                  setJobDescription={setJobDescription}
+                />
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -50,7 +56,11 @@ const ResumePage = () => {
                 </p>
                 <Button 
                   className="bg-jobblue hover:bg-jobblue-dark"
-                  onClick={() => setUploadSuccess(false)}
+                  onClick={() => {
+                    setUploadSuccess(false);
+                    setResumeFileName("");
+                    setJobDescription("");
+                  }}
                 >
                   Upload Another Resume
                 </Button>

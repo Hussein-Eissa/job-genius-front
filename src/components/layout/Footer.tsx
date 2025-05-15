@@ -37,8 +37,8 @@ const Footer = () => {
               <div>
                 <h3 className="text-sm font-bold mb-4">Resume Analyzer</h3>
                 <ul className="space-y-2 text-sm text-gray-300">
-                  <li><Link to="/resume" className="hover:text-jobblue-light">How it works</Link></li>
-                  <li><Link to="/resume/upload" className="hover:text-jobblue-light">Upload Resume</Link></li>
+                  <li><Link to="/resume/how-it-works" className="hover:text-jobblue-light">How it works</Link></li>
+                  <li><Link to="/resume" className="hover:text-jobblue-light">Upload Resume</Link></li>
                 </ul>
               </div>
 
