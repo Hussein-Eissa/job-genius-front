@@ -6,7 +6,15 @@ import { useUserStore } from "@/reducers/UserReducerStore";
 import { LogOutIcon } from "lucide-react";
 
 const Header = () => {
-  const isAuthenticated = useUserStore.getState().isAuthenticated;
+  let isAuthenticated = useUserStore.getState().isAuthenticated;
+  const { logout } = useUserStore();
+
+  function HandelLogOut() {
+    logout()
+    isAuthenticated = useUserStore.getState().isAuthenticated;
+    console.log("Logged Out",isAuthenticated)
+  }
+
   return (
     <header className="bg-white border-b border-gray-200 py-4">
       <div className="container mx-auto flex items-center justify-between px-4">
@@ -34,7 +42,7 @@ const Header = () => {
                   className="h-8 w-8 rounded-full"
                 />
               </Link>
-              <Button variant="outline" size="sm" className="ml-4">
+              <Button variant="outline" size="sm" className="ml-4" onClick={HandelLogOut}>
                 <LogOutIcon></LogOutIcon>
                 Logout
               </Button>

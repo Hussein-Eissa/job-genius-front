@@ -1,4 +1,3 @@
-
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import JobList from "@/components/jobs/JobList";
@@ -34,14 +33,6 @@ const JobListingPage = () => {
     { id: 'technology', label: 'Technology', count: 5 },
   ];
 
-  const jobLevels = [
-    { id: 'entry', label: 'Entry Level', count: 57 },
-    { id: 'mid', label: 'Mid Level', count: 3 },
-    { id: 'senior', label: 'Senior Level', count: 5 },
-    { id: 'director', label: 'Director', count: 12 },
-    { id: 'vp', label: 'VP or Above', count: 8 },
-  ];
-
   const salaryRanges = [
     { id: 'range1', label: '$100 - $1000', count: 4 },
     { id: 'range2', label: '$100 - $1500', count: 6 },
@@ -51,9 +42,19 @@ const JobListingPage = () => {
 
   const {searchJobs } = useJobStore();
   const [searchTerm, setSearchTerm] = useState({keyword: "", location: ""});
-  const SearchHandler = () => {
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+
+  const SearchHandler = async () => {
+    setSearchError("");
+    setSearchLoading(true);
     const [city, country] = searchTerm.location.split(',').map(str => str.trim());
-    searchJobs(searchTerm.keyword, country, city);
+    try {
+      await searchJobs(searchTerm.keyword, country, city);
+    } catch (err) {
+      setSearchError("Failed to search jobs. Please try again.");
+    }
+    setSearchLoading(false);
   }
 
   const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,11 +133,11 @@ const JobListingPage = () => {
                 </span>
               </div>
               
-              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition" onClick={SearchHandler}>
-                Search
+              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition flex items-center justify-center min-w-[100px]" onClick={SearchHandler} disabled={searchLoading}>
+                {searchLoading ? <span className="animate-spin h-5 w-5 border-2 border-white border-t-jobblue rounded-full"></span> : "Search"}
               </button>
             </div>
-            
+            {searchError && <div className="text-red-500 mt-2">{searchError}</div>}
             <div className="mt-4 text-sm">
               <span className="text-gray-600">Popular: </span>
               <span className="text-gray-800">UI Designer, UX Researcher, Admin, Graphic Designer</span>
@@ -158,7 +159,6 @@ const JobListingPage = () => {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <FilterGroup title="Type of Employment" items={employmentTypes} />
                 <FilterGroup title="Categories" items={categories} />
-                <FilterGroup title="Job Level" items={jobLevels} />
                 <FilterGroup title="Salary Range" items={salaryRanges} />
               </div>
               <div className="mt-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">

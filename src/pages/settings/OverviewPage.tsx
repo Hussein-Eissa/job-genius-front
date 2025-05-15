@@ -1,8 +1,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import { Link } from "react-router-dom";
 
@@ -43,7 +41,6 @@ const OverviewPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={true} />
       <div className="flex-grow flex">
         <SettingsSidebar />
         <main className="flex-grow px-8 py-6">
@@ -222,7 +219,6 @@ const OverviewPage = () => {
           </div>
         </main>
       </div>
-      <Footer />
     </div>
   );
 };

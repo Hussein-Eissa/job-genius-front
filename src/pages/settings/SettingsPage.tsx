@@ -3,8 +3,6 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Check, Trash2 } from "lucide-react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import ProfileSettings from "@/components/settings/ProfileSettings";
 import LoginSettings from "@/components/settings/LoginSettings";
@@ -17,7 +15,6 @@ const SettingsPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={true} />
       <div className="flex-grow flex">
         <SettingsSidebar />
         <main className="flex-grow px-8 py-6">
@@ -85,7 +82,6 @@ const SettingsPage = () => {
           )}
         </main>
       </div>
-      <Footer />
       
       <DeleteAccountModal open={showDeleteModal} onOpenChange={setShowDeleteModal} />
     </div>

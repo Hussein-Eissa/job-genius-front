@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useUserStore } from "@/reducers/UserReducerStore";
+import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
 const SignupForm = () => {
@@ -12,12 +13,14 @@ const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
+  const navigate = useNavigate();
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // handle signup logic here
     register({ fullName, email, password }); 
-    console.log("Signup attempt with:", { fullName, email, password });
+    // console.log("Signup attempt with:", { fullName, email, password });
+    navigate("/verify-email");
   };
 
   return (

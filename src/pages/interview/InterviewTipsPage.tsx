@@ -1,4 +1,3 @@
-
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
@@ -62,18 +61,18 @@ const InterviewTipsPage = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#f6f8fa]">
       <Header isAuthenticated={true} />
       <main className="flex-grow">
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-2">
-            Interview <span className="text-jobblue">Tips & Resources</span>
+        <div className="max-w-4xl mx-auto px-4 py-10">
+          <h1 className="text-3xl font-bold mb-2 text-jobblue">
+            Interview <span className="text-blue-600">Tips & Resources</span>
           </h1>
           <p className="text-gray-600 mb-10">Expert advice to help you ace your next job interview</p>
 
           <div className="grid md:grid-cols-2 gap-12 mb-16">
             <div>
-              <h2 className="text-2xl font-semibold mb-6">Essential Interview Tips</h2>
+              <h2 className="text-2xl font-semibold mb-6 text-jobblue">Essential Interview Tips</h2>
               <div className="space-y-6">
                 {tips.map((tip, index) => (
                   <div key={index} className="flex gap-4">
@@ -88,9 +87,8 @@ const InterviewTipsPage = () => {
                 ))}
               </div>
             </div>
-            
             <div>
-              <h2 className="text-2xl font-semibold mb-6">Helpful Resources</h2>
+              <h2 className="text-2xl font-semibold mb-6 text-jobblue">Helpful Resources</h2>
               <div className="grid gap-6">
                 {resources.map((resource, index) => (
                   <a 

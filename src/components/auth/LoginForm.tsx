@@ -22,7 +22,7 @@ const LoginForm = () => {
       const isAuthenticated = useUserStore.getState().isAuthenticated;
   
       if (isAuthenticated) {
-        navigate("/");
+        navigate("/profile");
       } else {
         alert("Login failed. Please check your credentials.");
       }

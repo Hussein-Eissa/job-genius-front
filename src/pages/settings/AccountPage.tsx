@@ -1,8 +1,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 
 const AccountPage = () => {
@@ -51,7 +49,6 @@ const AccountPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={true} />
       <div className="flex-grow flex">
         <SettingsSidebar />
         <main className="flex-grow px-8 py-6">
@@ -197,7 +194,6 @@ const AccountPage = () => {
           </div>
         </main>
       </div>
-      <Footer />
     </div>
   );
 };

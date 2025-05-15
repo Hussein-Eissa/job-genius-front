@@ -1,9 +1,8 @@
-
-import { useState  , useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import JobCard from './JobCard';
-import { Grid, List, ArrowLeft, ArrowRight, Search } from 'lucide-react';
-import {useJobStore} from '@/reducers/JobListingReducerStore';
+import { Grid, List, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useJobStore } from '@/reducers/JobListingReducerStore';
 import { 
   Select,
   SelectContent,
@@ -11,27 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { useParams } from 'react-router-dom';
-
-// const companyLogos = {
-//   nomad: <div className="w-full h-full bg-emerald-500 flex items-center justify-center text-white">N</div>,
-//   dropbox: <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white">DB</div>,
-//   terraform: <div className="w-full h-full bg-cyan-500 flex items-center justify-center text-white">TF</div>,
-//   recruit: <div className="w-full h-full bg-gray-500 flex items-center justify-center text-white">RC</div>,
-//   canva: <div className="w-full h-full bg-teal-500 flex items-center justify-center text-white">CA</div>,
-//   classpass: <div className="w-full h-full bg-blue-600 flex items-center justify-center text-white">CP</div>,
-//   pitch: <div className="w-full h-full bg-black flex items-center justify-center text-white">PI</div>,
-//   stripe: <div className="w-full h-full bg-purple-500 flex items-center justify-center text-white">S</div>,
-//   truebill: <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white">TB</div>,
-//   square: <div className="w-full h-full bg-black flex items-center justify-center text-white">SQ</div>,
-//   coinbase: <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white">CB</div>,
-//   robinhood: <div className="w-full h-full bg-gray-200 flex items-center justify-center text-black">RH</div>,
-//   kraken: <div className="w-full h-full bg-purple-600 flex items-center justify-center text-white">KR</div>,
-// };
-
-// const {categoryName} = useParams();
-
+import './typewriter.css';
 
 interface JobListProps {
   type?: 'all' | 'ai' | 'finance';
@@ -42,59 +21,119 @@ interface JobListProps {
 const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobListProps) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [currentPage, setCurrentPage] = useState(1);
-  const {  fetchJobs , jobs} = useJobStore();
-  const [start, setStart] = useState(0);
-  const [slicedJobs, setSlicedJobs] = useState<any>([]); 
+  const { fetchJobs, jobs } = useJobStore();
+  const [slicedJobs, setSlicedJobs] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const ITEMS_PER_PAGE = 10;
+  const [totalPages, setTotalPages] = useState(1);
 
-useEffect(() => {
-  fetchJobs();
-}, []);
+  useEffect(() => {
+    const loadJobs = async () => {
+      setIsLoading(true);
+      await fetchJobs();
+      setIsLoading(false);
+    };
+    loadJobs();
+  }, []);
 
-useEffect(() => {
-  const end = start + 10;
-  if (Array.isArray(jobs)) {
-    const sliced = jobs.slice(start, end);
-    setSlicedJobs(sliced);
-  } else if (jobs?.$values && Array.isArray(jobs.$values)) {
-    const sliced = jobs.$values.slice(start, end).sort(() => 0.5 - Math.random());
-    setSlicedJobs(sliced);
-  } else {
-    console.warn("Jobs data is not valid array:", jobs);
-    setSlicedJobs([]);
-  }
-}, [jobs, start]);
+  useEffect(() => {
+    // Calculate total number of items
+    let totalItems = 0;
+    if (Array.isArray(jobs)) {
+      totalItems = jobs.length;
+    } else if (jobs?.$values && Array.isArray(jobs.$values)) {
+      totalItems = jobs.$values.length;
+    }
+    
+    // Calculate total pages
+    const pages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    setTotalPages(pages > 0 ? pages : 1);
+    
+    // Calculate start and end indices
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    
+    // Slice the jobs based on pagination
+    if (Array.isArray(jobs)) {
+      setSlicedJobs(jobs.slice(startIndex, endIndex));
+    } else if (jobs?.$values && Array.isArray(jobs.$values)) {
+      setSlicedJobs(jobs.$values.slice(startIndex, endIndex));
+    } else {
+      console.warn("Jobs data is not valid array:", jobs);
+      setSlicedJobs([]);
+    }
+  }, [jobs, currentPage]);
 
-// useEffect(() => {
-//   if (categoryName) {
-//    const filteredJobs = jobs.filter((job: any) => 
-//   job.categories.$values.includes(categoryName)
-// );
+  useEffect(() => {
+    console.log("Sliced jobs:", slicedJobs);
+  }, [slicedJobs]);
 
-//     setSlicedJobs(filteredJobs);
-//   }
-// } , [categoryName]);
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
-useEffect(() => {
-  console.log("Sliced jobs:", slicedJobs);
-}, [slicedJobs]);
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
 
-const jobsForward10 = () => {
-  const totalLength = Array.isArray(jobs) ? jobs.length : jobs?.$values?.length || 0;
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
 
-  if (start + 10 < totalLength) {
-    setStart(prev => prev + 10);
-    setCurrentPage(prev => prev + 1);
-  }
-};
-
-const jobsBack10 = () => {
-  if (start - 10 >= 0) {
-    setStart(prev => prev - 10);
-    setCurrentPage(prev => prev - 1);
-  }
-};
-
-
+  // Generate an array of page numbers to display
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5; // Maximum number of page buttons to show
+    
+    if (totalPages <= maxVisiblePages) {
+      // If we have fewer pages than the max, show all pages
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always include the first page
+      pages.push(1);
+      
+      if (currentPage <= 3) {
+        // Near the start, show pages 1-5
+        for (let i = 2; i <= 5; i++) {
+          pages.push(i);
+        }
+        // Add ellipsis and last page if we have more than 6 pages
+        if (totalPages > 6) {
+          pages.push(-1); // -1 represents ellipsis
+          pages.push(totalPages);
+        } else if (totalPages === 6) {
+          pages.push(6);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        // Near the end
+        pages.push(-1); // ellipsis
+        // Show the last 4 pages
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // In the middle
+        pages.push(-1); // ellipsis
+        // Show current page and one page on each side
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push(-1); // ellipsis
+        pages.push(totalPages); // last page
+      }
+    }
+    
+    return pages;
+  };
 
   return (
     <section className="py-8">
@@ -145,37 +184,62 @@ const jobsBack10 = () => {
           )}
         </div>
 
-        <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-1'}`}>
-          {
-          slicedJobs.map((job) => (
-            <JobCard key={job.jobID}  {...job} id={job.jobID} categories={job.categories.$values}/>
-          ))}
-          
-          {/* {slicedJobs.map((job) => (
-            <JobCard key={job.jobID} {...job} />
-          ))} */}
-        </div>
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="typewriter">
+              <div className="slide"><i></i></div>
+              <div className="paper"></div>
+              <div className="keyboard"></div>
+            </div>
+            <p className="mt-4 text-lg text-gray-600 font-medium">Loading Jobs...</p>
+          </div>
+        ) : (
+          <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-1'}`}>
+            {slicedJobs.map((job) => (
+              <JobCard key={job.jobID} {...job} id={job.jobID} categories={job.categories.$values} />
+            ))}
+          </div>
+        )}
 
-        {type === 'all' && (
+        {type === 'all' && totalPages > 1 && !isLoading && (
           <div className="flex justify-center mt-10">
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="icon" onClick={jobsBack10} disabled={currentPage === 1}>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={goToPreviousPage} 
+                disabled={currentPage === 1}
+              >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <Button variant={currentPage === 1 ? "default" : "outline"} size="sm" className="w-8 h-8 p-0">1</Button>
-              <Button variant={currentPage === 2 ? "default" : "outline"} size="sm" className="w-8 h-8 p-0">2</Button>
-              <Button variant={currentPage === 3 ? "default" : "outline"} size="sm" className="w-8 h-8 p-0">3</Button>
-              <Button variant={currentPage === 4 ? "default" : "outline"} size="sm" className="w-8 h-8 p-0">4</Button>
-              <Button variant={currentPage === 5 ? "default" : "outline"} size="sm" className="w-8 h-8 p-0">5</Button>
-              <span className="px-2">...</span>
-              <Button variant="outline" size="sm" className="w-8 h-8 p-0">33</Button>
-              <Button variant="outline" size="icon" onClick={jobsForward10} disabled={start + 10 >= jobs.length}>
+              
+              {getPageNumbers().map((pageNum, index) => 
+                pageNum === -1 ? (
+                  <span key={`ellipsis-${index}`} className="px-2">...</span>
+                ) : (
+                  <Button 
+                    key={`page-${pageNum}`}
+                    variant={currentPage === pageNum ? "default" : "outline"} 
+                    size="sm" 
+                    className="w-8 h-8 p-0"
+                    onClick={() => goToPage(pageNum)}
+                  >
+                    {pageNum}
+                  </Button>
+                )
+              )}
+              
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={goToNextPage} 
+                disabled={currentPage === totalPages}
+              >
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
         )}
-
       </div>
     </section>
   );

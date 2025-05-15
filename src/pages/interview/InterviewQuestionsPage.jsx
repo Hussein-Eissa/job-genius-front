@@ -1,124 +1,112 @@
-
 import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const InterviewQuestionsPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const questions = JSON.parse(localStorage.getItem("interviewQuestions") || "[]");
+  const meta = JSON.parse(localStorage.getItem("interviewMeta") || "{}") || {};
+  const numQuestions = questions.length;
+  const [current, setCurrent] = useState(0);
+  const [answers, setAnswers] = useState(Array(numQuestions).fill(""));
+  const [showFeedback, setShowFeedback] = useState(false);
 
-  const questionCategories = [
-    {
-      name: "Behavioral",
-      questions: [
-        "Tell me about a time you had to work with a difficult person.",
-        "Describe a situation where you had to meet a tight deadline.",
-        "Give an example of how you handled a major crisis.",
-        "Tell me about a time you went above and beyond for a customer or client.",
-        "Describe a time when you had to adapt to a significant change at work."
-      ]
-    },
-    {
-      name: "Technical",
-      questions: [
-        "Explain how you would design a scalable web application.",
-        "What testing frameworks have you used and why?",
-        "Describe your experience with cloud services.",
-        "How do you approach debugging a complex issue?",
-        "Explain the concept of OOP in your own words."
-      ]
-    },
-    {
-      name: "Leadership",
-      questions: [
-        "How do you motivate team members?",
-        "Describe your leadership style.",
-        "Tell me about a time you had to make an unpopular decision.",
-        "How do you delegate responsibilities to your team?",
-        "How do you handle conflicts within your team?"
-      ]
-    },
-    {
-      name: "Problem Solving",
-      questions: [
-        "Describe a complex problem you solved and your approach.",
-        "How do you make decisions when you don't have all the information?",
-        "Tell me about a time you failed and what you learned.",
-        "How do you prioritize when you have multiple deadlines?",
-        "Describe a situation where you had to think outside the box."
-      ]
+  if (!questions.length) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#f6f8fa]">
+        <Header isAuthenticated={true} />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center text-lg text-gray-600">No interview session found. Please start a new interview.</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const handleAnswer = (val) => {
+    const newAnswers = [...answers];
+    newAnswers[current] = val;
+    setAnswers(newAnswers);
+  };
+
+  const handleNext = () => {
+    if (current < numQuestions - 1) {
+      setCurrent(current + 1);
+    } else {
+      setShowFeedback(true);
     }
-  ];
+  };
+
+  const handleSkip = () => {
+    handleAnswer("");
+    handleNext();
+  };
+
+  // Demo feedbacks (replace with real feedback if available)
+  const feedbacks = questions.map((q, i) => ({
+    question: q.question || q.text || `Question ${i + 1}`,
+    feedback: `Your answer for this question was received. Here's some feedback and suggestions for improvement.`,
+  }));
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#f6f8fa]">
       <Header isAuthenticated={true} />
       <main className="flex-grow">
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">
-            Practice <span className="text-jobblue">Questions Library</span>
-          </h1>
-
-          <div className="mb-8">
-            <div className="max-w-md">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search questions..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pr-10"
+        <div className="max-w-3xl mx-auto py-10 px-4">
+          <h1 className="text-3xl font-bold mb-2 text-jobblue">Simulate Your <span className="text-blue-600">Interview</span></h1>
+          {!showFeedback && (
+            <>
+              <div className="flex items-center gap-2 mb-6">
+                {[...Array(numQuestions)].map((_, i) => (
+                  <span key={i} className={`w-7 h-7 rounded-full flex items-center justify-center text-base font-bold border-2 ${i === current ? "bg-jobblue text-white border-jobblue" : "bg-white text-jobblue border-jobblue/30"}`}>{i + 1}</span>
+                ))}
+              </div>
+              <div className="bg-white rounded-lg shadow p-8 mb-6">
+                <div className="text-lg font-semibold mb-4">{questions[current].question || questions[current].text || `Question ${current + 1}`}</div>
+                <textarea
+                  className="w-full border rounded p-3 min-h-[120px] mb-2"
+                  placeholder="write your answer here...."
+                  maxLength={500}
+                  value={answers[current]}
+                  onChange={e => handleAnswer(e.target.value)}
                 />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                <div className="text-xs text-gray-500 mb-2">Maximum 500 characters</div>
+                <div className="flex gap-4 justify-end">
+                  <button
+                    className="px-6 py-2 rounded border border-gray-300 hover:bg-gray-100"
+                    onClick={handleSkip}
+                    type="button"
                   >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" x2="16.65" y1="21" y2="16.65"></line>
-                  </svg>
+                    Skip Question
+                  </button>
+                  <button
+                    className="bg-jobblue text-white px-6 py-2 rounded-md hover:bg-jobblue-dark transition-colors"
+                    onClick={handleNext}
+                    type="button"
+                  >
+                    {current === numQuestions - 1 ? "Finish" : "Next Question"}
+                  </button>
                 </div>
               </div>
+            </>
+          )}
+          {showFeedback && (
+            <div>
+              <div className="text-2xl font-bold text-jobblue mb-4">Great Work!, Let's Discuss some Feedbacks!</div>
+              <div className="space-y-6">
+                {feedbacks.map((fb, i) => (
+                  <div key={i} className="bg-white rounded-lg shadow p-4">
+                    <div className="font-bold text-jobblue mb-1">{i + 1}. {fb.question}</div>
+                    <div className="text-gray-700 mb-2">{fb.feedback}</div>
+                    <div className="text-sm text-gray-500">Your answer: <span className="italic">{answers[i] || <span className="text-gray-400">(skipped)</span>}</span></div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-4 justify-center mt-8">
+                <button className="px-6 py-2 rounded border border-gray-300 hover:bg-gray-100" onClick={() => alert('Feedback sent!')}>Send Feedbacks</button>
+                <button className="bg-jobblue text-white px-6 py-2 rounded-md hover:bg-jobblue-dark transition-colors" onClick={() => window.location.href = '/interview'}>Enter Interview Again</button>
+              </div>
             </div>
-          </div>
-
-          <Tabs defaultValue="Behavioral" className="w-full">
-            <TabsList className="mb-8">
-              {questionCategories.map((category) => (
-                <TabsTrigger key={category.name} value={category.name}>
-                  {category.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {questionCategories.map((category) => (
-              <TabsContent key={category.name} value={category.name} className="w-full">
-                <div className="grid gap-4">
-                  {category.questions.map((question, index) => (
-                    <div key={index} className="border rounded-lg p-6 bg-white hover:shadow-md transition-shadow">
-                      <h3 className="text-lg font-medium mb-4">{question}</h3>
-                      <div className="flex space-x-3">
-                        <Button variant="outline" size="sm" className="text-jobblue border-jobblue hover:bg-blue-50">
-                          View Sample Answer
-                        </Button>
-                        <Button size="sm" className="bg-jobblue hover:bg-jobblue-dark text-white">
-                          Practice Now
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
+          )}
         </div>
       </main>
       <Footer />

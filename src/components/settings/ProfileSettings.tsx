@@ -102,27 +102,6 @@ const ProfileSettings = () => {
         </div>
       </div>
       
-      <div className="mb-8">
-        <h3 className="text-lg font-medium mb-4">Account Type</h3>
-        <p className="text-gray-600 mb-4">You can update your account type</p>
-        
-        <RadioGroup defaultValue="job_seeker" className="space-y-4">
-          <div className="flex items-center space-x-2 border rounded-md p-4">
-            <RadioGroupItem value="job_seeker" id="job_seeker" />
-            <div className="grid gap-1.5">
-              <Label htmlFor="job_seeker" className="font-medium">Job Seeker</Label>
-              <p className="text-sm text-muted-foreground">Looking for a job</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2 border rounded-md p-4">
-            <RadioGroupItem value="employer" id="employer" />
-            <div className="grid gap-1.5">
-              <Label htmlFor="employer" className="font-medium">Employer</Label>
-              <p className="text-sm text-muted-foreground">Hiring, sourcing candidates, or posting a jobs</p>
-            </div>
-          </div>
-        </RadioGroup>
-      </div>
       
       <div className="flex justify-end">
         <Button className="bg-jobblue hover:bg-jobblue-dark">Save Profile</Button>

@@ -100,7 +100,7 @@ export const useUserStore = create<UserState>((set) => ({
       });
       if (res.data.success) {
         console.log("Registration success:", res.data.message);
-        alert(res.data.message);
+        // alert(res.data.message);
       } else {
         throw new Error(res.data.message);
       }
@@ -114,7 +114,7 @@ export const useUserStore = create<UserState>((set) => ({
     try {
       const res = await axios.post(`https://jobgenius.bsite.net/api/auth/forgot-password?email=${email}`);
       if (res.data.success) {
-        alert(res.data.message);
+        // alert(res.data.message);
       } else {
         throw new Error(res.data.message);
       }

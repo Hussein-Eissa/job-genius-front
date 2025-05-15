@@ -8,6 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Pencil, Plus } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -24,17 +26,49 @@ import { format, set } from "date-fns";
 const ProfilePage = () => {
   const { id } = useParams();
   const { experiences, fetchExperiences } = useExperienceStore();
-  const { portfolios, fetchAllPortfolios, fetchPortfolioImage , addPortfolio } = usePortfolioStore();
+  const { portfolios, fetchAllPortfolios, fetchPortfolioImage, addPortfolio } = usePortfolioStore();
   // const { savedJobs, fetchSavedJobs } = useJobStore();
   const { educations, fetchEducations } = useEducationStore();
-  const { profile, fetchProfileById, fetchMeProfile } = useProfileStore();
+  const { 
+    profile, 
+    fetchProfileById, 
+    fetchMeProfile, 
+    updateProfile,
+    addLanguage,
+    deleteLanguage,
+    addSkill,
+    deleteSkill,
+    addSocialLink,
+    deleteSocialLink,
+    updateSocialLink 
+  } = useProfileStore();
   const [showProfileSetupModal, setShowProfileSetupModal] = useState(false);
   const [showAddPortfolioModal, setShowAddPortfolioModal] = useState(false);
+  const [showEditBasicInfoModal, setShowEditBasicInfoModal] = useState(false);
+  const [showEditAboutModal, setShowEditAboutModal] = useState(false);
+  const [showEditSkillsModal, setShowEditSkillsModal] = useState(false);
+  const [showEditLanguagesModal, setShowEditLanguagesModal] = useState(false);
+  const [showEditSocialLinksModal, setShowEditSocialLinksModal] = useState(false);
+  const [basicInfo, setBasicInfo] = useState({
+    jobTitle: "",
+    phone: "",
+    gender: "",
+    type: "",
+    image: null as File | null,
+    coverImage: null as File | null,
+  });
+  const [aboutMe, setAboutMe] = useState("");
+  const [newSkill, setNewSkill] = useState("");
+  const [newLanguage, setNewLanguage] = useState("");
+  const [newSocialLink, setNewSocialLink] = useState({
+    platform: "",
+    link: "",
+  });
   const [newPortfolio, setNewPortfolio] = useState({
     title: "",
     description: "",
     date: "",
-    image: null,
+    image: null as File | null,
   });
 
   const [skills, setSkills] = useState([
@@ -45,21 +79,20 @@ const ProfilePage = () => {
     "User Experience",
   ]);
   useEffect(() => {
-  fetchMeProfile();
-  if (id && !isNaN(Number(id))) {
-    fetchProfileById(Number(id));
-  }
-  fetchExperiences();
-  fetchEducations();
-  fetchAllPortfolios();
-}, [id]);
+    fetchMeProfile();
+    if (id && !isNaN(Number(id))) {
+      fetchProfileById(Number(id));
+    }
+    fetchExperiences();
+    fetchEducations();
+    fetchAllPortfolios();
+  }, [id]);
 
-useEffect(() => {
-  if (profile?.userSkills?.$values) {
-    setSkills(profile.userSkills.$values);
-  }
-}, [profile]);
-
+  useEffect(() => {
+    if (profile?.userSkills?.$values) {
+      setSkills(profile.userSkills.$values);
+    }
+  }, [profile]);
 
   useEffect(() => {
     portfolios.forEach((portfolio) => {
@@ -67,8 +100,21 @@ useEffect(() => {
         fetchPortfolioImage(portfolio.portfolioID, portfolio.image);
       }
     });
-    
   }, [portfolios, fetchPortfolioImage]);
+
+  useEffect(() => {
+    if (profile) {
+      setBasicInfo({
+        jobTitle: profile.jobTitle || "",
+        phone: profile.phone || "",
+        gender: profile.gender || "",
+        type: profile.type || "",
+        image: null,
+        coverImage: null,
+      });
+      setAboutMe(profile.aboutMe || "");
+    }
+  }, [profile]);
 
   const handleAddPortfolio = async (e) => {
     e.preventDefault();
@@ -78,14 +124,70 @@ useEffect(() => {
       date: newPortfolio.date || new Date().toISOString(),
       image: newPortfolio.image,
     });
+  };
 
-    // setNewPortfolio({ title: "", description: "", date: "", image: null });
-    // setShowAddPortfolioModal(false);
+  const handleBasicInfoUpdate = async () => {
+    try {
+      await updateProfile({
+        jobTitle: basicInfo.jobTitle,
+        phone: basicInfo.phone,
+        gender: basicInfo.gender,
+        type: basicInfo.type,
+        image: basicInfo.image,
+        coverImage: basicInfo.coverImage,
+      });
+      setShowEditBasicInfoModal(false);
+    } catch (error) {
+      console.error("Error updating basic info:", error);
+    }
+  };
+
+  const handleAboutMeUpdate = async () => {
+    try {
+      await updateProfile({
+        aboutMe: aboutMe,
+      });
+      setShowEditAboutModal(false);
+    } catch (error) {
+      console.error("Error updating about me:", error);
+    }
+  };
+
+  const handleAddSkill = async () => {
+    if (newSkill.trim()) {
+      try {
+        await addSkill(newSkill.trim());
+        setNewSkill("");
+      } catch (error) {
+        console.error("Error adding skill:", error);
+      }
+    }
+  };
+
+  const handleAddLanguage = async () => {
+    if (newLanguage.trim()) {
+      try {
+        await addLanguage(newLanguage.trim());
+        setNewLanguage("");
+      } catch (error) {
+        console.error("Error adding language:", error);
+      }
+    }
+  };
+
+  const handleAddSocialLink = async () => {
+    if (newSocialLink.platform.trim() && newSocialLink.link.trim()) {
+      try {
+        await addSocialLink(newSocialLink.platform.trim(), newSocialLink.link.trim());
+        setNewSocialLink({ platform: "", link: "" });
+      } catch (error) {
+        console.error("Error adding social link:", error);
+      }
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={true} />
       <div className="flex-grow flex">
         <SettingsSidebar />
         <main className="flex-grow px-8 py-6">
@@ -102,8 +204,8 @@ useEffect(() => {
               <div className="flex items-start">
                 <div className="w-24 h-24 rounded-full overflow-hidden mr-6">
                   <img
-                    src="https://randomuser.me/api/portraits/men/44.jpg"
-                    alt="Ahmed Safwat"
+                    src={profile?.image || "https://randomuser.me/api/portraits/men/44.jpg"}
+                    alt={profile?.fullname || "Profile"}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -112,7 +214,12 @@ useEffect(() => {
                     <h2 className="text-2xl font-bold mr-2">
                       {profile?.fullname || "Loading..."}
                     </h2>
-                    <Button variant="ghost" size="sm" className="p-1 h-auto">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="p-1 h-auto"
+                      onClick={() => setShowEditBasicInfoModal(true)}
+                    >
                       <Pencil size={16} />
                     </Button>
                   </div>
@@ -157,7 +264,12 @@ useEffect(() => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-xl font-bold">About Me</h3>
-                    <Button variant="ghost" size="sm" className="p-1 h-auto">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="p-1 h-auto"
+                      onClick={() => setShowEditAboutModal(true)}
+                    >
                       <Pencil size={16} />
                     </Button>
                   </div>
@@ -254,21 +366,38 @@ useEffect(() => {
                   <div className="flex justify-between mb-4">
                     <h3 className="text-xl font-bold">Skills</h3>
                     <div className="flex">
-                      <Button variant="ghost" size="sm" className="p-1 h-auto mr-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-1 h-auto mr-2"
+                        onClick={() => setShowEditSkillsModal(true)}
+                      >
                         <Pencil size={16} />
                       </Button>
-                      <Button variant="ghost" size="sm" className="flex items-center">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="flex items-center"
+                        onClick={() => setShowEditSkillsModal(true)}
+                      >
                         <Plus size={16} className="mr-1" />
                         Add
                       </Button>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                  {skills.length !== 0 ? skills.map((skill , index) => (
-                      <p key={index}>{skill}</p>
-                  )):
-                    <p>No skills found.</p>
-                    } 
+                    {profile?.userSkills.$values.length ? (
+                      profile.userSkills.$values.map((skill, index) => (
+                        <span 
+                          key={index}
+                          className="px-3 py-1 bg-gray-100 rounded-full text-sm"
+                        >
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <p>No skills found.</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -327,7 +456,12 @@ useEffect(() => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-lg font-bold">Additional Details</h3>
-                    <Button variant="ghost" size="sm" className="p-1 h-auto">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="p-1 h-auto"
+                      onClick={() => setShowEditBasicInfoModal(true)}
+                    >
                       <Pencil size={16} />
                     </Button>
                   </div>
@@ -351,7 +485,7 @@ useEffect(() => {
                         </svg>
                         <span className="text-gray-500 text-sm">Email</span>
                       </div>
-                      <p>{profile?.email || "a.safwat@email.com"}</p>
+                      <p>{profile?.email || "N/A"}</p>
                     </div>
                     <div>
                       <div className="flex mb-1">
@@ -372,7 +506,7 @@ useEffect(() => {
                         </svg>
                         <span className="text-gray-500 text-sm">Phone</span>
                       </div>
-                      <p>{profile?.phone || "+02012345678"}</p>
+                      <p>{profile?.phone || "N/A"}</p>
                     </div>
                     <div>
                       <div className="flex mb-1">
@@ -400,7 +534,11 @@ useEffect(() => {
                         </svg>
                         <span className="text-gray-500 text-sm">Languages</span>
                       </div>
-                      <p>{profile?.userLanguages.$values.length !== 0 ? profile?.userLanguages.$values.join(", ") : "Arabic, English"}</p>
+                      <p>
+                        {profile?.userLanguages.$values.length
+                          ? profile.userLanguages.$values.join(", ")
+                          : "No languages added"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -410,123 +548,28 @@ useEffect(() => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-lg font-bold">Social Links</h3>
-                    <Button variant="ghost" size="sm" className="p-1 h-auto">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="p-1 h-auto"
+                      onClick={() => setShowEditSocialLinksModal(true)}
+                    >
                       <Pencil size={16} />
                     </Button>
                   </div>
                   <div className="space-y-4">
-                    <div>
-                      <div className="flex mb-1">
-                        <svg
-                          width="16"
-                          height="16"
-                          className="mr-2 text-gray-500"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <path
-                            d="M16.8217 3.41772C15.2366 1.83264 13.1645 0.85083 10.9308 0.637664C8.69702 0.424498 6.45705 0.992297 4.59775 2.24023C2.73845 3.48817 1.36258 5.32441 0.685291 7.43827C0.00799614 9.55214 0.069587 11.8234 0.860141 13.8983C1.65069 15.9733 3.12233 17.7294 5.03793 18.8967C6.95354 20.064 9.20502 20.5774 11.4418 20.3522C13.6786 20.1271 15.7677 19.177 17.3305 17.6473C18.8932 16.1175 19.8874 14.0480 20.158 11.8149"
-                            stroke="#0077B5"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M8 12.5874L12 16.5874L22 6.58737"
-                            stroke="#0077B5"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <span className="text-gray-500 text-sm">Instagram</span>
-                      </div>
-                      <p>instagram.com/a.safwat</p>
-                    </div>
-                    <div>
-                      <div className="flex mb-1">
-                        <svg
-                          width="16"
-                          height="16"
-                          className="mr-2 text-gray-500"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <path
-                            d="M23 3C22.0424 3.67548 20.9821 4.19211 19.86 4.53C19.2577 3.83751 18.4573 3.34669 17.567 3.12393C16.6767 2.90116 15.7395 2.9572 14.8821 3.28445C14.0247 3.61171 13.2884 4.1944 12.773 4.95372C12.2575 5.71303 11.9877 6.61234 12 7.53V8.53C10.2426 8.57557 8.50127 8.18581 6.93101 7.39545C5.36074 6.60508 4.01032 5.43864 3 4C3 4 -1 13 8 17C5.94053 18.398 3.48716 19.0989 1 19C10 24 21 19 21 7.5C20.9991 7.22145 20.9723 6.94359 20.92 6.67C21.9406 5.66349 22.6608 4.39271 23 3V3Z"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <span className="text-gray-500 text-sm">X</span>
-                      </div>
-                      <p>twitter.com/a.safwat</p>
-                    </div>
-                    <div>
-                      <div className="flex mb-1">
-                        <svg
-                          width="16"
-                          height="16"
-                          className="mr-2 text-gray-500"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <path
-                            d="M3 4H21"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7 8H11"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M3 20H21V4H3V20Z"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M16 12L14 14L16 16"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M18 12L16 14L18 16"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7 12H11"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7 16H11"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <span className="text-gray-500 text-sm">Website</span>
-                      </div>
-                      <p>www.ah-safwat.com</p>
-                    </div>
+                    {profile?.socialLinks.$values.length ? (
+                      profile.socialLinks.$values.map((link) => (
+                        <div key={link.linkID}>
+                          <div className="flex mb-1">
+                            <span className="text-gray-500 text-sm">{link.platform}</span>
+                          </div>
+                          <p>{link.link}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No social links added</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -534,7 +577,6 @@ useEffect(() => {
           </div>
         </main>
       </div>
-      <Footer />
 
       {/* Profile Setup Modal */}
       <Dialog open={showProfileSetupModal} onOpenChange={setShowProfileSetupModal}>
@@ -619,6 +661,214 @@ useEffect(() => {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Basic Info Modal */}
+      <Dialog open={showEditBasicInfoModal} onOpenChange={setShowEditBasicInfoModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Basic Information</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Job Title</label>
+              <Input
+                value={basicInfo.jobTitle}
+                onChange={(e) => setBasicInfo({ ...basicInfo, jobTitle: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Phone</label>
+              <Input
+                value={basicInfo.phone}
+                onChange={(e) => setBasicInfo({ ...basicInfo, phone: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Gender</label>
+              <select
+                value={basicInfo.gender}
+                onChange={(e) => setBasicInfo({ ...basicInfo, gender: e.target.value })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Type</label>
+              <select
+                value={basicInfo.type}
+                onChange={(e) => setBasicInfo({ ...basicInfo, type: e.target.value })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">Select Type</option>
+                <option value="full-time">Full Time</option>
+                <option value="part-time">Part Time</option>
+                <option value="freelance">Freelance</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Profile Image</label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setBasicInfo({ ...basicInfo, image: e.target.files?.[0] || null })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Cover Image</label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setBasicInfo({ ...basicInfo, coverImage: e.target.files?.[0] || null })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleBasicInfoUpdate}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit About Modal */}
+      <Dialog open={showEditAboutModal} onOpenChange={setShowEditAboutModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit About Me</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">About Me</label>
+              <Textarea
+                value={aboutMe}
+                onChange={(e) => setAboutMe(e.target.value)}
+                rows={5}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleAboutMeUpdate}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Skills Modal */}
+      <Dialog open={showEditSkillsModal} onOpenChange={setShowEditSkillsModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Skills</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Add New Skill</label>
+              <div className="flex gap-2">
+                <Input
+                  value={newSkill}
+                  onChange={(e) => setNewSkill(e.target.value)}
+                  placeholder="Enter skill"
+                />
+                <Button onClick={handleAddSkill}>Add</Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {profile?.userSkills.$values.map((skill, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <span>{skill}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteSkill(skill)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Languages Modal */}
+      <Dialog open={showEditLanguagesModal} onOpenChange={setShowEditLanguagesModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Languages</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Add New Language</label>
+              <div className="flex gap-2">
+                <Input
+                  value={newLanguage}
+                  onChange={(e) => setNewLanguage(e.target.value)}
+                  placeholder="Enter language"
+                />
+                <Button onClick={handleAddLanguage}>Add</Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {profile?.userLanguages.$values.map((language, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <span>{language}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteLanguage(language)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Social Links Modal */}
+      <Dialog open={showEditSocialLinksModal} onOpenChange={setShowEditSocialLinksModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Social Links</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Add New Social Link</label>
+              <div className="space-y-2">
+                <Input
+                  value={newSocialLink.platform}
+                  onChange={(e) => setNewSocialLink({ ...newSocialLink, platform: e.target.value })}
+                  placeholder="Platform (e.g., LinkedIn, Twitter)"
+                />
+                <Input
+                  value={newSocialLink.link}
+                  onChange={(e) => setNewSocialLink({ ...newSocialLink, link: e.target.value })}
+                  placeholder="Link URL"
+                />
+                <Button onClick={handleAddSocialLink}>Add</Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {profile?.socialLinks.$values.map((link) => (
+                <div key={link.linkID} className="flex justify-between items-center">
+                  <div>
+                    <span className="font-medium">{link.platform}: </span>
+                    <span>{link.link}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteSocialLink(link.linkID)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
