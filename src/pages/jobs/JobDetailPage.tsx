@@ -117,10 +117,11 @@ const JobDetailPage = () => {
         />
         
         <JobDescription 
+          applyBefore={format(new Date(jobData.applyBefore), "MMMM d, yyyy")}
           description={jobData.description}
-          responsibilities={job.responsibilities}
-          requirements={job.requirements} // jobData.whoyouare isn't an array  so do nice to have and responsibilites
-          niceTohaves={job.niceTohaves}
+          responsibilities={jobData.responsibilities.split(".").slice(0, -1)}
+          requirements={jobData.whoYouAre.split(".").slice(0, -1)} // jobData.whoyouare isn't an array  so do nice to have and responsibilites
+          niceTohaves={jobData.niceToHaves.split(".").slice(0, -1)}
           datePosted={format(new Date(jobData.jobPostedOn), "MMMM d, yyyy")}
           salary={` from ${jobData.salaryFrom} to ${jobData.salaryTo}`}
           jobType={jobData.type}

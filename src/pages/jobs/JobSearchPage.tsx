@@ -23,7 +23,22 @@ const JobSearchPage = () => {
   const [isAILoadingOpen, setIsAILoadingOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [showAIResults, setShowAIResults] = useState(false);
+  const {searchJobs , jobs} = useJobStore();
+  const [searchTerm, setSearchTerm] = useState({keyword: "", location: ""});
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
+  const SearchHandler = async () => {
+    setSearchError("");
+    setSearchLoading(true);
+    const [city, country] = searchTerm.location.split(',').map(str => str.trim());
+    try {
+      await searchJobs(searchTerm.keyword, country, city);
+    } catch (err) {
+      setSearchError("Failed to search jobs. Please try again.");
+    }
+    setSearchLoading(false);
+  }
   const handleTryNow = () => {
     setIsAIInfoOpen(true);
   };
@@ -75,7 +90,9 @@ const JobSearchPage = () => {
             <div className="bg-white p-3 rounded-lg shadow-sm flex items-center space-x-4">
               <div className="relative flex-1">
                 <input
+                  name="keyword"
                   type="text"
+                  onChange={(e) => setSearchTerm({ ...searchTerm, keyword: e.target.value })}
                   placeholder="Job title or keyword"
                   className="w-full pl-10 pr-4 py-2.5 rounded-md border-gray-200 focus:border-jobblue focus:ring-jobblue"
                   onChange={inputChangeHandler}
@@ -90,6 +107,8 @@ const JobSearchPage = () => {
               
               <div className="relative flex-1">
                 <input
+                  name="location"
+                  onChange={(e) => setSearchTerm({ ...searchTerm, location: e.target.value })}
                   type="text"
                   placeholder="Cairo, Egypt"
                   className="w-full pl-10 pr-4 py-2.5 rounded-md border-gray-200 focus:border-jobblue focus:ring-jobblue"
