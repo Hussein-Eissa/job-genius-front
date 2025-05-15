@@ -1,26 +1,58 @@
-
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useUserStore } from "@/reducers/UserReducerStore";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
-import axios from "axios";
+const nameRegex = /^[A-Za-z\s]+$/;
+
 const SignupForm = () => {
   const { register } = useUserStore();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // handle signup logic here
-    register({ fullName, email, password }); 
-    // console.log("Signup attempt with:", { fullName, email, password });
-    navigate("/verify-email");
+    setIsLoading(true);
+    
+    // Validate full name
+    if (!nameRegex.test(fullName.trim())) {
+      toast({
+        title: "Invalid Name",
+        description: "Full name must contain only letters and spaces.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      await register({ fullName, email, password });
+      toast({
+        title: "Registration Successful",
+        description: "Please check your email for verification code.",
+      });
+      navigate("/verify-email", { 
+        state: { 
+          email,
+          isPasswordReset: false 
+        } 
+      });
+    } catch (error: any) {
+      toast({
+        title: "Registration Failed",
+        description: error.message || "Failed to register. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -41,7 +73,13 @@ const SignupForm = () => {
             placeholder="Enter your full name"
             className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-jobblue focus:border-transparent"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => {
+              // Only allow letters and spaces
+              const value = e.target.value;
+              if (value === '' || nameRegex.test(value)) {
+                setFullName(value);
+              }
+            }}
             required
           />
         </div>
@@ -70,6 +108,7 @@ const SignupForm = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={8}
             />
             <button
               type="button"
@@ -84,9 +123,9 @@ const SignupForm = () => {
         <Button
           type="submit"
           className="w-full bg-jobblue hover:bg-jobblue-dark text-white py-6"
-          onClick={handleSubmit}
+          disabled={isLoading}
         >
-          Continue
+          {isLoading ? "Creating Account..." : "Continue"}
         </Button>
 
         <div className="mt-8 text-center">
@@ -97,13 +136,13 @@ const SignupForm = () => {
           </div>
 
           <div className="mt-4 flex justify-center space-x-4">
-            <button className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
+            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
               <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" className="h-6 w-6" />
             </button>
-            <button className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
-              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoft/microsoft-original.svg" alt="Microsoft" className="h-6 w-6" />
+            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
+              <img src="/lovable-uploads/Images/logos_microsoft-icon.svg" alt="Microsoft" className="h-6 w-6" />
             </button>
-            <button className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
+            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
               <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg" alt="Facebook" className="h-6 w-6" />
             </button>
           </div>

@@ -15,10 +15,11 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { useState, useEffect } from "react";
 
 const FormSchema = z.object({
   otp: z.string().length(5, {
-    message: "Your one-time password must be exactly 6 characters.",
+    message: "Your one-time password must be exactly 5 characters.",
   }),
 });
 
@@ -26,7 +27,23 @@ export default function VerifyEmailForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { resetPasswordRequest } = useUserStore();
+  const { resetPasswordRequest, verifyEmail, forgetPassword } = useUserStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+
+  // Check if email exists in state
+  useEffect(() => {
+    const email = state?.email || resetPasswordRequest?.email;
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Email is missing. Please start the process again.",
+        variant: "destructive",
+      });
+      navigate("/login");
+    }
+  }, [state, resetPasswordRequest, toast, navigate]);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -35,52 +52,98 @@ export default function VerifyEmailForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log("VerifyEmailForm: Initial resetPasswordRequest:", resetPasswordRequest);
-    console.log("VerifyEmailForm: Location state:", state);
+  const startResendCountdown = () => {
+    setResendDisabled(true);
+    setResendCountdown(60);
+    const timer = setInterval(() => {
+      setResendCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setResendDisabled(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleResendCode = async () => {
+    if (resendDisabled) return;
 
     const email = state?.email || resetPasswordRequest?.email;
-
     if (!email) {
-      console.error("VerifyEmailForm: Email is missing");
       toast({
         title: "Error",
         description: "Email is missing. Please start the process again.",
         variant: "destructive",
       });
-      navigate("/forgot-password");
       return;
     }
-    try {
-      useUserStore.setState({
-        resetPasswordRequest: {
-          email,
-          resetCode: data.otp,
-          newPassword: resetPasswordRequest?.newPassword || "",
-        },
-      });
 
-      const updatedResetPasswordRequest = useUserStore.getState().resetPasswordRequest;
-      console.log("VerifyEmailForm: Updated resetPasswordRequest:", updatedResetPasswordRequest);
-    } catch (err) {
-      console.error("Error setting resetPasswordRequest:", err);
+    try {
+      setIsLoading(true);
+      await forgetPassword(email);
+      startResendCountdown();
       toast({
-        title: "Error",
-        description: "Failed to process OTP. Please try again.",
+        title: "Verification Code Sent",
+        description: "A new verification code has been sent to your email.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Resend Failed",
+        description: error.message || "Failed to resend verification code. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    const email = state?.email || resetPasswordRequest?.email;
+    const isPasswordReset = state?.isPasswordReset || false;
+
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Email is missing. Please start the process again.",
+        variant: "destructive",
+      });
+      navigate("/login");
       return;
     }
-    toast({
-      title: "Email Verified",
-      description: "You have successfully verified your email.",
-    });
 
-    navigate("/reset-password", {
-      state: { email, resetCode: data.otp },
-    });
-
-    console.log("VerifyEmailForm: Submitted OTP:", data.otp);
+    setIsLoading(true);
+    try {
+      if (isPasswordReset) {
+        // Handle password reset verification
+        useUserStore.setState({
+          resetPasswordRequest: {
+            email,
+            resetCode: data.otp,
+            newPassword: resetPasswordRequest?.newPassword || "",
+          },
+        });
+        navigate("/reset-password", {
+          state: { email, resetCode: data.otp },
+        });
+      } else {
+        // Handle signup verification
+        const isVerified = await verifyEmail({ email, otp: data.otp });
+        if (isVerified) {
+          toast({
+            title: "Success",
+            description: "Your email has been verified. You can now login.",
+          });
+          navigate("/login");
+        }
+      }
+    } catch (err: any) {
+      // Error is already handled in the store with specific messages
+      console.error("Error processing verification:", err);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -108,14 +171,19 @@ export default function VerifyEmailForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          Verify Email
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Verifying..." : "Verify Email"}
         </Button>
         <FormDescription className="text-center">
           Didn&apos;t receive a code?{" "}
-          <Link to="#" className="text-jobblue hover:underline">
-            Resend
-          </Link>
+          <button
+            type="button"
+            onClick={handleResendCode}
+            disabled={resendDisabled || isLoading}
+            className={`text-jobblue hover:underline ${(resendDisabled || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {resendDisabled ? `Resend in ${resendCountdown}s` : 'Resend'}
+          </button>
         </FormDescription>
       </form>
     </Form>

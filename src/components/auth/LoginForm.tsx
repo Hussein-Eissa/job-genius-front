@@ -1,33 +1,49 @@
-
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useUserStore } from "@/reducers/UserReducerStore";
-
+import { useToast } from "@/hooks/use-toast";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { loginAsync } = useUserStore();
+  const { toast } = useToast();
   const navigate = useNavigate();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    
     try {
       await loginAsync(email, password);
-  
       const isAuthenticated = useUserStore.getState().isAuthenticated;
   
       if (isAuthenticated) {
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
         navigate("/profile");
       } else {
-        alert("Login failed. Please check your credentials.");
+        toast({
+          title: "Login Failed",
+          description: "Please check your credentials and try again.",
+          variant: "destructive",
+        });
       }
     } catch (error: any) {
-      alert(error.message || "Login error occurred.");
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred during login. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,8 +116,9 @@ const LoginForm = () => {
         <Button
           type="submit"
           className="w-full bg-jobblue hover:bg-jobblue-dark text-white py-6"
+          disabled={isLoading}
         >
-          Login
+          {isLoading ? "Logging in..." : "Login"}
         </Button>
 
         <div className="mt-8 text-center">
@@ -112,13 +129,13 @@ const LoginForm = () => {
           </div>
 
           <div className="mt-4 flex justify-center space-x-4">
-            <button className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
+            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
               <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" className="h-6 w-6" />
             </button>
-            <button className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
-              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoft/microsoft-original.svg" alt="Microsoft" className="h-6 w-6" />
+            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
+              <img src="/lovable-uploads/Images/logos_microsoft-icon.svg" alt="Microsoft" className="h-6 w-6" />
             </button>
-            <button className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
+            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
               <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg" alt="Facebook" className="h-6 w-6" />
             </button>
           </div>
