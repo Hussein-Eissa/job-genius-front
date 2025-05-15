@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 
-const ResumeRecommendations = () => {
+const ResumeRecommendations = ({ recommendations = [] }) => {
   return (
     <div className="mt-16">
       <div className="flex items-center mb-6">
@@ -9,40 +8,29 @@ const ResumeRecommendations = () => {
           JobGenius <span className="text-jobblue">AI Recommendations:</span>
         </h2>
       </div>
-      
+
       <div className="grid md:grid-cols-2 gap-8">
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <span className="font-bold">1.</span>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-          </div>
-          <div className="flex gap-2">
-            <span className="font-bold">2.</span>
-            <p>Quisque lobortis facilisis orci non volutpat.</p>
-          </div>
-          <div className="flex gap-2">
-            <span className="font-bold">3.</span>
-            <p>elit et fringilla auctor, lectus magna placerat.</p>
-          </div>
-          <div className="flex gap-2">
-            <span className="font-bold">4.</span>
-            <p>dictum elit eget, eleifend odio. Vestibulum ante ipsum.</p>
-          </div>
-          <div className="flex gap-2">
-            <span className="font-bold">5.</span>
-            <p>Proin vitae augue nisi. Integer imperdiet.</p>
-          </div>
+          {recommendations.length > 0 ? (
+            recommendations.map((rec, index) => (
+              <div key={index} className="flex gap-2">
+                <span className="font-bold">{index + 1}.</span>
+                <p>{rec}</p>
+              </div>
+            ))
+          ) : (
+            <p>No recommendations available yet.</p>
+          )}
         </div>
-        
+
         <div className="flex justify-center">
-          <img 
-            src="/lovable-uploads/Images/vector 1.png" 
-            alt="Resume Analysis Visualization" 
+          <img
+            src="/lovable-uploads/Images/vector 1.png"
+            alt="Resume Analysis Visualization"
             className="max-h-64"
           />
         </div>
       </div>
-      
     </div>
   );
 };

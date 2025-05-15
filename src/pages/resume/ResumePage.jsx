@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Check } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -12,12 +19,43 @@ const ResumePage = () => {
   const [resumeFileName, setResumeFileName] = useState("");
   const [open, setOpen] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
+  const [recommendations, setRecommendations] = useState([]);
 
-  const handleUpload = (fileName) => {
+  const handleUpload = async (fileName, file) => {
     if (jobDescription.trim().length >= 20) {
-      setResumeFileName(fileName);
-      setUploadSuccess(true);
-      setOpen(true);
+      try {
+        const formData = new FormData();
+        formData.append("File", file);
+        formData.append("FileName", fileName);
+        formData.append("JobDescription", jobDescription);
+
+        // const url = new URL("https://jobgenius.bsite.net/api/Resume");
+        // url.searchParams.append("FileName", fileName);
+        // url.searchParams.append("JobDescription", jobDescription);
+
+        const token = localStorage.getItem("token");
+
+        const response = await fetch("https://jobgenius.bsite.net/api/Resume", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        setResumeFileName(fileName);
+        setRecommendations(data.recommendations || []);
+        setUploadSuccess(true);
+        setOpen(true);
+      } catch (error) {
+        console.error("Upload failed:", error);
+      }
     }
   };
 
@@ -37,8 +75,8 @@ const ResumePage = () => {
             {!uploadSuccess ? (
               <div className="bg-white rounded-lg shadow-md p-6 mb-8">
                 <h2 className="text-xl font-semibold mb-4">Upload Your Resume</h2>
-                <ResumeUploader 
-                  onUpload={handleUpload} 
+                <ResumeUploader
+                  onUpload={(fileName, file) => handleUpload(fileName, file)}
                   jobDescription={jobDescription}
                   setJobDescription={setJobDescription}
                 />
@@ -54,12 +92,13 @@ const ResumePage = () => {
                 <p className="text-gray-600 mb-4">
                   {resumeFileName} has been uploaded and analyzed.
                 </p>
-                <Button 
+                <Button
                   className="bg-jobblue hover:bg-jobblue-dark"
                   onClick={() => {
                     setUploadSuccess(false);
                     setResumeFileName("");
                     setJobDescription("");
+                    setRecommendations([]);
                   }}
                 >
                   Upload Another Resume
@@ -67,7 +106,7 @@ const ResumePage = () => {
               </div>
             )}
 
-            {uploadSuccess && <ResumeRecommendations />}
+            {uploadSuccess && <ResumeRecommendations recommendations={recommendations} />}
           </div>
         </div>
       </main>
@@ -82,24 +121,14 @@ const ResumePage = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-green-100 p-1 rounded-full">
-                <Check className="h-4 w-4 text-green-600" />
+            {recommendations.slice(0, 3).map((rec, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <div className={`p-1 rounded-full ${idx === 2 ? "bg-yellow-100" : "bg-green-100"}`}>
+                  <Check className={`h-4 w-4 ${idx === 2 ? "text-yellow-600" : "text-green-600"}`} />
+                </div>
+                <p className="text-sm">{rec}</p>
               </div>
-              <p className="text-sm">Strong summary section</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-green-100 p-1 rounded-full">
-                <Check className="h-4 w-4 text-green-600" />
-              </div>
-              <p className="text-sm">Good experience descriptions</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-yellow-100 p-1 rounded-full">
-                <Check className="h-4 w-4 text-yellow-600" />
-              </div>
-              <p className="text-sm">Consider adding more keywords related to your target job</p>
-            </div>
+            ))}
           </div>
           <DialogFooter>
             <Button type="button" onClick={() => setOpen(false)}>
