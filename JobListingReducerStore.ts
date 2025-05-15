@@ -70,13 +70,11 @@ export interface JobListingState {
   saveJobByID: (jobId: number) => Promise<void>;
   deleteSavedJob: (jobId: number) => Promise<void>;
   fetchUserJobs: () => Promise<void>;
-  filterJobs: (filters: {
-    keyword?: string;
-    country?: string;
-    city?: string;
-    type?: string;
-    salaryFrom?: number;
-    salaryTo?: number;
+  filterJobs: (filters: { 
+    types?: string[];
+    categories?: string[];
+  salaryFrom?: number;
+  salaryTo?: number
   }) => Promise<void>;
 }
 
@@ -223,6 +221,7 @@ export const useJobStore = create<JobListingState>((set, get) => ({
     try {
       const res = await axios.get("https://jobgenius.bsite.net/api/JobListing/categories-job-count");
       set({ categoriesWithCount: res.data.$values, success: true, error: undefined });
+      console.log("Fetched category job counts:", res.data.$values);
     } catch (error: any) {
       console.error("Error fetching category job counts:", error.response?.data || error.message);
       set({ success: false, error: error.response?.data?.message || "Failed to fetch categories." });
@@ -330,33 +329,31 @@ export const useJobStore = create<JobListingState>((set, get) => ({
     }
   },
 
-  filterJobs: async (filters) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
+filterJobs: async (filters) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
 
-      const queryParams = new URLSearchParams();
-      if (filters.keyword) queryParams.append("keyword", filters.keyword);
-      if (filters.country) queryParams.append("country", filters.country);
-      if (filters.city) queryParams.append("city", filters.city);
-      if (filters.type) queryParams.append("type", filters.type);
-      if (filters.salaryFrom) queryParams.append("salaryFrom", filters.salaryFrom.toString());
-      if (filters.salaryTo) queryParams.append("salaryTo", filters.salaryTo.toString());
+    const response = await axios.post(
+      "https://jobgenius.bsite.net/api/JobListing/Filter",
+      filters,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-      const response = await axios.get(
-        `https://jobgenius.bsite.net/api/JobListing/Filter?${queryParams.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    set({ jobs: response.data, success: true, error: undefined });
+    console.log("Filtered jobs:", response.data);
+  } catch (error: any) {
+    console.error("Error filtering jobs:", error.response?.data || error.message);
+    set({
+      success: false,
+      error: error.response?.data?.message || "Failed to filter jobs.",
+    });
+  }
+},
 
-      set({ jobs: response.data, success: true, error: undefined });
-      console.log("Filtered jobs:", response.data);
-    } catch (error: any) {
-      console.error("Error filtering jobs:", error.response?.data || error.message);
-      set({ success: false, error: error.response?.data?.message || "Failed to filter jobs." });
-    }
-  },
 }));

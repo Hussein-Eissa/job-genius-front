@@ -51,10 +51,12 @@ const JobListingPage = () => {
   const [searchTerm, setSearchTerm] = useState({keyword: "", location: ""});
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
+
   useEffect(() => {
     fetchCategoriesWithCount();
     console.log("Categories With Count :",categoriesWithCount);
   }, [])
+
   const SearchHandler = async () => {
     setSearchError("");
     setSearchLoading(true);
