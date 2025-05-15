@@ -1,14 +1,53 @@
 import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { Link } from "react-router-dom";
+
+const getQuestionsFromStorage = () => {
+  const raw = localStorage.getItem("interviewQuestions") || "[]";
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+    if (parsed && Array.isArray(parsed.questions)) return parsed.questions;
+    return [];
+  } catch {
+    return [];
+  }
+};
+
+const FEEDBACK_API = "https://4055-196-134-66-41.ngrok-free.app/evaluate-answers";
+
+function parseFeedback(feedback) {
+  if (!feedback || typeof feedback !== "string") return null;
+  // Remove all '**' from the feedback string
+  const clean = feedback.replace(/\*\*/g, "");
+  // Split by section headers
+  const sections = clean.split(/\d+\. /g).filter(Boolean);
+  const result = {};
+  sections.forEach((section) => {
+    if (section.startsWith("Score/10:")) {
+      result.score = section.replace("Score/10:", "").trim();
+    } else if (section.startsWith("Top 2 Strengths:")) {
+      result.strengths = section.replace("Top 2 Strengths:", "").trim();
+    } else if (section.startsWith("Top 2 Improvement Areas:")) {
+      result.improvements = section.replace("Top 2 Improvement Areas:", "").trim();
+    } else if (section.startsWith("One Actionable Advice:")) {
+      result.advice = section.replace("One Actionable Advice:", "").trim();
+    }
+  });
+  return result;
+}
 
 const InterviewQuestionsPage = () => {
-  const questions = JSON.parse(localStorage.getItem("interviewQuestions") || "[]");
+  const questions = getQuestionsFromStorage();
   const meta = JSON.parse(localStorage.getItem("interviewMeta") || "{}") || {};
   const numQuestions = questions.length;
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState(Array(numQuestions).fill(""));
   const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackResult, setFeedbackResult] = useState(null);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackError, setFeedbackError] = useState("");
 
   if (!questions.length) {
     return (
@@ -43,9 +82,36 @@ const InterviewQuestionsPage = () => {
 
   // Demo feedbacks (replace with real feedback if available)
   const feedbacks = questions.map((q, i) => ({
-    question: q.question || q.text || `Question ${i + 1}`,
+    question: q.question || q.text || q || `Question ${i + 1}`,
     feedback: `Your answer for this question was received. Here's some feedback and suggestions for improvement.`,
   }));
+
+  const handleSendFeedbacks = async () => {
+    setFeedbackLoading(true);
+    setFeedbackError("");
+    setFeedbackResult(null);
+    try {
+      const qa = questions.map((q, i) => ({
+        question: q.question || q.text || q || `Question ${i + 1}`,
+        answer: answers[i] || "(skipped)"
+      }));
+      const res = await fetch(FEEDBACK_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qa }),
+      });
+      if (!res.ok) throw new Error("Failed to get feedback from API");
+      const data = await res.json();
+      setFeedbackResult(data.evaluation);
+      
+    } catch (err) {
+      setFeedbackError(err.message || "Failed to get feedback from API");
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
+  const parsedFeedback = feedbackResult ? parseFeedback(feedbackResult) : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f6f8fa]">
@@ -61,7 +127,7 @@ const InterviewQuestionsPage = () => {
                 ))}
               </div>
               <div className="bg-white rounded-lg shadow p-8 mb-6">
-                <div className="text-lg font-semibold mb-4">{questions[current].question || questions[current].text || `Question ${current + 1}`}</div>
+                <div className="text-lg font-semibold mb-4">{questions[current].question || questions[current].text || questions[current] || `Question ${current + 1}`}</div>
                 <textarea
                   className="w-full border rounded p-3 min-h-[120px] mb-2"
                   placeholder="write your answer here...."
@@ -102,9 +168,57 @@ const InterviewQuestionsPage = () => {
                 ))}
               </div>
               <div className="flex gap-4 justify-center mt-8">
-                <button className="px-6 py-2 rounded border border-gray-300 hover:bg-gray-100" onClick={() => alert('Feedback sent!')}>Send Feedbacks</button>
-                <button className="bg-jobblue text-white px-6 py-2 rounded-md hover:bg-jobblue-dark transition-colors" onClick={() => window.location.href = '/interview'}>Enter Interview Again</button>
+                <button
+                  className="px-6 py-2 rounded border border-gray-300 hover:bg-gray-100"
+                  onClick={handleSendFeedbacks}
+                  disabled={feedbackLoading}
+                >
+                  {feedbackLoading ? "Loading..." : "Show Feedbacks"}
+                </button>
+                <Link to={"/interview"}>
+                  <button className="bg-jobblue text-white px-6 py-2 rounded-md hover:bg-jobblue-dark transition-colors" >Enter Interview Again</button>
+                </Link>
               </div>
+              {feedbackError && <div className="text-red-500 text-center mt-4">{feedbackError}</div>}
+              {feedbackResult && (
+                <div className="mt-8 bg-gray-50 rounded-lg p-6">
+                  <h3 className="text-xl font-bold mb-4 text-jobblue">AI Feedback</h3>
+                  {parsedFeedback ? (
+                    <div className="space-y-4">
+                      {parsedFeedback.score && (
+                        <div>
+                          <div className="font-bold text-jobblue">Score:</div>
+                          <div className="text-lg">{parsedFeedback.score}</div>
+                        </div>
+                      )}
+                      {parsedFeedback.strengths && (
+                        <div>
+                          <div className="font-bold text-jobblue">Top 2 Strengths:</div>
+                          <ul className="list-disc ml-6 text-gray-800">
+                            {parsedFeedback.strengths.split(/\n|\r/).map((s, i) => s.trim() && <li key={i}>{s.trim().replace(/^\*+\s*/, "")}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      {parsedFeedback.improvements && (
+                        <div>
+                          <div className="font-bold text-jobblue">Top 2 Improvement Areas:</div>
+                          <ul className="list-disc ml-6 text-gray-800">
+                            {parsedFeedback.improvements.split(/\n|\r/).map((s, i) => s.trim() && <li key={i}>{s.trim().replace(/^\*+\s*/, "")}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      {parsedFeedback.advice && (
+                        <div>
+                          <div className="font-bold text-jobblue">One Actionable Advice:</div>
+                          <div className="text-gray-800 whitespace-pre-line">{parsedFeedback.advice}</div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="bg-white rounded p-4 text-sm overflow-x-auto border border-gray-200">{typeof feedbackResult === 'string' ? feedbackResult : JSON.stringify(feedbackResult, null, 2)}</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

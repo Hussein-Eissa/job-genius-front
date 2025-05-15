@@ -45,9 +45,10 @@ const SignupForm = () => {
         } 
       });
     } catch (error: any) {
+      console.log("Registration error:", error);
       toast({
         title: "Registration Failed",
-        description: error.message || "Failed to register. Please try again.",
+        description: error.message || error || "Failed to register. Please try again.",
         variant: "destructive",
       });
     } finally {
