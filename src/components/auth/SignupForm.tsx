@@ -5,7 +5,6 @@ import { Eye, EyeOff } from "lucide-react";
 import { useUserStore } from "@/reducers/UserReducerStore";
 import { useToast } from "@/hooks/use-toast";
 
-const nameRegex = /^[A-Za-z\s]+$/;
 
 const SignupForm = () => {
   const { register } = useUserStore();
@@ -17,6 +16,22 @@ const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
+  const nameRegex = /^[A-Za-z\s]+$/;
+
+  const BASE_URL = "https://jobgenius.bsite.net/api/auth";
+
+  const handleGoogle = () => {
+    window.location.href = `${BASE_URL}/signup-google`;
+  };
+
+  const handleMicrosoft = () => {
+    window.location.href = `${BASE_URL}/signup-Microsoft`;
+  };
+
+  const handleFacebook = () => {
+    window.location.href = `${BASE_URL}/signup-facebook`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -137,13 +152,13 @@ const SignupForm = () => {
           </div>
 
           <div className="mt-4 flex justify-center space-x-4">
-            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
+            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12" onClick={handleGoogle}>
               <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" className="h-6 w-6" />
             </button>
-            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
+            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12" onClick={handleMicrosoft}>
               <img src="/lovable-uploads/Images/logos_microsoft-icon.svg" alt="Microsoft" className="h-6 w-6" />
             </button>
-            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12">
+            <button type="button" className="border border-gray-300 rounded-lg p-2 hover:bg-gray-50 flex items-center justify-center w-20 h-12" onClick={handleFacebook}>
               <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg" alt="Facebook" className="h-6 w-6" />
             </button>
           </div>
