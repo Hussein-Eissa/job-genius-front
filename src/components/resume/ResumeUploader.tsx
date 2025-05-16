@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface ResumeUploaderProps {
-  onUpload: (fileName: string) => void;
+  onUpload: (fileName: string, file: File) => void;
   jobDescription: string;
   setJobDescription: (value: string) => void;
 }
@@ -42,8 +42,11 @@ const ResumeUploader = ({ onUpload, jobDescription, setJobDescription }: ResumeU
     }
   };
 
+  const [file, setFile] = useState<File | null>(null);
+
   const handleFile = (file: File) => {
     setFileName(file.name);
+    setFile(file);
     setIsUploaded(true);
   };
 
@@ -52,8 +55,8 @@ const ResumeUploader = ({ onUpload, jobDescription, setJobDescription }: ResumeU
   };
 
   const handleTryItNow = () => {
-    if (isUploaded && jobDescription.trim().length >= 20) {
-      onUpload(fileName);
+    if (isUploaded && jobDescription.trim().length >= 20 && file) {
+      onUpload(fileName, file);
     }
   };
 
@@ -103,8 +106,8 @@ const ResumeUploader = ({ onUpload, jobDescription, setJobDescription }: ResumeU
       </div>
 
       <div className="w-full flex align-center justify-center mb-6">
-        <textarea
-          className="border-2 border-dashed border-jobblue h-full min-w-full text-center overflow-show"
+        <input
+          className="border-2 border-dashed border-jobblue h-full min-w-full min-h-20 text-center overflow-show"
           placeholder="Enter the job description"
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}

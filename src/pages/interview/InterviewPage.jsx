@@ -3,7 +3,7 @@ import Footer from "@/components/layout/Footer";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "https://4055-196-134-66-41.ngrok-free.app/generate-questions";
+const API_URL = "https://499a-196-132-65-97.ngrok-free.app/generate-questions";
 
 const jobTitles = [
   "Data Scientist",

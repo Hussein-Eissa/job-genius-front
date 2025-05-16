@@ -25,32 +25,26 @@ const ResumePage = () => {
     if (jobDescription.trim().length >= 20) {
       try {
         const formData = new FormData();
-        formData.append("File", file);
-        formData.append("FileName", fileName);
-        formData.append("JobDescription", jobDescription);
-
-        // const url = new URL("https://jobgenius.bsite.net/api/Resume");
-        // url.searchParams.append("FileName", fileName);
-        // url.searchParams.append("JobDescription", jobDescription);
-
-        const token = localStorage.getItem("token");
-
-        const response = await fetch("https://jobgenius.bsite.net/api/Resume", {
+        formData.append("resume_file", file);
+        formData.append("job_description", jobDescription);
+  
+        console.log("1001");
+        const response = await fetch("https://74da-154-181-47-82.ngrok-free.app/score", {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
           body: formData,
+          redirect: "follow"
         });
-
+  
+        console.log("1011");
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
-
+  
         const data = await response.json();
-
+        console.log("1000", data);
         setResumeFileName(fileName);
-        setRecommendations(data.recommendations || []);
+        setRecommendations(Object.entries(data.feedback || {}));
         setUploadSuccess(true);
         setOpen(true);
       } catch (error) {

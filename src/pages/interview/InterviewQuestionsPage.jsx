@@ -15,7 +15,7 @@ const getQuestionsFromStorage = () => {
   }
 };
 
-const FEEDBACK_API = "https://4055-196-134-66-41.ngrok-free.app/evaluate-answers";
+const FEEDBACK_API = "https://499a-196-132-65-97.ngrok-free.app/evaluate-answers";
 
 function parseFeedback(feedback) {
   if (!feedback || typeof feedback !== "string") return null;
