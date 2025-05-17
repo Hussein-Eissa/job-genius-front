@@ -20,6 +20,7 @@ const ResumePage = () => {
   const [open, setOpen] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
   const [recommendations, setRecommendations] = useState([]);
+  const [score, setScore] = useState(0);
 
   const handleUpload = async (fileName, file) => {
     if (jobDescription.trim().length >= 20) {
@@ -28,23 +29,22 @@ const ResumePage = () => {
         formData.append("resume_file", file);
         formData.append("job_description", jobDescription);
   
-        console.log("1001");
-        const response = await fetch("https://74da-154-181-47-82.ngrok-free.app/score", {
+        const response = await fetch("https://a9df-197-39-76-99.ngrok-free.app/score", {
           method: "POST",
           body: formData,
           redirect: "follow"
         });
   
-        console.log("1011");
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
   
         const data = await response.json();
-        console.log("1000", data);
+        console.log(data);
         setResumeFileName(fileName);
         setRecommendations(Object.entries(data.feedback || {}));
+        setScore(data.score || 0);
         setUploadSuccess(true);
         setOpen(true);
       } catch (error) {
@@ -93,6 +93,7 @@ const ResumePage = () => {
                     setResumeFileName("");
                     setJobDescription("");
                     setRecommendations([]);
+                    setScore(0);
                   }}
                 >
                   Upload Another Resume
@@ -100,7 +101,7 @@ const ResumePage = () => {
               </div>
             )}
 
-            {uploadSuccess && <ResumeRecommendations recommendations={recommendations} />}
+            {uploadSuccess && <ResumeRecommendations recommendations={recommendations} score={score} />}
           </div>
         </div>
       </main>
@@ -111,16 +112,23 @@ const ResumePage = () => {
           <DialogHeader>
             <DialogTitle>Resume Uploaded Successfully</DialogTitle>
             <DialogDescription>
-              Your resume has been uploaded and analyzed. Here are some recommendations to improve it.
+              Your resume has been uploaded and analyzed with a match score of <span className="font-bold">{score}%</span>.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
-            {recommendations.slice(0, 3).map((rec, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <div className={`p-1 rounded-full ${idx === 2 ? "bg-yellow-100" : "bg-green-100"}`}>
-                  <Check className={`h-4 w-4 ${idx === 2 ? "text-yellow-600" : "text-green-600"}`} />
+            {recommendations.slice(0, 3).map(([category, content], idx) => (
+              <div key={idx} className="flex items-start gap-2">
+                <div className={`p-1 rounded-full mt-1 ${content.includes("Missing") ? "bg-red-100" : "bg-green-100"}`}>
+                  {content.includes("Missing") ? (
+                    <Check className="h-4 w-4 text-red-600" />
+                  ) : (
+                    <Check className="h-4 w-4 text-green-600" />
+                  )}
                 </div>
-                <p className="text-sm">{rec}</p>
+                <div>
+                  <p className="text-sm font-medium">{category}</p>
+                  <p className="text-xs text-gray-600">{content}</p>
+                </div>
               </div>
             ))}
           </div>
