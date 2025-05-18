@@ -29,7 +29,7 @@ const ResumePage = () => {
         formData.append("resume_file", file);
         formData.append("job_description", jobDescription);
   
-        const response = await fetch("https://a9df-197-39-76-99.ngrok-free.app/score", {
+        const response = await fetch("https://b4c8-102-45-207-229.ngrok-free.app/score", {
           method: "POST",
           body: formData,
           redirect: "follow"
