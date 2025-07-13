@@ -32,7 +32,11 @@ const ApplicationForm1 = ({ onNext }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-4"
+      style={{ width: "100%" }}
+    >
       <Stack
         spacing={4}
         direction={{ xs: "column", sm: "row" }}
