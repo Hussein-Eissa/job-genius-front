@@ -39,7 +39,7 @@ import SavedJobs from "./pages/settings/SavedJobsPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 const queryClient = new QueryClient();
-import ApplivcationForm from './components/jobs/jobApplicationForms/ApplicationForm1'
+import ApplivcationForm from './components/jobs/jobApplicationForms/ApplicationForm2'
 import { JobFormProvider } from "./context/jobApplicationFormContext";
 const App = () => (
   <QueryClientProvider client={queryClient}>

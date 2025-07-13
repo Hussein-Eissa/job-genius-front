@@ -5,7 +5,7 @@ const JobFormContext = createContext();
 export const JobFormProvider = ({ children }) => {
   const [formData, setFormData] = useState({
     // Temporary not required in backEnd
-    name : "",
+    fullname : "",
     email: "",
     phone: "",
     // /////////////////////////////////
