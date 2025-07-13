@@ -39,12 +39,14 @@ import SavedJobs from "./pages/settings/SavedJobsPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 const queryClient = new QueryClient();
-
+import ApplivcationForm from './components/jobs/jobApplicationForms/ApplicationForm1'
+import { JobFormProvider } from "./context/jobApplicationFormContext";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <JobFormProvider>
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
@@ -54,6 +56,8 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          {/* Trial Route */}
+          <Route path="/application-form" element={<ApplivcationForm />} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
@@ -82,11 +86,11 @@ const App = () => (
             <Route path="/overview" element={<OverviewPage />} />
             <Route path="/saved-jobs" element={<SavedJobs />} />
           </Route>
-
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      </JobFormProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
