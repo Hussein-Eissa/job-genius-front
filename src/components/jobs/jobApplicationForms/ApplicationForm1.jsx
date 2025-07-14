@@ -32,7 +32,8 @@ const ApplicationForm1 = ({ onNext }) => {
   };
 
   return (
-    <form id="form-1"
+    <form
+      id="form-1"
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-4"
       style={{ width: "100%", backgroundColor: "#f5f5f5" }}
@@ -43,11 +44,16 @@ const ApplicationForm1 = ({ onNext }) => {
         padding={3}
         className="w-full d-flex justify-evenly"
       >
-        <Stack spacing={1} direction={"column"} className="gap-3" sx={{ width: { xs: "100%", lg: "40%" } }}>
+        <Stack
+          spacing={1}
+          direction={"column"}
+          className="gap-3"
+          sx={{ width: { xs: "100%", lg: "40%" } }}
+        >
           <div>
             <label className="block font-medium py-2">{`Full Name (Required)`}</label>
             <Input
-              {...register("name", { required: true })}
+              {...register("fullname", { required: true })}
               placeholder="Enter your Full Name"
             />
             {errors.title && (
@@ -58,26 +64,35 @@ const ApplicationForm1 = ({ onNext }) => {
           <div>
             <label className="block font-medium py-2 !text-blue-900">{`Email Address (Required)`}</label>
             <Input
-              {...register("email", { required: true })}
+              {...register("email", {
+                required: true,
+                pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              })}
               placeholder=" Enter your Email"
-              type='email'
+              type="email"
             />
-            {errors.title && (
-              <p className="text-red-500 text-sm">Email is required</p>
+            {errors.email && (
+              <p className="text-red-500 text-sm">{`Email is ${
+                errors.email.type === "pattern" ? "invalid" : "required"
+              }`}</p>
             )}
           </div>
 
           <div>
             <label className="block font-medium py-2">{`Phone Number (Required)`}</label>
             <Input
-              {...register("phone", { required: true })}
-              placeholder="Enter your Phone Number"
+              {...register("phone", {
+                required: "Phone number is required",
+                pattern: {
+                  value: /^01[2|5|1][0-9]{8}$/, 
+                  message: "Phone number must be 11 digits and start with 01",
+                },
+              })}
             />
-            {errors.title && (
-              <p className="text-red-500 text-sm">Phone Number is required</p>
+            {errors.phone && (
+              <p className="text-red-500 text-sm">{errors.phone.message}</p>
             )}
           </div>
-
         </Stack>
         {/* <Stack alignContent={"center"} style={{ width: "45%" }}> */}
         <Stack
@@ -108,7 +123,6 @@ const ApplicationForm1 = ({ onNext }) => {
           </Paper>
         </Stack>
       </Stack>
-
     </form>
   );
 };

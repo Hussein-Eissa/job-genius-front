@@ -17,74 +17,93 @@ import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
-// import ReactQuill;
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-// import useMediaQuery from "@mui/material/useMediaQuery";
 import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined";
 import { Link, useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 
 const ApplicationForm3 = () => {
   const navigate = useNavigate();
 
   const { updateForm, formData } = useJobForm();
 
-  const [skills, setSkills] = React.useState(formData.skills || []);
+  // Safely initialize state with arrays or parsed values
+  const [skills, setSkills] = React.useState(
+    Array.isArray(formData.skills)
+      ? formData.skills
+      : typeof formData.skills === "string"
+      ? formData.skills.split(",").filter((item) => typeof item === "string" && item.trim())
+      : []
+  );
   const [skillInput, setSkillInput] = React.useState("");
 
-  const [categories, setCategories] = React.useState(formData.categories || []);
+  const [categories, setCategories] = React.useState(
+    Array.isArray(formData.categories)
+      ? formData.categories
+      : typeof formData.categories === "string"
+      ? formData.categories.split(",").filter((item) => typeof item === "string" && item.trim())
+      : []
+  );
   const [categoryInput, setCategoryInput] = React.useState("");
 
   const [responsibilities, setResponsibilities] = React.useState(
-    formData.responsibilities || []
+    Array.isArray(formData.responsibilities)
+      ? formData.responsibilities
+      : typeof formData.responsibilities === "string"
+      ? formData.responsibilities.split(",").filter((item) => typeof item === "string" && item.trim())
+      : []
   );
   const [responsibilityInput, setResponsibilityInput] = React.useState("");
 
-  const [whoYouAre, setWhoYouAre] = React.useState(formData.whoYouAre || []);
+  const [whoYouAre, setWhoYouAre] = React.useState(
+    Array.isArray(formData.whoYouAre)
+      ? formData.whoYouAre
+      : typeof formData.whoYouAre === "string"
+      ? formData.whoYouAre.split(",").filter((item) => typeof item === "string" && item.trim())
+      : []
+  );
   const [whoYouAreInput, setWhoYouAreInput] = React.useState("");
 
   const [niceToHaves, setNiceToHaves] = React.useState(
-    formData.responsibilities || []
+    Array.isArray(formData.niceToHaves)
+      ? formData.niceToHaves
+      : typeof formData.niceToHaves === "string"
+      ? formData.niceToHaves.split(",").filter((item) => typeof item === "string" && item.trim())
+      : []
   );
   const [niceToHavesInput, setNiceToHavesInput] = React.useState("");
 
-  const [benefits, setBenefits] = React.useState(formData.jobBenefits || []);
+  const [benefits, setBenefits] = React.useState(
+    Array.isArray(formData.jobBenefits)
+      ? formData.jobBenefits
+      : typeof formData.jobBenefits === "string"
+      ? JSON.parse(formData.jobBenefits || "[]").filter((item) => typeof item === "object" && item !== null)
+      : []
+  );
   const [benefitInput, setBenefitInput] = React.useState({
     title: "",
     description: "",
   });
 
-  // Custom Functions (adding Handlers)
-  const handleAddBenefit = () => {
-    if (!benefitInput.title || !benefitInput.description) return;
-    setBenefits((prev) => [...prev, benefitInput]);
-    setBenefitInput({ title: "", description: "" });
-  };
+  const handleAddtoList = (input, setList, clearInput) => {
+    if (!input) return;
 
-  const handleAddSkill = () => {
-    if (!skillInput) return;
-    setSkills((prev) => [...prev, skillInput]);
-  };
+    if (typeof input === "object" && input !== null) {
+      const hasValue = Object.values(input).some(
+        (val) => typeof val === "string" && val.trim()
+      );
+      if (!hasValue) return;
+    }
 
-  const handleAddResponsibility = () => {
-    if (!responsibilityInput) return;
-    setResponsibilities((prev) => [...prev, responsibilityInput]);
-  };
+    if (typeof input === "string" && !input.trim()) return;
 
-  const handleAddCategory = () => {
-    if (!categoryInput) return;
-    setCategories((prev) => [...prev, categoryInput]);
-  };
+    setList((prev) => [...prev, input]);
 
-  const handleAddWhoYouAre = () => {
-    if (!whoYouAreInput) return;
-    setWhoYouAre((prev) => [...prev, whoYouAreInput]);
-  };
-
-  const handleAddNiceToHave = () => {
-    if (!niceToHavesInput) return;
-    setNiceToHaves((prev) => [...prev, niceToHavesInput]);
+    if (typeof clearInput === "function") {
+      clearInput(typeof input === "object" ? { title: "", description: "" } : "");
+    }
   };
 
   const {
@@ -92,22 +111,30 @@ const ApplicationForm3 = () => {
     handleSubmit,
     control,
     watch,
-    setValue, // <-- ضيفي ده
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      salaryTo: formData.salaryTo,
-      salaryFrom: formData.salaryFrom,
-      applyBefore: formData.applyBefore,
-      capacity: formData.capacity,
-      title: formData.title,
-      type: formData.type,
+      title: formData.title || "",
+      company: formData.company || "",
+      city: formData.city || "",
+      country: formData.country || "",
+      type: formData.type || "",
+      description: formData.description || "",
       responsibilities: formData.responsibilities || [],
       whoYouAre: formData.whoYouAre || [],
       niceToHaves: formData.niceToHaves || [],
+      capacity: formData.capacity || 0,
+      applyBefore: formData.applyBefore || "",
+      salaryFrom: formData.salaryFrom || 0,
+      salaryTo: formData.salaryTo || 0,
+      companyWebsite: formData.companyWebsite || "",
+      keywords: formData.keywords || "",
+      additionalInformation: formData.additionalInformation || "",
+      companyPapers: formData.companyPapers || "",
+      categories: formData.categories || [],
       skills: formData.skills || [],
       jobBenefits: formData.jobBenefits || [],
-      categories: formData.categories || [],
     },
   });
 
@@ -120,59 +147,77 @@ const ApplicationForm3 = () => {
       ["emoji"],
     ],
   };
+
   const JobType = [
     { label: "Full Time", value: "Full Time" },
     { label: "Part Time", value: "Part Time" },
     { label: "Contract", value: "Contract" },
     { label: "Internship", value: "Internship" },
   ];
+
   React.useEffect(() => {
     setValue("responsibilities", responsibilities);
     setValue("whoYouAre", whoYouAre);
     setValue("niceToHaves", niceToHaves);
-  }, [responsibilities, whoYouAre, niceToHaves]);
+    setValue("skills", skills);
+    setValue("categories", categories);
+    setValue("jobBenefits", benefits);
+  }, [responsibilities, whoYouAre, niceToHaves, skills, categories, benefits]);
 
   const onSubmit = (data) => {
     const plainDescription = data.description.replace(/<[^>]+>/g, "").trim();
-    const plainResponsibilities = Array.isArray(data.responsibilities)
-      ? data.responsibilities.join(". ")
-      : data.responsibilities;
 
-    const plainWhoYouAre = Array.isArray(data.whoYouAre)
-      ? data.whoYouAre.join(". ")
-      : data.whoYouAre;
-
-    const plainNiceToHaves = Array.isArray(data.niceToHaves)
-      ? data.niceToHaves.join(". ")
-      : data.niceToHaves;
+    // Format applyBefore to ISO string if it's a date string
+    const formattedApplyBefore = new Date(data.applyBefore).toISOString();
 
     const cleanedData = {
-      ...data,
-      whoYouAre: plainWhoYouAre,
-      niceToHaves: plainNiceToHaves,
+      title: data.title || "",
+      company: data.company || "",
+      city: data.city || "",
+      country: data.country || "",
+      type: data.type || "",
       description: plainDescription,
-      responsibilities: plainResponsibilities,
-      jobBenefits: benefits.filter(
-        (b) => b.title.trim() || b.description.trim()
-      ),
-      skills: skills.filter((s) => s.trim()),
-      categories: categories.filter((c) => c.trim()),
+      responsibilities: responsibilities.length > 0 ? responsibilities.join(",") : "",
+      whoYouAre: whoYouAre.length > 0 ? whoYouAre.join(",") : "",
+      niceToHaves: niceToHaves.length > 0 ? niceToHaves.join(",") : "",
+      capacity: Number(data.capacity) || 0,
+      applyBefore: formattedApplyBefore,
+      salaryFrom: Number(data.salaryFrom) || 0,
+      salaryTo: Number(data.salaryTo) || 0,
+      companyWebsite: data.companyWebsite || "",
+      keywords: data.keywords || "",
+      additionalInformation: data.additionalInformation || "",
+      companyPapers: data.companyPapers || "",
+      categories: categories,
+      skills: skills,
+      jobBenefits: benefits.filter((b) => b.title.trim() || b.description.trim()),
     };
 
     updateForm(cleanedData);
     localStorage.setItem("formData3", JSON.stringify(cleanedData));
-    console.log(cleanedData);
-    // onNext();
+    console.log("Submitted Data:", cleanedData);
     navigate("/jobs");
   };
 
+  const handleRemoveItemFromArray = (index, array, setArray) => {
+    const updated = [...array];
+    updated.splice(index, 1);
+    setArray(updated);
+  };
+
   return (
-    <form id="form-3"
+    <form
+      id="form-3"
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 "
+      className="space-y-4"
       style={{ width: "100%", backgroundColor: "#f5f5f5" }}
     >
-      <Stack spacing={4} direction={{ xs: "column", lg: "row" }} padding={3} className="w-full d-flex justify-evenly">
+      <Stack
+        spacing={4}
+        direction={{ xs: "column", lg: "row" }}
+        padding={3}
+        className="w-full d-flex justify-evenly"
+      >
         {/* Job title */}
         <Stack
           spacing={1}
@@ -180,7 +225,7 @@ const ApplicationForm3 = () => {
           sx={{ width: { xs: "100%", lg: "40%" } }}
         >
           <div>
-            <label className="block font-medium py-2">{` Job Title (Required)`}</label>
+            <label className="block font-medium py-2">{`Job Title (Required)`}</label>
             <Input
               {...register("title", { required: true })}
               placeholder="Enter your Job Title"
@@ -191,7 +236,7 @@ const ApplicationForm3 = () => {
           </div>
 
           {/* Job Type */}
-          <label className="block font-medium py-2">{` Job Type (Required)`}</label>
+          <label className="block font-medium py-2">{`Job Type (Required)`}</label>
           <Stack spacing={1} direction={"row"}>
             <Stack sx={{ width: "100%" }}>
               <Controller
@@ -245,17 +290,15 @@ const ApplicationForm3 = () => {
               )}
             />
             {errors.description && (
-              <p className="text-red-500 text-sm">
-                Job description is required
-              </p>
+              <p className="text-red-500 text-sm">Job description is required</p>
             )}
           </Stack>
+
           {/* Job Responsibilities */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
               Job Responsibilities (required)
             </label>
-
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
                 type="text"
@@ -263,39 +306,34 @@ const ApplicationForm3 = () => {
                 onChange={(e) => setResponsibilityInput(e.target.value)}
                 placeholder="Enter Responsibilities"
               />
-              {errors.responsibilities && (
-                <p className="text-red-500 text-sm">
-                  Responsibilities is required
-                </p>
-              )}
-
               <IconButton
                 color="primary"
                 onClick={() => {
-                  handleAddResponsibility();
+                  handleAddtoList(
+                    responsibilityInput,
+                    setResponsibilities,
+                    setResponsibilityInput
+                  );
                 }}
                 sx={{ display: "flex", alignSelf: "end" }}
               >
                 <AddIcon />
               </IconButton>
             </Stack>
-
-            {responsibilities.some((b) => b.trim()) && (
+            {responsibilities.length > 0 && (
               <Stack
                 spacing={1}
                 sx={{
-                  flexWrap: "wrap",
                   maxHeight: "150px",
-                  maxWidth: "100%",
+                  width: "95%",
                   overflowY: "auto",
-                  mx: "auto",
                   mt: 2,
                   border: "1px solid #ccc",
                   borderRadius: "8px",
                   padding: 1,
                   background: "#f9f9f9",
                 }}
-                direction={"row"}
+                direction={"column"}
               >
                 {responsibilities.map(
                   (item, index) =>
@@ -303,11 +341,29 @@ const ApplicationForm3 = () => {
                       <Paper
                         key={index}
                         style={{
-                          marginBottom: "10px",
-                          padding: "5px",
-                          width: "fit-content",
+                          position: "relative",
+                          marginBottom: "5px",
+                          padding: "11px",
+                          width: "100%",
                         }}
                       >
+                        <CloseOutlinedIcon
+                          sx={{
+                            cursor: "pointer",
+                            position: "absolute",
+                            top: "0",
+                            right: "0",
+                            fontSize: "14px",
+                            color: "gray",
+                          }}
+                          onClick={() => {
+                            handleRemoveItemFromArray(
+                              index,
+                              responsibilities,
+                              setResponsibilities
+                            );
+                          }}
+                        />
                         <Typography fontWeight="bold">{item.trim()}</Typography>
                       </Paper>
                     )
@@ -356,11 +412,10 @@ const ApplicationForm3 = () => {
                   placeholder="Benefit description"
                 />
               </Stack>
-
               <IconButton
                 color="primary"
                 onClick={() => {
-                  handleAddBenefit();
+                  handleAddtoList(benefitInput, setBenefits, setBenefitInput);
                 }}
                 sx={{ display: "flex", alignSelf: "end" }}
               >
@@ -371,9 +426,8 @@ const ApplicationForm3 = () => {
               <Stack
                 spacing={1}
                 sx={{
-                  flexWrap: "wrap",
                   maxHeight: "150px",
-                  maxWidth: "100%",
+                  width: "90%",
                   overflowY: "auto",
                   mx: "auto",
                   mt: 2,
@@ -382,7 +436,7 @@ const ApplicationForm3 = () => {
                   padding: 1,
                   background: "#f9f9f9",
                 }}
-                direction={"row"}
+                direction={"column"}
               >
                 {benefits.map(
                   (item, index) =>
@@ -390,20 +444,30 @@ const ApplicationForm3 = () => {
                       <Paper
                         key={index}
                         style={{
-                          marginBottom: "10px",
-                          padding: "5px",
-                          width: "fit-content",
+                          position: "relative",
+                          marginBottom: "5px",
+                          padding: "11px",
+                          width: "100%",
                         }}
                       >
+                        <CloseOutlinedIcon
+                          sx={{
+                            cursor: "pointer",
+                            position: "absolute",
+                            top: "0",
+                            right: "0",
+                            fontSize: "14px",
+                            color: "gray",
+                          }}
+                          onClick={() => {
+                            handleRemoveItemFromArray(index, benefits, setBenefits);
+                          }}
+                        />
                         {item.title && (
-                          <Typography fontWeight="bold">
-                            {item.title}
-                          </Typography>
+                          <Typography fontWeight="bold">{item.title}</Typography>
                         )}
                         {item.description && (
-                          <Typography variant="body2">
-                            {item.description}
-                          </Typography>
+                          <Typography variant="body2">{item.description}</Typography>
                         )}
                       </Paper>
                     )
@@ -411,15 +475,16 @@ const ApplicationForm3 = () => {
               </Stack>
             )}
           </Stack>
-
         </Stack>
+
+        {/* right side */}
         <Stack
           alignItems={"center"}
           sx={{ width: { xs: "100%", lg: "45%" }, margin: "auto" }}
           direction={{ xs: "column-reverse", lg: "column" }}
         >
           <Paper
-            className="p-5 text-center "
+            className="p-5 text-center"
             sx={{
               borderRadius: "10px",
               backgroundColor: "#EEF7FE",
@@ -440,63 +505,68 @@ const ApplicationForm3 = () => {
               for Tips and Tricks!
             </p>
           </Paper>
-
-          {/* Job Skills */}
+          {/* Job Nice to have */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
-              Job Skills (required)
+              Job Nice to have (required)
             </label>
-
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
                 type="text"
-                value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
-                placeholder="Skill"
+                value={niceToHavesInput}
+                onChange={(e) => setNiceToHavesInput(e.target.value)}
+                placeholder="Nice to have"
               />
-              {errors.skills && (
-                <p className="text-red-500 text-sm">Job Skills is required</p>
-              )}
-
               <IconButton
                 color="primary"
                 onClick={() => {
-                  handleAddSkill();
+                  handleAddtoList(niceToHavesInput, setNiceToHaves, setNiceToHavesInput);
                 }}
                 sx={{ display: "flex", alignSelf: "end" }}
               >
                 <AddIcon />
               </IconButton>
             </Stack>
-
-            {skills.some((b) => b.trim()) && (
+            {niceToHaves.length > 0 && (
               <Stack
                 spacing={1}
                 sx={{
-                  flexWrap: "wrap",
                   maxHeight: "150px",
-                  maxWidth: "100%",
+                  width: "95%",
                   overflowY: "auto",
-                  mx: "auto",
                   mt: 2,
                   border: "1px solid #ccc",
                   borderRadius: "8px",
                   padding: 1,
                   background: "#f9f9f9",
                 }}
-                direction={"row"}
+                direction={"column"}
               >
-                {skills.map(
+                {niceToHaves.map(
                   (item, index) =>
                     item.trim() && (
                       <Paper
                         key={index}
                         style={{
+                          width: "100%",
+                          position: "relative",
                           marginBottom: "5px",
-                          padding: "5px",
-                          width: "fit-content",
+                          padding: "11px",
                         }}
                       >
+                        <CloseOutlinedIcon
+                          sx={{
+                            cursor: "pointer",
+                            position: "absolute",
+                            top: "0",
+                            right: "0",
+                            fontSize: "14px",
+                            color: "gray",
+                          }}
+                          onClick={() => {
+                            handleRemoveItemFromArray(index, niceToHaves, setNiceToHaves);
+                          }}
+                        />
                         <Typography fontWeight="bold">{item.trim()}</Typography>
                       </Paper>
                     )
@@ -504,13 +574,11 @@ const ApplicationForm3 = () => {
               </Stack>
             )}
           </Stack>
-
           {/* Job Categories */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
               Job Categories (required)
             </label>
-
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
                 type="text"
@@ -518,22 +586,17 @@ const ApplicationForm3 = () => {
                 onChange={(e) => setCategoryInput(e.target.value)}
                 placeholder="Category"
               />
-              {errors.categories && (
-                <p className="text-red-500 text-sm">Category is required</p>
-              )}
-
               <IconButton
                 color="primary"
                 onClick={() => {
-                  handleAddCategory();
+                  handleAddtoList(categoryInput, setCategories, setCategoryInput);
                 }}
                 sx={{ display: "flex", alignSelf: "end" }}
               >
                 <AddIcon />
               </IconButton>
             </Stack>
-
-            {categories.some((b) => b.trim()) && (
+            {categories.length > 0 && (
               <Stack
                 spacing={1}
                 sx={{
@@ -556,11 +619,25 @@ const ApplicationForm3 = () => {
                       <Paper
                         key={index}
                         style={{
+                          position: "relative",
                           marginBottom: "5px",
-                          padding: "5px",
+                          padding: "11px",
                           width: "fit-content",
                         }}
                       >
+                        <CloseOutlinedIcon
+                          sx={{
+                            cursor: "pointer",
+                            position: "absolute",
+                            top: "0",
+                            right: "0",
+                            fontSize: "14px",
+                            color: "gray",
+                          }}
+                          onClick={() => {
+                            handleRemoveItemFromArray(index, categories, setCategories);
+                          }}
+                        />
                         <Typography fontWeight="bold">{item.trim()}</Typography>
                       </Paper>
                     )
@@ -569,32 +646,29 @@ const ApplicationForm3 = () => {
             )}
           </Stack>
 
-          {/* Job Nice to have */}
+          {/* Job Skills */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
-              Job Nice to have (required)
+              Job Skills (required)
             </label>
-
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
                 type="text"
-                value={niceToHavesInput}
-                onChange={(e) => setNiceToHavesInput(e.target.value)}
-                placeholder="Nice to have"
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                placeholder="Skill"
               />
-
               <IconButton
                 color="primary"
                 onClick={() => {
-                  handleAddNiceToHave();
+                  handleAddtoList(skillInput, setSkills, setSkillInput);
                 }}
                 sx={{ display: "flex", alignSelf: "end" }}
               >
                 <AddIcon />
               </IconButton>
             </Stack>
-
-            {niceToHaves.some((b) => b.trim()) && (
+            {skills.length > 0 && (
               <Stack
                 spacing={1}
                 sx={{
@@ -611,17 +685,31 @@ const ApplicationForm3 = () => {
                 }}
                 direction={"row"}
               >
-                {niceToHaves.map(
+                {skills.map(
                   (item, index) =>
                     item.trim() && (
                       <Paper
                         key={index}
                         style={{
+                          position: "relative",
                           marginBottom: "5px",
-                          padding: "5px",
+                          padding: "11px",
                           width: "fit-content",
                         }}
                       >
+                        <CloseOutlinedIcon
+                          sx={{
+                            cursor: "pointer",
+                            position: "absolute",
+                            top: "0",
+                            right: "0",
+                            fontSize: "14px",
+                            color: "gray",
+                          }}
+                          onClick={() => {
+                            handleRemoveItemFromArray(index, skills, setSkills);
+                          }}
+                        />
                         <Typography fontWeight="bold">{item.trim()}</Typography>
                       </Paper>
                     )
@@ -630,12 +718,11 @@ const ApplicationForm3 = () => {
             )}
           </Stack>
 
-          {/* Who you are */}
+          {/* Job Who you are */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
               Job Who you are (required)
             </label>
-
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
                 type="text"
@@ -643,34 +730,30 @@ const ApplicationForm3 = () => {
                 onChange={(e) => setWhoYouAreInput(e.target.value)}
                 placeholder="Who you are"
               />
-
               <IconButton
                 color="primary"
                 onClick={() => {
-                  handleAddWhoYouAre();
+                  handleAddtoList(whoYouAreInput, setWhoYouAre, setWhoYouAreInput);
                 }}
                 sx={{ display: "flex", alignSelf: "end" }}
               >
                 <AddIcon />
               </IconButton>
             </Stack>
-
-            {whoYouAre.some((b) => b.trim()) && (
+            {whoYouAre.length > 0 && (
               <Stack
                 spacing={1}
                 sx={{
-                  flexWrap: "wrap",
                   maxHeight: "150px",
-                  maxWidth: "100%",
+                  width: "95%",
                   overflowY: "auto",
-                  mx: "auto",
                   mt: 2,
                   border: "1px solid #ccc",
                   borderRadius: "8px",
-                  padding: 1,
+                  padding: "5px",
                   background: "#f9f9f9",
                 }}
-                direction={"row"}
+                direction={"column"}
               >
                 {whoYouAre.map(
                   (item, index) =>
@@ -678,11 +761,25 @@ const ApplicationForm3 = () => {
                       <Paper
                         key={index}
                         style={{
+                          position: "relative",
                           marginBottom: "5px",
-                          padding: "5px",
-                          width: "fit-content",
+                          padding: "11px",
+                          width: "100%",
                         }}
                       >
+                        <CloseOutlinedIcon
+                          sx={{
+                            cursor: "pointer",
+                            position: "absolute",
+                            top: "0",
+                            right: "0",
+                            fontSize: "14px",
+                            color: "gray",
+                          }}
+                          onClick={() => {
+                            handleRemoveItemFromArray(index, whoYouAre, setWhoYouAre);
+                          }}
+                        />
                         <Typography fontWeight="bold">{item.trim()}</Typography>
                       </Paper>
                     )
@@ -728,8 +825,7 @@ const ApplicationForm3 = () => {
             </Stack>
           </Stack>
 
-          {/* Apply Before  & Capacity*/}
-
+          {/* Apply Before & Capacity */}
           <Stack sx={{ width: "100%" }}>
             <Stack
               direction={"row"}
