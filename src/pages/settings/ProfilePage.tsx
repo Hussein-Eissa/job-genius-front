@@ -7,32 +7,174 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Pencil, Plus } from "lucide-react";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import LogoIcon from "@/components/common/LogoIcon";
-import { useJobStore } from "@/reducers/JobListingReducerStore";
 import { useProfileStore } from "@/reducers/ProfileReducerStore";
 import { useExperienceStore, Experience, ExperiencePayload } from "@/reducers/ExperienceReducerStore";
 import { useEducationStore, Education, EducationPayload } from "@/reducers/EducationReducerStore";
 import { usePortfolioStore } from "@/reducers/PortfolioReducerStore";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
+
+const UpdatePortfolioDialog = ({ portfolio, onClose }) => {
+  const [formData, setFormData] = useState({
+    title: portfolio.title || "",
+    description: portfolio.description || "",
+    date: portfolio.date ? format(new Date(portfolio.date), "yyyy-MM-dd") : "",
+    deleteImage: false,
+    image: null as File | null,
+  });
+
+  const { updatePortfolio, deletePortfolio, isLoading, error } = usePortfolioStore();
+
+  const handleChange = (e) => {
+    const { name, value, type, checked, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : type === "file" ? files[0] : value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updatePortfolio(portfolio.portfolioID, {
+        title: formData.title,
+        description: formData.description,
+        date: formData.date,
+        deleteImage: formData.deleteImage,
+        image: formData.image,
+      });
+      onClose();
+    } catch (err) {
+      console.error("Submission error:", err);
+    }
+  };
+
+  const handleDeletePortfolio = async () => {
+    if (window.confirm("Are you sure you want to delete this portfolio?")) {
+      try {
+        await deletePortfolio(portfolio.portfolioID);
+        onClose();
+        
+      } catch (err) {
+        console.error("Deletion error:", err);
+      }
+    }
+  };
+
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Update Portfolio</DialogTitle>
+          <DialogDescription>
+            Edit the details of your portfolio item. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="title" className="text-sm font-medium">
+              Title
+            </Label>
+            <Input
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="description" className="text-sm font-medium">
+              Description
+            </Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <Label htmlFor="date" className="text-sm font-medium">
+              Date
+            </Label>
+            <Input
+              id="date"
+              name="date"
+              type="date"
+              value={formData.date}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="deleteImage"
+              name="deleteImage"
+              checked={formData.deleteImage}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, deleteImage: checked }))
+              }
+            />
+            <Label htmlFor="deleteImage" className="text-sm font-medium">
+              Delete Image
+            </Label>
+          </div>
+          <div>
+            <Label htmlFor="image" className="text-sm font-medium">
+              Image
+            </Label>
+            <Input
+              id="image"
+              name="image"
+              type="file"
+              accept="image/*"
+              onChange={handleChange}
+            />
+          </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <DialogFooter className="sm:justify-center mt-4">
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDeletePortfolio}
+              disabled={isLoading}
+            >
+              <Trash2 size={16} className="mr-1" />
+              Delete
+            </Button>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const ProfilePage = () => {
   const { id } = useParams();
   const { experiences, fetchExperiences } = useExperienceStore();
-  const { portfolios, fetchAllPortfolios, fetchPortfolioImage, addPortfolio } = usePortfolioStore();
-  // const { savedJobs, fetchSavedJobs } = useJobStore();
+  const { portfolios, fetchPortfolios, fetchAllPortfolios, fetchPortfolioImage, addPortfolio } = usePortfolioStore();
   const { educations, fetchEducations } = useEducationStore();
-  const { 
-    profile, 
-    fetchProfileById, 
-    fetchMeProfile, 
+  const {
+    profile,
+    fetchProfileById,
+    fetchMeProfile,
     updateProfile,
     addLanguage,
     deleteLanguage,
@@ -40,10 +182,12 @@ const ProfilePage = () => {
     deleteSkill,
     addSocialLink,
     deleteSocialLink,
-    updateSocialLink 
+    updateSocialLink,
   } = useProfileStore();
   const [showProfileSetupModal, setShowProfileSetupModal] = useState(false);
   const [showAddPortfolioModal, setShowAddPortfolioModal] = useState(false);
+  const [showEditPortfolioModal, setShowEditPortfolioModal] = useState(false);
+  const [editingPortfolio, setEditingPortfolio] = useState(null);
   const [showEditBasicInfoModal, setShowEditBasicInfoModal] = useState(false);
   const [showEditAboutModal, setShowEditAboutModal] = useState(false);
   const [showEditSkillsModal, setShowEditSkillsModal] = useState(false);
@@ -54,6 +198,7 @@ const ProfilePage = () => {
   const [showAddEducationModal, setShowAddEducationModal] = useState(false);
   const [showAddExperienceModal, setShowAddExperienceModal] = useState(false);
   const [basicInfo, setBasicInfo] = useState({
+    fullname:"",
     jobTitle: "",
     phone: "",
     gender: "",
@@ -101,15 +246,18 @@ const ProfilePage = () => {
     "Wire Frames",
     "User Experience",
   ]);
+
   useEffect(() => {
     fetchMeProfile();
     if (id && !isNaN(Number(id))) {
       fetchProfileById(Number(id));
+      fetchPortfolios(Number(id)); // Fetch portfolios for the specific user
+    } else {
+      fetchAllPortfolios(); // Fetch portfolios for the authenticated user
     }
     fetchExperiences();
     fetchEducations();
-    fetchAllPortfolios();
-  }, [id]);
+  }, [id, fetchMeProfile, fetchProfileById, fetchPortfolios, fetchAllPortfolios, fetchExperiences, fetchEducations]);
 
   useEffect(() => {
     if (profile?.userSkills?.$values) {
@@ -128,6 +276,7 @@ const ProfilePage = () => {
   useEffect(() => {
     if (profile) {
       setBasicInfo({
+        fullname: profile.fullname || "",
         jobTitle: profile.jobTitle || "",
         phone: profile.phone || "",
         gender: profile.gender || "",
@@ -147,12 +296,15 @@ const ProfilePage = () => {
       date: newPortfolio.date || new Date().toISOString(),
       image: newPortfolio.image,
     });
+    setShowAddPortfolioModal(false);
+    setNewPortfolio({ title: "", description: "", date: "", image: null });
   };
 
   const handleBasicInfoUpdate = async () => {
     try {
       const payload: any = {
         ...profile,
+        fullname: basicInfo.fullname,
         jobTitle: basicInfo.jobTitle,
         phone: basicInfo.phone,
         gender: basicInfo.gender,
@@ -225,6 +377,11 @@ const ProfilePage = () => {
     setShowEditExperienceModal(true);
   };
 
+  const handleEditPortfolio = (portfolio) => {
+    setEditingPortfolio(portfolio);
+    setShowEditPortfolioModal(true);
+  };
+
   const handleAddEducation = async () => {
     try {
       await useEducationStore.getState().addEducation(newEducation);
@@ -240,7 +397,16 @@ const ProfilePage = () => {
     try {
       await useExperienceStore.getState().addExperience(newExperience);
       setShowAddExperienceModal(false);
-      setNewExperience({ title: "", company: "", type: "", dateFrom: "", dateTo: "", city: "", country: "", description: "" });
+      setNewExperience({
+        title: "",
+        company: "",
+        type: "",
+        dateFrom: "",
+        dateTo: "",
+        city: "",
+        country: "",
+        description: "",
+      });
       fetchExperiences();
     } catch (error) {
       console.error("Error adding experience:", error);
@@ -265,7 +431,10 @@ const ProfilePage = () => {
               <div className="flex items-start">
                 <div className="w-24 h-24 rounded-full overflow-hidden mr-6">
                   <img
-                    src={`https://jobgenius.bsite.net/api${profile?.image}` || "https://randomuser.me/api/portraits/men/44.jpg"}
+                    src={
+                      `https://jobgenius.bsite.net/api${profile?.image}` ||
+                      "https://randomuser.me/api/portraits/men/44.jpg"
+                    }
                     alt={profile?.fullname || "Profile"}
                     className="w-full h-full object-cover"
                   />
@@ -275,9 +444,9 @@ const ProfilePage = () => {
                     <h2 className="text-2xl font-bold mr-2">
                       {profile?.fullname || "Loading..."}
                     </h2>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="p-1 h-auto"
                       onClick={() => setShowEditBasicInfoModal(true)}
                     >
@@ -325,9 +494,9 @@ const ProfilePage = () => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-xl font-bold">About Me</h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="p-1 h-auto"
                       onClick={() => setShowEditAboutModal(true)}
                     >
@@ -343,7 +512,12 @@ const ProfilePage = () => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-xl font-bold">Experiences</h3>
-                    <Button variant="ghost" size="sm" className="flex items-center" onClick={() => setShowAddExperienceModal(true)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center"
+                      onClick={() => setShowAddExperienceModal(true)}
+                    >
                       <Plus size={16} className="mr-1" />
                       Add
                     </Button>
@@ -356,9 +530,6 @@ const ProfilePage = () => {
                     >
                       <div className="flex justify-between">
                         <div className="flex">
-                          {/* <div className="w-12 h-12 rounded-md bg-gray-100 mr-4 flex items-center justify-center overflow-hidden">
-                            <img src={experience.companyLogo} alt={experience.company} className="w-8 h-8 object-contain" />
-                          </div> */}
                           <div>
                             <h4 className="font-medium text-lg">{experience.title}</h4>
                             <p className="text-gray-600">
@@ -372,7 +543,12 @@ const ProfilePage = () => {
                             <p className="mt-2 text-gray-700">{experience.description}</p>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm" className="p-1 h-auto" onClick={() => handleEditExperience(experience)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="p-1 h-auto"
+                          onClick={() => handleEditExperience(experience)}
+                        >
                           <Pencil size={16} />
                         </Button>
                       </div>
@@ -386,7 +562,12 @@ const ProfilePage = () => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-xl font-bold">Educations</h3>
-                    <Button variant="ghost" size="sm" className="flex items-center" onClick={() => setShowAddEducationModal(true)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center"
+                      onClick={() => setShowAddEducationModal(true)}
+                    >
                       <Plus size={16} className="mr-1" />
                       Add
                     </Button>
@@ -399,9 +580,6 @@ const ProfilePage = () => {
                     >
                       <div className="flex justify-between">
                         <div className="flex">
-                          {/* <div className="w-12 h-12 rounded-md bg-gray-100 mr-4 flex items-center justify-center overflow-hidden">
-                            <img src={edu.university} alt={edu.institution} className="w-8 h-8 object-contain" />
-                          </div> */}
                           <div>
                             <h4 className="font-medium text-lg">{edu.university}</h4>
                             <p className="text-gray-600">{edu.degree}</p>
@@ -412,7 +590,12 @@ const ProfilePage = () => {
                             <p className="mt-2 text-gray-700">{edu.description}</p>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm" className="p-1 h-auto" onClick={() => handleEditEducation(edu)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="p-1 h-auto"
+                          onClick={() => handleEditEducation(edu)}
+                        >
                           <Pencil size={16} />
                         </Button>
                       </div>
@@ -427,17 +610,17 @@ const ProfilePage = () => {
                   <div className="flex justify-between mb-4">
                     <h3 className="text-xl font-bold">Skills</h3>
                     <div className="flex">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="p-1 h-auto mr-2"
                         onClick={() => setShowEditSkillsModal(true)}
                       >
                         <Pencil size={16} />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="flex items-center"
                         onClick={() => setShowEditSkillsModal(true)}
                       >
@@ -449,7 +632,7 @@ const ProfilePage = () => {
                   <div className="flex flex-wrap gap-2">
                     {profile?.userSkills.$values.length ? (
                       profile.userSkills.$values.map((skill, index) => (
-                        <span 
+                        <span
                           key={index}
                           className="px-3 py-1 bg-gray-100 rounded-full text-sm"
                         >
@@ -484,7 +667,7 @@ const ProfilePage = () => {
                       <div key={portfolio.portfolioID} className="relative group">
                         {portfolio.image ? (
                           <img
-                            src={'https://jobgenius.bsite.net/api'+ portfolio.image.replace("s", "")}
+                            src={'https://jobgenius.bsite.net/api' + portfolio.image.replace("s", "")}
                             alt={portfolio.title}
                             className="w-full h-40 object-cover rounded-lg"
                           />
@@ -493,13 +676,28 @@ const ProfilePage = () => {
                             Loading image...
                           </div>
                         )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute top-2 right-2 p-1 h-auto bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Pencil size={16} />
-                        </Button>
+                        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1 h-auto bg-white rounded-full"
+                            onClick={() => handleEditPortfolio(portfolio)}
+                          >
+                            <Pencil size={16} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="p-1 h-auto bg-white rounded-full"
+                            onClick={async () => {
+                              if (window.confirm("Are you sure you want to delete this portfolio?")) {
+                                await usePortfolioStore.getState().deletePortfolio(portfolio.portfolioID);
+                              }
+                            }}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </div>
                         <p className="mt-1 text-sm font-medium">{portfolio.title}</p>
                         <p className="text-gray-600 text-sm">
                           {format(new Date(portfolio.date), "MMMM d, yyyy")}
@@ -517,9 +715,9 @@ const ProfilePage = () => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-lg font-bold">Additional Details</h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="p-1 h-auto"
                       onClick={() => setShowEditBasicInfoModal(true)}
                     >
@@ -594,9 +792,9 @@ const ProfilePage = () => {
                           />
                         </svg>
                         <span className="text-gray-500 text-sm">Languages</span>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="p-1 h-auto"
                           onClick={() => setShowEditLanguagesModal(true)}
                         >
@@ -617,9 +815,9 @@ const ProfilePage = () => {
                 <div className="p-6">
                   <div className="flex justify-between mb-4">
                     <h3 className="text-lg font-bold">Social Links</h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="p-1 h-auto"
                       onClick={() => setShowEditSocialLinksModal(true)}
                     >
@@ -703,7 +901,7 @@ const ProfilePage = () => {
             <div>
               <label className="block text-sm font-medium">Date</label>
               <input
-                type="datetime-local"
+                type="date"
                 value={newPortfolio.date}
                 onChange={(e) => setNewPortfolio({ ...newPortfolio, date: e.target.value })}
                 className="w-full p-2 border rounded"
@@ -721,7 +919,6 @@ const ProfilePage = () => {
             </div>
             <DialogFooter className="sm:justify-center mt-4">
               <Button
-              onClick={handleAddPortfolio}
                 type="submit"
                 className="bg-jobblue hover:bg-jobblue-dark w-full sm:w-auto"
                 disabled={usePortfolioStore((state) => state.isLoading)}
@@ -733,6 +930,17 @@ const ProfilePage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Portfolio Modal */}
+      {editingPortfolio && showEditPortfolioModal &&(
+        <UpdatePortfolioDialog
+          portfolio={editingPortfolio}
+          onClose={() => {
+            setShowEditPortfolioModal(false)
+            console.log(showEditPortfolioModal);}
+          }
+        />
+      )}
+
       {/* Edit Basic Info Modal */}
       <Dialog open={showEditBasicInfoModal} onOpenChange={setShowEditBasicInfoModal}>
         <DialogContent>
@@ -740,6 +948,13 @@ const ProfilePage = () => {
             <DialogTitle>Edit Basic Information</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Full Name</label>
+              <Input
+                value={basicInfo.fullname}
+                onChange={(e) => setBasicInfo({ ...basicInfo, fullname: e.target.value })}
+              />
+            </div>
             <div>
               <label className="text-sm font-medium">Job Title</label>
               <Input
@@ -909,7 +1124,9 @@ const ProfilePage = () => {
               <div className="space-y-2">
                 <Input
                   value={newSocialLink.platform}
-                  onChange={(e) => setNewSocialLink({ ...newSocialLink, platform: e.target.value })}
+                  onChange={(e) =>
+                    setNewSocialLink({ ...newSocialLink, platform: e.target.value })
+                  }
                   placeholder="Platform (e.g., LinkedIn, Twitter)"
                 />
                 <Input
@@ -952,7 +1169,9 @@ const ProfilePage = () => {
               <label className="text-sm font-medium">University</label>
               <Input
                 value={editingEducation?.university || ""}
-                onChange={(e) => setEditingEducation({ ...editingEducation, university: e.target.value })}
+                onChange={(e) =>
+                  setEditingEducation({ ...editingEducation, university: e.target.value })
+                }
               />
             </div>
             <div>
@@ -967,7 +1186,9 @@ const ProfilePage = () => {
               <Input
                 type="date"
                 value={editingEducation?.dateFrom || ""}
-                onChange={(e) => setEditingEducation({ ...editingEducation, dateFrom: e.target.value })}
+                onChange={(e) =>
+                  setEditingEducation({ ...editingEducation, dateFrom: e.target.value })
+                }
               />
             </div>
             <div>
@@ -975,24 +1196,34 @@ const ProfilePage = () => {
               <Input
                 type="date"
                 value={editingEducation?.dateTo || ""}
-                onChange={(e) => setEditingEducation({ ...editingEducation, dateTo: e.target.value })}
+                onChange={(e) =>
+                  setEditingEducation({ ...editingEducation, dateTo: e.target.value })}
               />
             </div>
             <div>
               <label className="text-sm font-medium">Description</label>
               <Textarea
                 value={editingEducation?.description || ""}
-                onChange={(e) => setEditingEducation({ ...editingEducation, description: e.target.value })}
+                onChange={(e) =>
+                  setEditingEducation({ ...editingEducation, description: e.target.value })
+                }
               />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => {
-              if (editingEducation?.educationID) {
-                useEducationStore.getState().updateEducation(editingEducation.educationID, editingEducation);
-              }
-              setShowEditEducationModal(false);
-            }}>Save Changes</Button>
+            <Button
+              onClick={() => {
+                if (editingEducation?.educationID) {
+                  useEducationStore.getState().updateEducation(
+                    editingEducation.educationID,
+                    editingEducation
+                  );
+                }
+                setShowEditEducationModal(false);
+              }}
+            >
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1008,21 +1239,27 @@ const ProfilePage = () => {
               <label className="text-sm font-medium">Title</label>
               <Input
                 value={editingExperience?.title || ""}
-                onChange={(e) => setEditingExperience({ ...editingExperience, title: e.target.value })}
+                onChange={(e) =>
+                  setEditingExperience({ ...editingExperience, title: e.target.value })
+                }
               />
             </div>
             <div>
               <label className="text-sm font-medium">Company</label>
               <Input
                 value={editingExperience?.company || ""}
-                onChange={(e) => setEditingExperience({ ...editingExperience, company: e.target.value })}
+                onChange={(e) =>
+                  setEditingExperience({ ...editingExperience, company: e.target.value })
+                }
               />
             </div>
             <div>
               <label className="text-sm font-medium">Type</label>
               <Input
                 value={editingExperience?.type || ""}
-                onChange={(e) => setEditingExperience({ ...editingExperience, type: e.target.value })}
+                onChange={(e) =>
+                  setEditingExperience({ ...editingExperience, type: e.target.value })
+                }
               />
             </div>
             <div>
@@ -1030,7 +1267,9 @@ const ProfilePage = () => {
               <Input
                 type="date"
                 value={editingExperience?.dateFrom || ""}
-                onChange={(e) => setEditingExperience({ ...editingExperience, dateFrom: e.target.value })}
+                onChange={(e) =>
+                  setEditingExperience({ ...editingExperience, dateFrom: e.target.value })
+                }
               />
             </div>
             <div>
@@ -1038,39 +1277,54 @@ const ProfilePage = () => {
               <Input
                 type="date"
                 value={editingExperience?.dateTo || ""}
-                onChange={(e) => setEditingExperience({ ...editingExperience, dateTo: e.target.value })}
+                onChange={(e) =>
+                  setEditingExperience({ ...editingExperience, dateTo: e.target.value })
+                }
               />
             </div>
             <div>
               <label className="text-sm font-medium">City</label>
               <Input
                 value={editingExperience?.city || ""}
-                onChange={(e) => setEditingExperience({ ...editingExperience, city: e.target.value })}
+                onChange={(e) =>
+                  setEditingExperience({ ...editingExperience, city: e.target.value })
+                }
               />
             </div>
             <div>
               <label className="text-sm font-medium">Country</label>
               <Input
                 value={editingExperience?.country || ""}
-                onChange={(e) => setEditingExperience({ ...editingExperience, country: e.target.value })}
+                onChange={(e) =>
+                  setEditingExperience({ ...editingExperience, country: e.target.value })
+                }
               />
             </div>
             <div>
               <label className="text-sm font-medium">Description</label>
               <Textarea
                 value={editingExperience?.description || ""}
-                onChange={(e) => setEditingExperience({ ...editingExperience, description: e.target.value })}
+                onChange={(e) =>
+                  setEditingExperience({ ...editingExperience, description: e.target.value })
+                }
               />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={async () => {
-              if (editingExperience?.experienceID) {
-                await useExperienceStore.getState().updateExperience(editingExperience.experienceID, editingExperience);
-                await fetchExperiences();
-              }
-              setShowEditExperienceModal(false);
-            }}>Save Changes</Button>
+            <Button
+              onClick={async () => {
+                if (editingExperience?.experienceID) {
+                  await useExperienceStore.getState().updateExperience(
+                    editingExperience.experienceID,
+                    editingExperience
+                  );
+                  await fetchExperiences();
+                }
+                setShowEditExperienceModal(false);
+              }}
+            >
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1084,23 +1338,42 @@ const ProfilePage = () => {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">University</label>
-              <Input value={newEducation.university} onChange={e => setNewEducation({ ...newEducation, university: e.target.value })} />
+              <Input
+                value={newEducation.university}
+                onChange={(e) => setNewEducation({ ...newEducation, university: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Degree</label>
-              <Input value={newEducation.degree} onChange={e => setNewEducation({ ...newEducation, degree: e.target.value })} />
+              <Input
+                value={newEducation.degree}
+                onChange={(e) => setNewEducation({ ...newEducation, degree: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Date From</label>
-              <Input type="date" value={newEducation.dateFrom} onChange={e => setNewEducation({ ...newEducation, dateFrom: e.target.value })} />
+              <Input
+                type="date"
+                value={newEducation.dateFrom}
+                onChange={(e) => setNewEducation({ ...newEducation, dateFrom: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Date To</label>
-              <Input type="date" value={newEducation.dateTo || ""} onChange={e => setNewEducation({ ...newEducation, dateTo: e.target.value })} />
+              <Input
+                type="date"
+                value={newEducation.dateTo || ""}
+                onChange={(e) => setNewEducation({ ...newEducation, dateTo: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Description</label>
-              <Textarea value={newEducation.description || ""} onChange={e => setNewEducation({ ...newEducation, description: e.target.value })} />
+              <Textarea
+                value={newEducation.description || ""}
+                onChange={(e) =>
+                  setNewEducation({ ...newEducation, description: e.target.value })
+                }
+              />
             </div>
           </div>
           <DialogFooter>
@@ -1118,35 +1391,63 @@ const ProfilePage = () => {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">Title</label>
-              <Input value={newExperience.title} onChange={e => setNewExperience({ ...newExperience, title: e.target.value })} />
+              <Input
+                value={newExperience.title}
+                onChange={(e) => setNewExperience({ ...newExperience, title: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Company</label>
-              <Input value={newExperience.company} onChange={e => setNewExperience({ ...newExperience, company: e.target.value })} />
+              <Input
+                value={newExperience.company}
+                onChange={(e) => setNewExperience({ ...newExperience, company: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Type</label>
-              <Input value={newExperience.type} onChange={e => setNewExperience({ ...newExperience, type: e.target.value })} />
+              <Input
+                value={newExperience.type}
+                onChange={(e) => setNewExperience({ ...newExperience, type: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Date From</label>
-              <Input type="date" value={newExperience.dateFrom} onChange={e => setNewExperience({ ...newExperience, dateFrom: e.target.value })} />
+              <Input
+                type="date"
+                value={newExperience.dateFrom}
+                onChange={(e) => setNewExperience({ ...newExperience, dateFrom: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Date To</label>
-              <Input type="date" value={newExperience.dateTo} onChange={e => setNewExperience({ ...newExperience, dateTo: e.target.value })} />
+              <Input
+                type="date"
+                value={newExperience.dateTo}
+                onChange={(e) => setNewExperience({ ...newExperience, dateTo: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">City</label>
-              <Input value={newExperience.city} onChange={e => setNewExperience({ ...newExperience, city: e.target.value })} />
+              <Input
+                value={newExperience.city}
+                onChange={(e) => setNewExperience({ ...newExperience, city: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Country</label>
-              <Input value={newExperience.country} onChange={e => setNewExperience({ ...newExperience, country: e.target.value })} />
+              <Input
+                value={newExperience.country}
+                onChange={(e) => setNewExperience({ ...newExperience, country: e.target.value })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Description</label>
-              <Textarea value={newExperience.description} onChange={e => setNewExperience({ ...newExperience, description: e.target.value })} />
+              <Textarea
+                value={newExperience.description}
+                onChange={(e) =>
+                  setNewExperience({ ...newExperience, description: e.target.value })
+                }
+              />
             </div>
           </div>
           <DialogFooter>

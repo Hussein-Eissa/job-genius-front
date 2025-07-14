@@ -38,6 +38,7 @@ interface Profile {
 interface UpdateProfilePayload {
   // id: number;
   // token?: string;
+  fullname?: string;
   jobTitle?: string;
   aboutMe?: string;
   phone?: string;
@@ -119,6 +120,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   updateProfile: async (data: UpdateProfilePayload) => {
     const {
+      fullname,
       jobTitle,
       aboutMe,
       phone,

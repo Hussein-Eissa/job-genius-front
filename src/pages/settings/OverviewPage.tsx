@@ -1,11 +1,19 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import { Link } from "react-router-dom";
+import { useProfileStore } from "@/reducers/ProfileReducerStore";
+import { useJobStore } from "@/reducers/JobListingReducerStore";
 
 const OverviewPage = () => {
   const [dateRange, setDateRange] = useState("Jul 19 - Jul 25");
+  const {fetchSavedJobs , savedJobs} = useJobStore();
+  const {
+    profile,
+    fetchProfileById,
+    fetchMeProfile,
+  } = useProfileStore();
   const [recentApplications, setRecentApplications] = useState([
     {
       id: 1,
@@ -39,6 +47,11 @@ const OverviewPage = () => {
     }
   ]);
 
+  useEffect(() => {
+    fetchMeProfile();
+    fetchSavedJobs();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow flex">
@@ -53,7 +66,7 @@ const OverviewPage = () => {
           
           <div className="mb-8 flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold">Good morning, Ahmed</h2>
+              <h2 className="text-2xl font-bold">Good morning, {profile?.fullname.split(" ")[0]}</h2>
               <p className="text-gray-600">Here is what's happening with all your activity from July 19 - July 25.</p>
             </div>
             <div className="flex items-center border rounded-md p-2 bg-white">
@@ -113,7 +126,7 @@ const OverviewPage = () => {
             <div className="bg-white p-6 rounded-lg border">
               <h3 className="text-gray-700 mb-2">Total Jobs Saved</h3>
               <div className="flex items-center">
-                <span className="text-4xl font-bold mr-3">60</span>
+                <span className="text-4xl font-bold mr-3">{savedJobs.length}</span>
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-300">
                   <path d="M17.5 4.5C17.5 3.11929 16.3807 2 15 2H9C7.61929 2 6.5 3.11929 6.5 4.5V20.5C6.5 21.0523 6.94772 21.5 7.5 21.5C7.77286 21.5 8.03757 21.3878 8.2 21.2L12 16.9L15.8 21.2C15.9624 21.3878 16.2271 21.5 16.5 21.5C17.0523 21.5 17.5 21.0523 17.5 20.5V4.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>

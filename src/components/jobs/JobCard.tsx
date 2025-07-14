@@ -1,11 +1,10 @@
-
 import { Bookmark } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import JobApplicationForm from "./JobApplicationForm";
 import { useJobStore } from "@/reducers/JobListingReducerStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface JobCardProps {
   id: number;
@@ -33,28 +32,34 @@ const JobCard = ({
   applicationSent,
   capacity,
 }: JobCardProps) => {
-  const {saveJobByID , deleteSavedJob } = useJobStore();
+  const { saveJobByID, deleteSavedJob, savedJobs } = useJobStore();
   const [isJobSaved, setIsJobSaved] = useState(false);
+
+  // Sync isJobSaved with savedJobs from the store on mount and when savedJobs changes
+  useEffect(() => {
+    setIsJobSaved(savedJobs.some((job) => job.jobID === id));
+  }, [savedJobs, id]);
+
   const handleSaveJob = (id: number) => {
-    if(!isJobSaved){  
-      saveJobByID(id);
-      setIsJobSaved(!isJobSaved);
-    }
-    else{
+    if (savedJobs.some((job) => job.jobID === id)) {
       deleteSavedJob(id);
-      setIsJobSaved(!isJobSaved);
+      setIsJobSaved(false);
+    } else {
+      saveJobByID(id);
+      setIsJobSaved(true);
     }
-    
-  }
+  };
+
   return (
     <div className="border-b py-4 flex flex-col sm:flex-row justify-between items-start gap-4">
       <div className="flex gap-4">
         <Link to={`/jobs/${id}`}>
           <div className="w-12 h-12 flex items-center justify-center rounded-md overflow-hidden">
             <div className="w-full h-full bg-emerald-500 flex items-center justify-center text-white">
-                 {title.split(' ').length>1?title.split(' ')[0].charAt(0).toUpperCase()+title.split(' ')[1].charAt(0).toUpperCase():title.charAt(0).toUpperCase()}
+              {title.split(' ').length > 1
+                ? title.split(' ')[0].charAt(0).toUpperCase() + title.split(' ')[1].charAt(0).toUpperCase()
+                : title.charAt(0).toUpperCase()}
             </div>
-          
           </div>
         </Link>
         <div className="space-y-1">
@@ -87,8 +92,8 @@ const JobCard = ({
         </div>
       </div>
       <div className="flex gap-2 w-full sm:w-auto">
-        <Button variant="outline" size="sm" className={ `rounded-md px-3` } onClick={() => handleSaveJob(id)}>
-          <Bookmark className="h-4 w-4" />
+        <Button variant="outline" size="sm" className="rounded-md px-3" onClick={() => handleSaveJob(id)}>
+          <Bookmark className="h-4 w-4" style={{ color: isJobSaved ? "gold" : "black" }} />
         </Button>
         <Link to={`/jobs/${id}`} className="w-full sm:w-auto">
           <Button size="sm" className="rounded-md w-full">Apply</Button>

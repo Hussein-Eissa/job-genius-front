@@ -13,10 +13,10 @@ export interface Portfolio {
 interface PortfolioState {
   portfolios: Portfolio[];
   error?: string;
-  isLoading: boolean; 
+  isLoading: boolean;
   fetchPortfolios: (userId: number) => Promise<void>;
   addPortfolio: (data: { title: string; description: string; date: string; image: File | null }) => Promise<void>;
-  updatePortfolio: (id: number, data: { title: string; description: string; date: string; deleteImage: boolean }) => Promise<void>;
+  updatePortfolio: (id: number, data: { title: string; description: string; date: string; deleteImage: boolean; image?: File | null }) => Promise<void>;
   deletePortfolio: (id: number) => Promise<void>;
   fetchPortfolioImage: (portfolioID: number, imageName: string) => Promise<string | undefined>;
   fetchAllPortfolios: () => Promise<void>;
@@ -72,7 +72,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       const formData = new FormData();
       formData.append('Title', title);
       formData.append('Description', description);
-      formData.append('Date', date); 
+      formData.append('Date', date);
       if (image) {
         formData.append('Image', image);
       }
@@ -108,27 +108,64 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     }
   },
 
-  updatePortfolio: async (id, { title, description, date, deleteImage }) => {
+  updatePortfolio: async (id, { title, description, date, deleteImage, image }) => {
     try {
       set({ isLoading: true });
+
+      if (!title || !description || !date) {
+        set({ error: 'Title, description, and date are required.', isLoading: false });
+        throw new Error('Missing required fields.');
+      }
+      if (image && !['image/jpeg', 'image/png', 'image/gif'].includes(image.type)) {
+        set({ error: 'Invalid image format. Only JPEG, PNG, and GIF are allowed.', isLoading: false });
+        throw new Error('Invalid image format.');
+      }
+      if (image && image.size > 5 * 1024 * 1024) {
+        set({ error: 'Image size exceeds 5MB.', isLoading: false });
+        throw new Error('Image size too large.');
+      }
+
       const token = localStorage.getItem('token');
       if (!token) {
         set({ error: 'No authentication token found. Please log in.', isLoading: false });
         throw new Error('No authentication token found.');
       }
-      const query = `?Title=${encodeURIComponent(title)}&Description=${encodeURIComponent(description)}&Date=${encodeURIComponent(date)}&DeleteImage=${deleteImage}`;
-      const response = await axios.put(`https://jobgenius.bsite.net/api/Portfolio/${id}${query}`, null, {
+
+      const formData = new FormData();
+      formData.append('Title', title);
+      formData.append('Description', description);
+      formData.append('Date', date);
+      formData.append('DeleteImage', deleteImage.toString());
+      if (image) {
+        formData.append('Image', image);
+      }
+
+      const response = await axios.put(`https://jobgenius.bsite.net/api/Portfolio/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
         },
       });
+
+      const updatedPortfolio = response.data;
       set((state) => ({
         portfolios: state.portfolios.map((portfolio) =>
-          portfolio.portfolioID === id ? { ...portfolio, ...response.data } : portfolio
+          portfolio.portfolioID === id ? { ...portfolio, ...updatedPortfolio } : portfolio
         ),
         error: undefined,
         isLoading: false,
       }));
+
+      if (updatedPortfolio.image && !deleteImage) {
+        const imageUrl = await get().fetchPortfolioImage(updatedPortfolio.portfolioID, updatedPortfolio.image);
+        if (imageUrl) {
+          set((state) => ({
+            portfolios: state.portfolios.map((p) =>
+              p.portfolioID === updatedPortfolio.portfolioID ? { ...p, ImageUploadURL: imageUrl } : p
+            ),
+          }));
+        }
+      }
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update portfolio. Please try again.';
       console.error('Error updating portfolio:', err);
@@ -159,32 +196,25 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
     }
   },
 
- fetchPortfolioImage : async (
-    portfolioID: number,
-    imageName: string
-  ): Promise<string> => {
+  fetchPortfolioImage: async (portfolioID: number, imageName: string): Promise<string | undefined> => {
     const encodedImageName = encodeURIComponent(imageName);
-    console.log(`https://jobgenius.bsite.net/api/Portfolio/${portfolioID}/images/${encodedImageName}`);
     const token = localStorage.getItem('token');
     try {
       const response = await axios.get(
         `https://jobgenius.bsite.net/api/Portfolio/${portfolioID}/images/${encodedImageName}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          // responseType: 'blob',
+          responseType: 'blob', // Ensure blob response for images
         }
       );
-      
       const imageUrl = URL.createObjectURL(response.data);
-      console.log(`Image URL: ${imageUrl}`);
       return imageUrl;
     } catch (error) {
       console.error('Error fetching portfolio image:', error);
-      return ''; 
+      return undefined;
     }
   },
-  
-  
+
   fetchAllPortfolios: async () => {
     try {
       set({ isLoading: true });
@@ -196,10 +226,10 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       const res = await axios.get('https://jobgenius.bsite.net/api/Portfolio', {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       const portfolios = res.data.$values || [];
       set({ portfolios, error: undefined, isLoading: false });
-  
+
       for (const portfolio of portfolios) {
         if (portfolio.image && !portfolio.ImageUploadURL) {
           await get().fetchPortfolioImage(portfolio.portfolioID, portfolio.image);
@@ -211,5 +241,4 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => ({
       set({ error: errorMessage, isLoading: false });
     }
   },
-  
 }));

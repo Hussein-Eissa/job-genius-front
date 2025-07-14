@@ -59,6 +59,7 @@ export interface JobListingState {
   savedJobs: JobListing[];
   success: boolean | null;
   error?: string;
+  isLoading?: boolean;
   fetchJobs: () => Promise<void>;
   getJobById: (jobId: number) => Promise<JobListing>;
   createJob: (jobData: JobListing) => Promise<void>;
@@ -229,25 +230,21 @@ export const useJobStore = create<JobListingState>((set, get) => ({
     }
   },
 
-  fetchSavedJobs: async () => {
+fetchSavedJobs: async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
-
-      const response = await axios.get("https://jobgenius.bsite.net/api/JobListing/saved", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      set({ isLoading: true });
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+      const res = await axios.get('https://jobgenius.bsite.net/api/JobListing/saved', {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      set({ savedJobs: response.data.$values || response.data, success: true, error: undefined });
-      console.log("Fetched saved jobs:", response.data);
+      set({ savedJobs: res.data.$values || [], error: undefined, isLoading: false });
     } catch (error: any) {
-      console.error("Error fetching saved jobs:", error.response?.data || error.message);
-      set({ success: false, error: error.response?.data?.message || "Failed to fetch saved jobs." });
+      console.error('Error fetching saved jobs:', error.response?.data || error.message);
+      set({ error: error.response?.data?.message || 'Failed to fetch saved jobs.', isLoading: false });
+      throw error;
     }
   },
-
   saveJobByID: async (jobId) => {
     if (!Number.isInteger(jobId) || jobId <= 0) {
       throw new Error("Invalid job ID");
@@ -284,15 +281,16 @@ export const useJobStore = create<JobListingState>((set, get) => ({
     }
   },
 
-  deleteSavedJob: async (jobId) => {
+deleteSavedJob: async (jobId) => {
+    console.log("Deleting job with ID:", jobId); // Debug log
     if (!Number.isInteger(jobId) || jobId <= 0) {
       throw new Error("Invalid job ID");
     }
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       if (!token) throw new Error("No token found");
 
-      await axios.delete(`https://jobgenius.bsite.net/api/JobListing/saved?jobId=${jobId}`, {
+      await axios.delete(`https://jobgenius.bsite.net/api/JobListing/saved/${jobId}`, { // Changed to path parameter
         headers: {
           Authorization: `Bearer ${token}`,
         },

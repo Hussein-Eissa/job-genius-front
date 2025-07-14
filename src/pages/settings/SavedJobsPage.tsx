@@ -1,20 +1,24 @@
+
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import { Link } from "react-router-dom";
 import { useJobStore } from "@/reducers/JobListingReducerStore";
+import { useProfileStore } from "@/reducers/ProfileReducerStore";
+import { toast } from 'react-toastify'; // Assuming react-toastify is installed
 
 const SavedJobsPage = () => {
-  const { savedJobs, fetchSavedJobs, deleteSavedJob } = useJobStore();
+  const { savedJobs, fetchSavedJobs, deleteSavedJob, error, success } = useJobStore();
+  const { profile, fetchMeProfile } = useProfileStore();
 
   function getLast7DaysRange() {
     const now = new Date();
-    const endDate = new Date(now); 
+    const endDate = new Date(now);
     const startDate = new Date(now);
     startDate.setDate(startDate.getDate() - 6);
-  
+
     const formatDate = (d) => d.toISOString().slice(0, 10);
-  
+
     return {
       startDate: formatDate(startDate),
       endDate: formatDate(endDate),
@@ -23,8 +27,8 @@ const SavedJobsPage = () => {
 
   const { startDate: defaultStart, endDate: defaultEnd } = getLast7DaysRange();
 
-    const [startDate, setStartDate] = useState(defaultStart);
-    const [endDate, setEndDate] = useState(defaultEnd);
+  const [startDate, setStartDate] = useState(defaultStart);
+  const [endDate, setEndDate] = useState(defaultEnd);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -39,9 +43,9 @@ const SavedJobsPage = () => {
 
   useEffect(() => {
     fetchSavedJobs();
-  }, [fetchSavedJobs]);
+    fetchMeProfile();
+  }, []);
 
-  // اغلاق الـ datepicker لو ضغطت بره
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -61,6 +65,14 @@ const SavedJobsPage = () => {
     };
   }, [showDatePicker]);
 
+  useEffect(() => {
+    if (success) {
+      toast.success("Job removed successfully!");
+    } else if (error) {
+      toast.error(error || "Failed to remove job.");
+    }
+  }, [success, error]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow flex">
@@ -70,7 +82,7 @@ const SavedJobsPage = () => {
           <header className="flex flex-wrap gap-10 justify-between items-center bg-white max-md:px-5 relative">
             <section className="self-stretch my-auto min-w-60 max-md:max-w-full">
               <h2 className="text-2xl text-slate-800">
-                <strong>Great job, Ahmed!</strong>
+                <strong>Great job, {profile?.fullname.split(" ")[0]}!</strong>
               </h2>
               <p className="mt-2 text-base font-medium leading-relaxed text-slate-500 max-md:max-w-full">
                 Here are the jobs you bookmarked from {formatRange(startDate, endDate)}.
@@ -126,7 +138,6 @@ const SavedJobsPage = () => {
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    {/* Example SVG icon */}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-6 w-6 text-green-600"
@@ -146,7 +157,14 @@ const SavedJobsPage = () => {
                   </div>
                   <div>
                     <Button
-                      onClick={() => deleteSavedJob(job.jobID)}
+                      onClick={async () => {
+                        try {
+                          await deleteSavedJob(job.jobID);
+                          // fetchSavedJobs(); // Removed to avoid immediate refetch
+                        } catch (err) {
+                          console.error("Failed to delete job:", err);
+                        }
+                      }}
                       variant="destructive"
                       size="sm"
                     >
@@ -159,7 +177,6 @@ const SavedJobsPage = () => {
                   <span className="px-2 py-1 rounded bg-green-100 text-green-800 text-xs font-medium">
                     {job.type}
                   </span>
-                  {/* Categories */}
                   {Array.isArray(job.categories)
                     ? job.categories.map((category, idx) => (
                         <span
@@ -171,7 +188,6 @@ const SavedJobsPage = () => {
                       ))
                     : null}
 
-                  {/* Skills */}
                   {Array.isArray(job.skills)
                     ? job.skills.map((skill, idx) => (
                         <span
