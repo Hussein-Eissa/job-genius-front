@@ -29,7 +29,6 @@ const ApplicationForm3 = () => {
 
   const { updateForm, formData } = useJobForm();
 
-  // Safely initialize state with arrays or parsed values
   const [skills, setSkills] = React.useState(
     Array.isArray(formData.skills)
       ? formData.skills
@@ -167,7 +166,6 @@ const ApplicationForm3 = () => {
   const onSubmit = (data) => {
     const plainDescription = data.description.replace(/<[^>]+>/g, "").trim();
 
-    // Format applyBefore to ISO string if it's a date string
     const formattedApplyBefore = new Date(data.applyBefore).toISOString();
 
     const cleanedData = {
