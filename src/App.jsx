@@ -12,6 +12,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import NotFound from "./pages/NotFound";
 
+import AddJobPage from "./pages/jobs/AddJobPage";
 import JobListingPage from "./pages/jobs/JobListingPage";
 import JobDetailPage from "./pages/jobs/JobDetailPage";
 import JobSearchPage from "./pages/jobs/JobSearchPage";
@@ -63,6 +64,7 @@ const App = () => (
           <Route element={<ProtectedRoute />}>
             <Route path="/jobs" element={<JobListingPage />} />
             <Route path="/jobs/:id" element={<JobDetailPage />} />
+            <Route path="/jobs/addjob" element={<AddJobPage />} />
             <Route path="/jobs/search" element={<JobSearchPage />} />
             <Route path="/jobs/finance" element={<JobFinancePage />} />
             <Route path="/jobs/category/:categoryName" element={<JobListingPage />} />

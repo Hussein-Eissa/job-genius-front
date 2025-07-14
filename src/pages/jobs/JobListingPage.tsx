@@ -179,7 +179,7 @@ const JobListingPage = () => {
                 <p className="text-lg font-medium mb-2">
                   Are you a stakeholder or employer? <span className="text-jobblue">Post your job now!</span>
                 </p>
-                <Button className="mt-2">Add Your Job</Button>
+                <Button className="mt-2" onClick={()=>{navigate("/jobs/addjob");}}>Add Your Job</Button>
               </div>
             </div>
             

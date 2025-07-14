@@ -32,18 +32,18 @@ const ApplicationForm1 = ({ onNext }) => {
   };
 
   return (
-    <form
+    <form id="form-1"
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-4"
-      style={{ width: "100%" }}
+      style={{ width: "100%", backgroundColor: "#f5f5f5" }}
     >
       <Stack
         spacing={4}
         direction={{ xs: "column", sm: "row" }}
         padding={3}
-        sx={{ backgroundColor: "#f5f5f5" }}
+        className="w-full d-flex justify-evenly"
       >
-        <Stack spacing={1} direction={"column"}>
+        <Stack spacing={1} direction={"column"} className="gap-3" sx={{ width: { xs: "100%", lg: "40%" } }}>
           <div>
             <label className="block font-medium py-2">{`Full Name (Required)`}</label>
             <Input
@@ -60,6 +60,7 @@ const ApplicationForm1 = ({ onNext }) => {
             <Input
               {...register("email", { required: true })}
               placeholder=" Enter your Email"
+              type='email'
             />
             {errors.title && (
               <p className="text-red-500 text-sm">Email is required</p>
@@ -77,54 +78,19 @@ const ApplicationForm1 = ({ onNext }) => {
             )}
           </div>
 
-          <div
-            className="flex mt-5"
-            style={{ width: "100%", justifyContent: "space-between" }}
-          >
-            <Button
-              sx={{
-                width: "45%",
-                color: "#333",
-                border: "1px solid #333",
-                borderRadius: "10px",
-              }}
-            >
-              Back
-            </Button>
-            <Button
-              onClick={handleSubmit(onSubmit)}
-              type="submit"
-              sx={{
-                width: "45%",
-                color: "#fff",
-                backgroundColor: "#244F6F",
-                border: "1px solid #333",
-                borderRadius: "10px",
-              }}
-            >
-              Next
-            </Button>
-          </div>
-          <p className="text-xs text-gray-500 mt-3">
-            By sending the request you can confirm that you accept our{" "}
-            <a href="#" className="text-blue-500 underline">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="#" className="text-blue-500 underline">
-              Privacy Policy
-            </a>
-            .
-          </p>
         </Stack>
-        <Stack alignContent={"center"}>
+        {/* <Stack alignContent={"center"} style={{ width: "45%" }}> */}
+        <Stack
+          alignItems={"center"}
+          sx={{ width: { xs: "100%", lg: "45%" }, margin: "auto" }}
+        >
           <Paper
             className="p-5 text-center"
             sx={{
               borderRadius: "10px",
 
               backgroundColor: "#EEF7FE",
-              width: "100%",
+              width: "75%",
               mt: { xs: 2, lg: 5 },
             }}
           >
@@ -142,6 +108,7 @@ const ApplicationForm1 = ({ onNext }) => {
           </Paper>
         </Stack>
       </Stack>
+
     </form>
   );
 };

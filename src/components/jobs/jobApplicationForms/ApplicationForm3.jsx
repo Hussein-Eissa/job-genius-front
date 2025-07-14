@@ -14,7 +14,6 @@ import {
 
 // MUI Components
 import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
@@ -23,10 +22,12 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 // import useMediaQuery from "@mui/material/useMediaQuery";
 import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlined";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 
-const ApplicationForm2 = () => {
+const ApplicationForm3 = () => {
+  const navigate = useNavigate();
+
   const { updateForm, formData } = useJobForm();
 
   const [skills, setSkills] = React.useState(formData.skills || []);
@@ -162,20 +163,21 @@ const ApplicationForm2 = () => {
     localStorage.setItem("formData3", JSON.stringify(cleanedData));
     console.log(cleanedData);
     // onNext();
+    navigate("/jobs");
   };
 
   return (
-    <form
+    <form id="form-3"
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-4 "
-      style={{ width: "100%" }}
+      style={{ width: "100%", backgroundColor: "#f5f5f5" }}
     >
-      <Stack spacing={4} direction={{ xs: "column", lg: "row" }} padding={3}>
+      <Stack spacing={4} direction={{ xs: "column", lg: "row" }} padding={3} className="w-full d-flex justify-evenly">
         {/* Job title */}
         <Stack
           spacing={1}
           direction={"column"}
-          sx={{ width: { xs: "100%", lg: "50%" } }}
+          sx={{ width: { xs: "100%", lg: "40%" } }}
         >
           <div>
             <label className="block font-medium py-2">{` Job Title (Required)`}</label>
@@ -282,17 +284,18 @@ const ApplicationForm2 = () => {
               <Stack
                 spacing={1}
                 sx={{
-                  width: "100%",
+                  flexWrap: "wrap",
                   maxHeight: "150px",
+                  maxWidth: "100%",
                   overflowY: "auto",
                   mx: "auto",
                   mt: 2,
                   border: "1px solid #ccc",
                   borderRadius: "8px",
-                  padding: 2,
+                  padding: 1,
                   background: "#f9f9f9",
                 }}
-                direction={"column"}
+                direction={"row"}
               >
                 {responsibilities.map(
                   (item, index) =>
@@ -301,8 +304,8 @@ const ApplicationForm2 = () => {
                         key={index}
                         style={{
                           marginBottom: "10px",
-                          padding: "8px",
-                          width: "100%",
+                          padding: "5px",
+                          width: "fit-content",
                         }}
                       >
                         <Typography fontWeight="bold">{item.trim()}</Typography>
@@ -368,21 +371,29 @@ const ApplicationForm2 = () => {
               <Stack
                 spacing={1}
                 sx={{
+                  flexWrap: "wrap",
                   maxHeight: "150px",
+                  maxWidth: "100%",
                   overflowY: "auto",
+                  mx: "auto",
                   mt: 2,
                   border: "1px solid #ccc",
                   borderRadius: "8px",
-                  padding: 2,
+                  padding: 1,
                   background: "#f9f9f9",
                 }}
+                direction={"row"}
               >
                 {benefits.map(
                   (item, index) =>
                     (item.title.trim() || item.description.trim()) && (
                       <Paper
                         key={index}
-                        style={{ marginBottom: "10px", padding: "8px" }}
+                        style={{
+                          marginBottom: "10px",
+                          padding: "5px",
+                          width: "fit-content",
+                        }}
                       >
                         {item.title && (
                           <Typography fontWeight="bold">
@@ -401,21 +412,10 @@ const ApplicationForm2 = () => {
             )}
           </Stack>
 
-          <p className="text-xs text-gray-500 mt-3">
-            By sending the request you can confirm that you accept our{" "}
-            <a href="#" className="text-blue-500 underline">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="#" className="text-blue-500 underline">
-              Privacy Policy
-            </a>
-            .
-          </p>
         </Stack>
         <Stack
           alignItems={"center"}
-          sx={{ width: { xs: "100%", lg: "50%" }, margin: "auto" }}
+          sx={{ width: { xs: "100%", lg: "45%" }, margin: "auto" }}
           direction={{ xs: "column-reverse", lg: "column" }}
         >
           <Paper
@@ -423,8 +423,9 @@ const ApplicationForm2 = () => {
             sx={{
               borderRadius: "10px",
               backgroundColor: "#EEF7FE",
-              width: "100%",
+              width: "75%",
               mt: { xs: 2, lg: 5 },
+              mb: 5,
             }}
           >
             <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
@@ -474,13 +475,13 @@ const ApplicationForm2 = () => {
                 sx={{
                   flexWrap: "wrap",
                   maxHeight: "150px",
-                  maxWidth: "95%",
+                  maxWidth: "100%",
                   overflowY: "auto",
                   mx: "auto",
                   mt: 2,
                   border: "1px solid #ccc",
                   borderRadius: "8px",
-                  padding: 2,
+                  padding: 1,
                   background: "#f9f9f9",
                 }}
                 direction={"row"}
@@ -491,8 +492,8 @@ const ApplicationForm2 = () => {
                       <Paper
                         key={index}
                         style={{
-                          marginBottom: "10px",
-                          padding: "8px",
+                          marginBottom: "5px",
+                          padding: "5px",
                           width: "fit-content",
                         }}
                       >
@@ -538,13 +539,13 @@ const ApplicationForm2 = () => {
                 sx={{
                   flexWrap: "wrap",
                   maxHeight: "150px",
-                  maxWidth: "95%",
+                  maxWidth: "100%",
                   overflowY: "auto",
                   mx: "auto",
                   mt: 2,
                   border: "1px solid #ccc",
                   borderRadius: "8px",
-                  padding: 2,
+                  padding: 1,
                   background: "#f9f9f9",
                 }}
                 direction={"row"}
@@ -555,8 +556,8 @@ const ApplicationForm2 = () => {
                       <Paper
                         key={index}
                         style={{
-                          marginBottom: "10px",
-                          padding: "8px",
+                          marginBottom: "5px",
+                          padding: "5px",
                           width: "fit-content",
                         }}
                       >
@@ -597,17 +598,18 @@ const ApplicationForm2 = () => {
               <Stack
                 spacing={1}
                 sx={{
+                  flexWrap: "wrap",
                   maxHeight: "150px",
-                  maxWidth: "95%",
+                  maxWidth: "100%",
                   overflowY: "auto",
                   mx: "auto",
                   mt: 2,
                   border: "1px solid #ccc",
                   borderRadius: "8px",
-                  padding: 2,
+                  padding: 1,
                   background: "#f9f9f9",
                 }}
-                direction={"column"}
+                direction={"row"}
               >
                 {niceToHaves.map(
                   (item, index) =>
@@ -615,8 +617,8 @@ const ApplicationForm2 = () => {
                       <Paper
                         key={index}
                         style={{
-                          marginBottom: "10px",
-                          padding: "8px",
+                          marginBottom: "5px",
+                          padding: "5px",
                           width: "fit-content",
                         }}
                       >
@@ -657,17 +659,18 @@ const ApplicationForm2 = () => {
               <Stack
                 spacing={1}
                 sx={{
+                  flexWrap: "wrap",
                   maxHeight: "150px",
-                  maxWidth: "95%",
+                  maxWidth: "100%",
                   overflowY: "auto",
                   mx: "auto",
                   mt: 2,
                   border: "1px solid #ccc",
                   borderRadius: "8px",
-                  padding: 2,
+                  padding: 1,
                   background: "#f9f9f9",
                 }}
-                direction={"column"}
+                direction={"row"}
               >
                 {whoYouAre.map(
                   (item, index) =>
@@ -675,8 +678,8 @@ const ApplicationForm2 = () => {
                       <Paper
                         key={index}
                         style={{
-                          marginBottom: "10px",
-                          padding: "8px",
+                          marginBottom: "5px",
+                          padding: "5px",
                           width: "fit-content",
                         }}
                       >
@@ -690,7 +693,7 @@ const ApplicationForm2 = () => {
 
           {/* Salary */}
           <Stack sx={{ width: "100%" }}>
-            <label color="#0F3552" className="block font-medium py-2">
+            <label color="#0F3552" className="block font-medium mt-1 py-2">
               Salary (required)
             </label>
             <Stack
@@ -699,7 +702,8 @@ const ApplicationForm2 = () => {
               sx={{ width: "100%", alignItems: "center", mb: "20px" }}
             >
               <Stack
-                direction={"column"}
+                direction={"row"}
+                spacing={1}
                 sx={{ width: { sm: "100%", lg: "50%" } }}
               >
                 <label className="block font-small py-1">From</label>
@@ -710,7 +714,8 @@ const ApplicationForm2 = () => {
                 />
               </Stack>
               <Stack
-                direction={"column"}
+                direction={"row"}
+                spacing={1}
                 sx={{ width: { sm: "100%", lg: "50%" } }}
               >
                 <label className="block font-thin py-1">To</label>
@@ -726,9 +731,6 @@ const ApplicationForm2 = () => {
           {/* Apply Before  & Capacity*/}
 
           <Stack sx={{ width: "100%" }}>
-            <label color="#0F3552" className="block font-medium py-2">
-              Salary (required)
-            </label>
             <Stack
               direction={"row"}
               spacing={2}
@@ -767,40 +769,8 @@ const ApplicationForm2 = () => {
           </Stack>
         </Stack>
       </Stack>
-      <div
-        className="flex mt-5"
-        style={{
-          width: "50%",
-          justifyContent: "space-between",
-          margin: " 20px auto",
-        }}
-      >
-        <Button
-          sx={{
-            width: "45%",
-            color: "#333",
-            border: "1px solid #333",
-            borderRadius: "10px",
-          }}
-        >
-          Back
-        </Button>
-        <Button
-          onClick={handleSubmit(onSubmit)}
-          type="submit"
-          sx={{
-            width: "45%",
-            color: "#fff",
-            backgroundColor: "#244F6F",
-            border: "1px solid #333",
-            borderRadius: "10px",
-          }}
-        >
-          Submit
-        </Button>
-      </div>
     </form>
   );
 };
 
-export default ApplicationForm2;
+export default ApplicationForm3;
