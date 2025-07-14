@@ -21,9 +21,6 @@ const SettingsSidebar = () => {
 
   useEffect(() => {
     fetchMeProfile();
-    console.log("profile?.image");
-    console.log(profile?.image);
-    
   }, [fetchMeProfile]);
 
   function HandelLogOut() {
@@ -105,7 +102,7 @@ const SettingsSidebar = () => {
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center mb-4">
           <img
-            src={profile?.image || "https://randomuser.me/api/portraits/men/44.jpg"}
+            src={`https://jobgenius.bsite.net/api${profile?.image}`|| "https://randomuser.me/api/portraits/men/44.jpg"}
             alt="User Avatar"
             className="h-10 w-10 rounded-full mr-3 object-cover"
           />

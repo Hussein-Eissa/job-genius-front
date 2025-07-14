@@ -4,10 +4,18 @@ import { Button } from "@/components/ui/button";
 import LogoIcon from "../common/LogoIcon";
 import { useUserStore } from "@/reducers/UserReducerStore";
 import { LogOutIcon } from "lucide-react";
+import { useProfileStore } from "@/reducers/ProfileReducerStore";
+import { useEffect } from "react";
 
 const Header = () => {
   let isAuthenticated = useUserStore.getState().isAuthenticated;
   const { logout } = useUserStore();
+
+  const { profile, fetchMeProfile } = useProfileStore();
+
+  useEffect(() => {
+    fetchMeProfile();
+  }, [fetchMeProfile]);
 
   function HandelLogOut() {
     logout()
@@ -37,7 +45,7 @@ const Header = () => {
             <div className="flex items-center">
               <Link to="/profile">
                 <img
-                  src="https://randomuser.me/api/portraits/men/44.jpg"
+                  src={`https://jobgenius.bsite.net/api${profile?.image}`|| "https://randomuser.me/api/portraits/men/44.jpg"}
                   alt="User Avatar"
                   className="h-8 w-8 rounded-full"
                 />

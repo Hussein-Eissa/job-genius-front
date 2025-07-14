@@ -265,7 +265,7 @@ const ProfilePage = () => {
               <div className="flex items-start">
                 <div className="w-24 h-24 rounded-full overflow-hidden mr-6">
                   <img
-                    src={profile?.image || "https://randomuser.me/api/portraits/men/44.jpg"}
+                    src={`https://jobgenius.bsite.net/api${profile?.image}` || "https://randomuser.me/api/portraits/men/44.jpg"}
                     alt={profile?.fullname || "Profile"}
                     className="w-full h-full object-cover"
                   />
@@ -482,9 +482,9 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     {portfolios.map((portfolio) => (
                       <div key={portfolio.portfolioID} className="relative group">
-                        {portfolio.ImageUploadURL ? (
+                        {portfolio.image ? (
                           <img
-                            src={portfolio.ImageUploadURL}
+                            src={'https://jobgenius.bsite.net/api'+ portfolio.image.replace("s", "")}
                             alt={portfolio.title}
                             className="w-full h-40 object-cover rounded-lg"
                           />
