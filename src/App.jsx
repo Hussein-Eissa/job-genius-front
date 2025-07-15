@@ -37,7 +37,7 @@ import AccountPage from "./pages/settings/AccountPage";
 import OverviewPage from "./pages/settings/OverviewPage";
 import SavedJobs from "./pages/settings/SavedJobsPage";
 import AnnouncedJobs from "./pages/settings/AnnouncedJobsPage";
-import OverViewTaps from "./pages/settings/AnnoncedJops/OverViewJobTabs/OverViewSection";
+import AnnouncedJobDetails from "./pages/settings/AnnouncedJobdetails";
 import ProtectedRoute from "./ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -58,9 +58,6 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
-          {/* Trial Route */}
-          <Route path="/application-form" element={<ApplivcationForm />} />
-          <Route path="/announced-jobs/tab1" element={<OverViewTaps />} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
@@ -90,6 +87,7 @@ const App = () => (
             <Route path="/overview" element={<OverviewPage />} />
             <Route path="/saved-jobs" element={<SavedJobs />} />
             <Route path="/announced-jobs" element={<AnnouncedJobs />} />
+            <Route path="/announced-jobs/:id" element={<AnnouncedJobDetails />} />
           </Route>
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />

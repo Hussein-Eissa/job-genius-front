@@ -11,7 +11,7 @@ import { Box, Stack, Typography } from "@mui/material";
 
 // import ReactQuill;
 import "react-quill/dist/quill.snow.css";
-const Tab2 = ({ onNext }) => {
+const Tab2 = ({ onNext , job }) => {
   const { updateForm, formData } = useJobForm();
   const [countryselected, setCountrySelected] = React.useState("");
   const [cityselected, setCitySelected] = React.useState("");
@@ -90,6 +90,7 @@ const Tab2 = ({ onNext }) => {
                 <Input
                   {...register("company", { required: true })}
                   placeholder="Enter your Company Name"
+                  value={job.company}
                 />
                 {errors.title && (
                   <p className="text-red-500 text-sm">
@@ -110,6 +111,7 @@ const Tab2 = ({ onNext }) => {
                     },
                   })}
                   placeholder=" Enter your Company Website"
+                  value={job.companyWebsite}
                 />
                 {errors.companyWebsite && (
                   <p className="text-red-500 text-sm">Invalid URL format</p>
@@ -127,6 +129,7 @@ const Tab2 = ({ onNext }) => {
                       onChange={(e) => {
                         setCountrySelected(e.target.value);
                       }}
+                      value={job.country}
                     />
                     {errors.country && (
                       <p className="text-red-500 text-sm">
@@ -142,6 +145,7 @@ const Tab2 = ({ onNext }) => {
                       onChange={(e) => {
                         setCitySelected(e.target.value);
                       }}
+                      value={job.city}
                     />
                     {errors.city && (
                       <p className="text-red-500 text-sm">City is required</p>

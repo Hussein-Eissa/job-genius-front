@@ -5,11 +5,9 @@ import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import Tab2 from "./Tab2";
 import Tab from "./Tab1";
 import Tab3 from "./Tab3";
-import ApplicantTable from "../ApplicantDetailsTaps/ApplicantTable";
 
-export default function Tab1() {
-  const [value, setValue] = React.useState("overview");
-  const [page, setPage] = React.useState(1); 
+export default function Tab1({ jobdeails }) {
+  const [page, setPage] = React.useState(1);
 
   const handlePageChange = (event, value) => {
     setPage(value);
@@ -18,11 +16,11 @@ export default function Tab1() {
   const renderCurrentTab = () => {
     switch (page) {
       case 1:
-        return <Tab onNext={() => setPage(2)} />;
+        return <Tab onNext={() => setPage(2)} job={jobdeails} />;
       case 2:
-        return <Tab2 onNext={() => setPage(3)} />;
+        return <Tab2 onNext={() => setPage(3)} job={jobdeails} />;
       case 3:
-        return <Tab3 onNext={() => {}} />;
+        return <Tab3 job={jobdeails} />;
       default:
         return null;
     }
@@ -30,57 +28,7 @@ export default function Tab1() {
 
   return (
     <Stack direction={"column"}>
-      {/* Buttons Box to navigation In future */}
-      <Box
-        sx={{
-          width: "95%",
-          ml: "auto",
-          my: "20px",
-          borderBottom: "1px solid #C4C4C4",
-          display: "flex",
-          gap: "20px",
-          justifyContent: "flex-start",
-        }}
-      >
-        <BottomNavigation
-          showLabels
-          value={value}
-          onChange={(event, newValue) => {
-            setValue(newValue);
-          }}
-          sx={{
-            "& .Mui-selected": {
-              color: "#25324B",
-              fontWeight: 600,
-            },
-          }}
-        >
-          <BottomNavigationAction
-            label="Overview"
-            value="overview"
-            sx={{
-              width: "100px",
-              borderBottom: value === "overview" ? "2px solid #25324B" : "none",
-              borderRadius: 0,
-              transition: "all 0.3s ease-in-out",
-              color: value === "overview" ? "#25324B" : "#C4C4C4",
-            }}
-          />
-          <BottomNavigationAction
-            label="Applicants Details"
-            value="applicants"
-            sx={{
-              borderBottom:
-                value === "applicants" ? "2px solid #25324B" : "none",
-              borderRadius: 0,
-              mx: "10px",
-              width: "200px",
-              transition: "all 0.3s ease-in-out",
-              color: value === "applicants" ? "#25324B" : "#C4C4C4",
-            }}
-          />
-        </BottomNavigation>
-      </Box>
+      
 
       {/* Render dynamic tab */}
       {renderCurrentTab()}

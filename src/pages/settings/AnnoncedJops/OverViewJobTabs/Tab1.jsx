@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useJobForm } from "../../../../context/jobApplicationFormContext";
 import { useForm } from "react-hook-form";
 
-export default function Tab1({ onNext }) {
+export default function Tab1({ onNext , job }) {
   const [resetClicked, setResetClicked] = React.useState(false);
   const { updateForm, formData } = useJobForm();
   const {
@@ -72,6 +72,7 @@ export default function Tab1({ onNext }) {
                 <Input
                   {...register("fullname", { required: true })}
                   placeholder=" Enter your Full Name"
+                  value={job.fullname}
                 />
                 {errors.title && (
                   <p className="text-red-500 text-sm">Name is required</p>
@@ -87,6 +88,7 @@ export default function Tab1({ onNext }) {
                   })}
                   placeholder=" Enter your Email"
                   type="email"
+                  value={job.email}
                 />
                 {errors.email && (
                   <p className="text-red-500 text-sm">{`Email is ${
@@ -106,6 +108,8 @@ export default function Tab1({ onNext }) {
                         "Phone number must be 11 digits and start with 01",
                     },
                   })}
+                  placeholder=" Enter your Phone Number"
+                  value={job.phone}
                 />
                 {errors.phone && (
                   <p className="text-red-500 mt-1 text-sm">

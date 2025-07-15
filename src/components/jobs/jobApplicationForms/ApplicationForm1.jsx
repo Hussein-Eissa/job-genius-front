@@ -103,7 +103,6 @@ const ApplicationForm1 = ({ onNext }) => {
             className="p-5 text-center"
             sx={{
               borderRadius: "10px",
-
               backgroundColor: "#EEF7FE",
               width: "75%",
               mt: { xs: 2, lg: 5 },

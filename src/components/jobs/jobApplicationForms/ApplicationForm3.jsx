@@ -199,7 +199,6 @@ const ApplicationForm3 = () => {
     updateForm(cleanedData);
     localStorage.setItem("formData3", JSON.stringify(cleanedData));
     console.log("Submitted Data:", cleanedData);
-    // navigate("/jobs");
     handleFinalSubmit(cleanedData);
   };
 
@@ -215,6 +214,7 @@ const ApplicationForm3 = () => {
       if (response.status === 200) {
         console.log("Job Application Submitted Successfully");
         toast({title: "Job Application Submitted",})
+        navigate("/jobs");
       } else {
         console.error("Submission failed:");
         toast({title: "Failed to Submit Job Application", variant: "destructive"})

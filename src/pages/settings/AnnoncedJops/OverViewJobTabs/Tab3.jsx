@@ -22,7 +22,7 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
 
-const Tab3 = () => {
+const Tab3 = ({ job }) => {
   const { updateForm, formData } = useJobForm();
   const [skills, setSkills] = React.useState(
     Array.isArray(formData.skills)

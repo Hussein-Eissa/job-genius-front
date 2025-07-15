@@ -64,13 +64,13 @@ const rows = [
 
 export default function ApplicantTable() {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // للتحقق من حجم الشاشة
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 //   const { showModal } = useModal();
   const MyColumns = [
     {
       field: "IDnumber",
       headerName: "ID",
-      width: isMobile ? 50 : 70, 
+      width: isMobile ? 70 : 90, 
       align: "center",
       headerAlign: "center",
     },
@@ -81,7 +81,6 @@ export default function ApplicantTable() {
       align: "center",
       headerAlign: "center",
     },
-
     {
       field: "DateOfApply",
       headerName: "Date Of Apply",
@@ -93,7 +92,7 @@ export default function ApplicantTable() {
     {
       field: "TimeOfApply",
       headerName: "TimeOfApply",
-      width: 60,
+      width: 150,
       align: "center",
       headerAlign: "center",
     },
@@ -191,7 +190,7 @@ export default function ApplicantTable() {
           </Box>
         );
       },
-    },
+    }
   ];
 
   return (
@@ -223,14 +222,14 @@ export default function ApplicantTable() {
         >
           {/* <Box sx={{ minWidth: isMobile ? "600px" : "800px", height: "100%" }}> */}
           <DataGrid
-            checkboxSelection
+            // checkboxSelection
             rows={rows}
             // @ts-ignore
             columns={MyColumns}
             disableRowSelectionOnClick
             sx={{
-              fontSize: 12,
-              "& .MuiDataGrid-columnHeaders": { fontSize: 13 },
+              fontSize: 13,
+              "& .MuiDataGrid-columnHeaders": { fontSize: 14 },
               "& .MuiDataGrid-virtualScroller": {
                 overflowX: "auto",
               },

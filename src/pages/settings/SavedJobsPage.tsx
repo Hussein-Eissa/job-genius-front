@@ -205,7 +205,7 @@ const SavedJobsPage = () => {
                 </div>
 
                 <Link
-                  to={`/job/${job.jobID}`}
+                  to={`/jobs/${job.jobID}`}
                   className="inline-block mt-4 text-blue-600 hover:underline"
                 >
                   Show Details

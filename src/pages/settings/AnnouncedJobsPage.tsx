@@ -201,7 +201,9 @@ const AnnouncedJobsPage = () => {
                                 
                                 <div className="flex flex-col items-center gap-4">
                                     <div className="flex justify-between items-center w-full">
-                                        <button className="bg-blue-900 text-white px-7 py-2 rounded-lg">View</button>
+                                        <Link to={`/announced-jobs/${job.jobID}`}>
+                                            <button className="bg-blue-900 text-white px-7 py-2 rounded-lg">View</button>
+                                        </Link>
                                         <button className="text-black-600 hover:text-red-500" onClick={() => handleDeleteJob(job.jobID)}>
                                             <Trash2 />
                                         </button>
