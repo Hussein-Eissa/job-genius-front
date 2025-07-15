@@ -165,13 +165,13 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
           {showFilter && (
             <div className="flex items-center space-x-3">
               <span className="text-sm text-gray-500">Sort by:</span>
-              <Select defaultValue="mostRelevant">
+              <Select defaultValue="newest">
                 <SelectTrigger className="w-40 h-9 text-sm">
                   <SelectValue placeholder="Sort" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mostRelevant">Most relevant</SelectItem>
                   <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="mostRelevant">Most relevant</SelectItem>
                   <SelectItem value="highestPaid">Highest paid</SelectItem>
                 </SelectContent>
               </Select>

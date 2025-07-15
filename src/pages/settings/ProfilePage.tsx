@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import LogoIcon from "@/components/common/LogoIcon";
 import { useProfileStore } from "@/reducers/ProfileReducerStore";
@@ -421,7 +421,7 @@ const ProfilePage = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-4xl font-bold">My Profile</h1>
             <Button variant="outline" className="bg-white" asChild>
-              <a href="/">Back to homepage</a>
+              <Link to="/">Back to homepage</Link>
             </Button>
           </div>
 

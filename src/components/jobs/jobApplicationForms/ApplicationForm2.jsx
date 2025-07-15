@@ -55,32 +55,32 @@ const ApplicationForm2 = ({ onNext }) => {
     ],
   };
 
-  const Countries = [
-    "Afghanistan",
-    "Albania",
-    "Algeria",
-    "Andorra",
-    "Angola",
-    "Antigua and Barbuda",
-    "Argentina",
-    "Armenia",
-    "Australia",
-    "Austria",
-    "Azerbaijan",
-    "Bahamas",
-    "Bahrain",
-    "Bangladesh",
-    "Barbados",
-    "Belarus",
-    "Belgium",
-    "Belize",
-    "Benin",
-    "Bhutan",
-    "Bolivia",
-    "Bosnia and Herzegovina",
-    "Botswana",
-    "Brazil",
-  ];
+  // const Countries = [
+  //   "Afghanistan",
+  //   "Albania",
+  //   "Algeria",
+  //   "Andorra",
+  //   "Angola",
+  //   "Antigua and Barbuda",
+  //   "Argentina",
+  //   "Armenia",
+  //   "Australia",
+  //   "Austria",
+  //   "Azerbaijan",
+  //   "Bahamas",
+  //   "Bahrain",
+  //   "Bangladesh",
+  //   "Barbados",
+  //   "Belarus",
+  //   "Belgium",
+  //   "Belize",
+  //   "Benin",
+  //   "Bhutan",
+  //   "Bolivia",
+  //   "Bosnia and Herzegovina",
+  //   "Botswana",
+  //   "Brazil",
+  // ];
 
   const Cities = [
     "Kabul",
@@ -133,7 +133,7 @@ const ApplicationForm2 = ({ onNext }) => {
           sx={{ width: { xs: "100%", lg: "40%" } }}
         >
           <div>
-            <label className="block font-medium py-2">{`Company Name (Required)`}</label>
+            <label className="block font-medium py-2">{`Company Name`}</label>
             <Input
               {...register("company", { required: true })}
               placeholder="Enter your Company Name"
@@ -144,69 +144,50 @@ const ApplicationForm2 = ({ onNext }) => {
           </div>
 
           <div>
-            <label className="block font-medium py-2 !text-blue-900">{`Company Website (Required)`}</label>
+            <label className="block font-medium py-2 !text-blue-900">{`Company Website`}</label>
             <Input
-              {...register("companyWebsite", { required: true })}
+              {...register("companyWebsite", { required: "Invalid URL format",
+                pattern: {
+                  value: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/,
+                  message: "Invalid URL format",
+                },
+              })}
               placeholder=" Enter your Company Website"
             />
-            {errors.title && (
+            {errors.companyWebsite && (
               <p className="text-red-500 text-sm">
-                Company website is required
+                Invalid URL format
               </p>
             )}
           </div>
-          <label className="block font-medium py-2">{`Company Location`}</label>
-          <Stack spacing={1} direction={"row"}>
-            <Stack sx={{ width: "100%" }}>
-              <Controller
-                name="country"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Countries.map((country, index) => (
-                        <SelectItem key={`${country}-${index}`} value={country}>
-                          {country}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <div>
+            <label className="block font-medium py-2 m-0">{`Company Location`}</label>
+            <Stack spacing={1} direction={"row"} padding={1} margin={0}>
+              <Stack sx={{ width: "100%" }}>
+                <label className="block font-medium">{`Country`}</label>
+                <Input
+                  {...register("country", { required: true })}
+                  placeholder="Enter your Country"
+                  onChange={(e) => { setCountrySelected(e.target.value);}}
+                />
+                {errors.country && (
+                  <p className="text-red-500 text-sm">Country is required</p>
                 )}
-              />
-              {errors.country && (
-                <p className="text-red-500 text-sm">Country is required</p>
-              )}
-            </Stack>
-            <Stack sx={{ width: "100%" }}>
-              <Controller
-                name="city"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Cities.map((city, index) => (
-                        <SelectItem key={`${city}-${index}`} value={city}>
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              </Stack>
+              <Stack sx={{ width: "100%" }}>
+                <label className="block font-medium">{`City`}</label>
+                <Input
+                  {...register("city", { required: true })}
+                  placeholder="Enter your City"
+                  onChange={(e) => { setCitySelected(e.target.value);}}
+                />
+                {errors.city && (
+                  <p className="text-red-500 text-sm">City is required</p>
                 )}
-              />
-              {errors.city && (
-                <p className="text-red-500 text-sm">City is required</p>
-              )}
+              </Stack>
             </Stack>
-          </Stack>
-          <Stack>
+          </div>
+          {/* <Stack>
             <label color="#0F3552" className="block font-medium py-2">
               Company Description (required)
             </label>
@@ -235,7 +216,7 @@ const ApplicationForm2 = ({ onNext }) => {
                 Company description is required
               </p>
             )}
-          </Stack>
+          </Stack> */}
         </Stack>
         <Stack
           alignItems={"center"}

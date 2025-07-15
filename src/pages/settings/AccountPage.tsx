@@ -1,9 +1,17 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
+import { useProfileStore } from "@/reducers/ProfileReducerStore";
+import { Link } from "react-router-dom";
 
 const AccountPage = () => {
+  const { profile, fetchMeProfile } = useProfileStore();
+
+  useEffect(() => {
+      fetchMeProfile();
+    }, []);
+
   const [applications, setApplications] = useState([
     {
       id: 1,
@@ -55,12 +63,12 @@ const AccountPage = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-4xl font-bold">My Applications</h1>
             <Button variant="outline" className="bg-white" asChild>
-              <a href="/">Back to homepage</a>
+              <Link to="/">Back to homepage</Link>
             </Button>
           </div>
           
           <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-2">Keep it up, Ahmed</h2>
+            <h2 className="text-2xl font-bold mb-2">Keep it up, {profile?.fullname.split(" ")[0]}</h2>
             <p className="text-gray-600">Here is job applications status from July 19 - July 25.</p>
           </div>
           

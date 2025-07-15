@@ -23,6 +23,8 @@ import TipsAndUpdatesOutlinedIcon from "@mui/icons-material/TipsAndUpdatesOutlin
 import { Link, useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import axios from "axios";
+import { toast } from "@/hooks/use-toast";
 
 const ApplicationForm3 = () => {
   const navigate = useNavigate();
@@ -137,6 +139,8 @@ const ApplicationForm3 = () => {
     },
   });
 
+  const salaryFrom = watch("salaryFrom");
+
   const description = watch("description") || "";
   const modules = {
     toolbar: [
@@ -166,7 +170,8 @@ const ApplicationForm3 = () => {
   const onSubmit = (data) => {
     const plainDescription = data.description.replace(/<[^>]+>/g, "").trim();
 
-    const formattedApplyBefore = new Date(data.applyBefore).toISOString();
+    // const formattedApplyBefore = new Date(data.applyBefore).toISOString();
+    const formattedApplyBefore = data.applyBefore.split("T")[0];
 
     const cleanedData = {
       title: data.title || "",
@@ -194,7 +199,30 @@ const ApplicationForm3 = () => {
     updateForm(cleanedData);
     localStorage.setItem("formData3", JSON.stringify(cleanedData));
     console.log("Submitted Data:", cleanedData);
-    navigate("/jobs");
+    // navigate("/jobs");
+    handleFinalSubmit(cleanedData);
+  };
+
+  const handleFinalSubmit = async (data) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post("https://jobgenius.bsite.net/api/JobListing", data, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      if (response.status === 200) {
+        console.log("Job Application Submitted Successfully");
+        toast({title: "Job Application Submitted",})
+      } else {
+        console.error("Submission failed:");
+        toast({title: "Failed to Submit Job Application", variant: "destructive"})
+      } 
+    } catch (error) {
+      console.error("Error submitting job application:", error);
+      toast({title: "Error Submitting Job Application", variant: "destructive"})
+    }
   };
 
   const handleRemoveItemFromArray = (index, array, setArray) => {
@@ -223,7 +251,7 @@ const ApplicationForm3 = () => {
           sx={{ width: { xs: "100%", lg: "40%" } }}
         >
           <div>
-            <label className="block font-medium py-2">{`Job Title (Required)`}</label>
+            <label className="block font-medium py-2">{`Job Title`}</label>
             <Input
               {...register("title", { required: true })}
               placeholder="Enter your Job Title"
@@ -234,7 +262,7 @@ const ApplicationForm3 = () => {
           </div>
 
           {/* Job Type */}
-          <label className="block font-medium py-2">{`Job Type (Required)`}</label>
+          <label className="block font-medium py-2">{`Job Type`}</label>
           <Stack spacing={1} direction={"row"}>
             <Stack sx={{ width: "100%" }}>
               <Controller
@@ -265,12 +293,23 @@ const ApplicationForm3 = () => {
           {/* Job Description */}
           <Stack>
             <label color="#0F3552" className="block font-medium py-2">
-              Job Description (required)
+              Job Description
             </label>
+
             <Controller
               name="description"
               control={control}
-              rules={{ required: true, maxLength: 500 }}
+              rules={{
+                required: "Job description is required",
+                minLength: {
+                  value: 20,
+                  message: "Job description must be at least 20 characters",
+                },
+                maxLength: {
+                  value: 550,
+                  message: "Job description must not exceed 500 characters",
+                },
+              }}
               render={({ field }) => (
                 <>
                   <ReactQuill
@@ -287,15 +326,18 @@ const ApplicationForm3 = () => {
                 </>
               )}
             />
+
             {errors.description && (
-              <p className="text-red-500 text-sm">Job description is required</p>
+              <p className="text-red-500 text-sm">
+                {errors.description.message}
+              </p>
             )}
           </Stack>
 
           {/* Job Responsibilities */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
-              Job Responsibilities (required)
+              Job Responsibilities
             </label>
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
@@ -373,7 +415,7 @@ const ApplicationForm3 = () => {
           {/* Job Benefits */}
           <Stack>
             <label color="#0F3552" className="block font-medium py-2">
-              Job Benefits (Optional)
+              Job Benefits
             </label>
             <Stack
               direction={"row"}
@@ -506,7 +548,7 @@ const ApplicationForm3 = () => {
           {/* Job Nice to have */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
-              Job Nice to have (required)
+              Job Nice to have
             </label>
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
@@ -575,7 +617,7 @@ const ApplicationForm3 = () => {
           {/* Job Categories */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
-              Job Categories (required)
+              Job Categories
             </label>
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
@@ -647,7 +689,7 @@ const ApplicationForm3 = () => {
           {/* Job Skills */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
-              Job Skills (required)
+              Job Skills
             </label>
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
@@ -719,7 +761,7 @@ const ApplicationForm3 = () => {
           {/* Job Who you are */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium py-2">
-              Job Who you are (required)
+              Job Who you are
             </label>
             <Stack direction={"row"} sx={{ width: "100%" }}>
               <Input
@@ -789,7 +831,7 @@ const ApplicationForm3 = () => {
           {/* Salary */}
           <Stack sx={{ width: "100%" }}>
             <label color="#0F3552" className="block font-medium mt-1 py-2">
-              Salary (required)
+              Salary
             </label>
             <Stack
               direction={"row"}
@@ -797,28 +839,52 @@ const ApplicationForm3 = () => {
               sx={{ width: "100%", alignItems: "center", mb: "20px" }}
             >
               <Stack
-                direction={"row"}
+                direction={"column"}
                 spacing={1}
                 sx={{ width: { sm: "100%", lg: "50%" } }}
               >
-                <label className="block font-small py-1">From</label>
-                <Input
-                  {...register("salaryFrom", { required: true })}
-                  type="number"
-                  placeholder="Salary From"
-                />
+                <div className="flex gap-2">
+                  <label className="block font-small py-1">From</label>
+                  <Input
+                    {...register("salaryFrom", { required: true ,
+                      min: 100,
+                    })}
+                    type="number"
+                    placeholder="Salary From"
+                  />
+                </div>
+                {errors.salaryFrom && (
+                  <p className="text-red-500 text-sm">
+                    Salary From must be at least 100
+                  </p>
+                )}
               </Stack>
               <Stack
-                direction={"row"}
+                direction={"column"}
                 spacing={1}
                 sx={{ width: { sm: "100%", lg: "50%" } }}
               >
-                <label className="block font-thin py-1">To</label>
-                <Input
-                  {...register("salaryTo", { required: true })}
-                  type="number"
-                  placeholder="Salary To"
-                />
+                <div className="flex gap-2">
+                  <label className="block font-thin py-1">To</label>
+                  <Input
+                    // {...register("salaryTo", { required: true ,
+                    //   min: 100,
+                    //   validate: (value) =>
+                    //     parseFloat(value) > parseFloat(salaryFrom || 0) ||
+                    //     "Salary To must be greater than Salary From",
+                    // })}
+                    {...register("salaryTo", { required: true,
+                      min: salaryFrom,
+                    })}
+                    type="number"
+                    placeholder="Salary To"
+                  />
+                </div>
+                {errors.salaryTo && (
+                  <p className="text-red-500 text-sm">
+                    Salary To must be greater than Salary From
+                  </p>
+                )}
               </Stack>
             </Stack>
           </Stack>
@@ -832,7 +898,7 @@ const ApplicationForm3 = () => {
             >
               <Stack sx={{ width: "100%" }}>
                 <label className="block font-medium py-2">
-                  Apply Before (required)
+                  Apply Before
                 </label>
                 <Input
                   type="date"
@@ -851,12 +917,15 @@ const ApplicationForm3 = () => {
               >
                 <label className="block font-thin py-1">Capacity</label>
                 <Input
-                  {...register("capacity", { required: true })}
+                  {...register("capacity", { required: true,
+                    min: 10,
+                    valueAsNumber: true,
+                  })}
                   type="number"
                   placeholder="Capacity"
                 />
                 {errors.capacity && (
-                  <p className="text-red-500 text-sm">Capacity is required</p>
+                  <p className="text-red-500 text-sm">Capacity must be at least 10</p>
                 )}
               </Stack>
             </Stack>

@@ -6,6 +6,7 @@ import {
   LayoutGrid,
   FileText,
   Bookmark,
+  Megaphone,
   User,
 } from "lucide-react";
 import LogoIcon from "@/components/common/LogoIcon";
@@ -32,6 +33,7 @@ const SettingsSidebar = () => {
     { to: "/overview", label: "Overview", icon: <LayoutGrid size={20} /> },
     { to: "/applications", label: "My Applications", icon: <FileText size={20} /> },
     { to: "/saved-jobs", label: "Saved Jobs", icon: <Bookmark size={20} /> },
+    { to: "/announced-jobs", label: "Announced Jobs", icon: <Megaphone size={20} /> },
     { to: "/profile", label: "My Profile", icon: <User size={20} /> },
   ];
 

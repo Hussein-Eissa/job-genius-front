@@ -78,55 +78,59 @@ const SavedJobsPage = () => {
       <div className="flex-grow flex">
         <SettingsSidebar />
         <main className="flex-grow px-8 py-6">
-          <h1 className="text-2xl font-semibold mb-6">My Applications</h1>
-          <header className="flex flex-wrap gap-10 justify-between items-center bg-white max-md:px-5 relative">
-            <section className="self-stretch my-auto min-w-60 max-md:max-w-full">
-              <h2 className="text-2xl text-slate-800">
-                <strong>Great job, {profile?.fullname.split(" ")[0]}!</strong>
-              </h2>
-              <p className="mt-2 text-base font-medium leading-relaxed text-slate-500 max-md:max-w-full">
-                Here are the jobs you bookmarked from {formatRange(startDate, endDate)}.
-              </p>
-            </section>
-
-            <button
-              className="flex justify-between items-center self-stretch px-4 py-3 text-base leading-relaxed bg-white rounded-2xl border border-solid border-[color:var(--Neutrals-20,#D6DDEB)] text-slate-800 w-[180px]"
-              aria-label="Select date range"
-              onClick={() => setShowDatePicker((prev) => !prev)}
-            >
-              <span className="self-stretch my-auto text-slate-800">
-                {formatRange(startDate, endDate)}
-              </span>
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets/673e1fe91fa1413d9a4985e3f88c2e3d/324e14ea9c25eb7964c35162952a0c39afe25fa1?placeholderIfAbsent=true"
-                className="object-contain shrink-0 self-stretch my-auto w-5 aspect-square"
-                alt="Calendar icon"
-              />
-            </button>
-
-            {showDatePicker && (
-              <div
-                ref={datePickerRef}
-                className="absolute top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 flex gap-2"
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-bold">Saved Jobs</h1>
+            <Button variant="outline" className="bg-white" asChild>
+              <Link to="/">Back to homepage</Link>
+            </Button>
+          </div>
+          
+          <div className="mb-8 flex items-center justify-between">
+            <div className="flex flex-col">
+              <h2 className="text-2xl font-bold mb-2">Great job, {profile?.fullname.split(" ")[0]}!</h2>
+              <p className="text-gray-600">Here are the jobs you bookmarked from {formatRange(startDate, endDate)}.</p>
+            </div>
+            
+            <div className="flex flex-col items-end">
+              <button
+                className="flex justify-between items-center self-stretch px-4 py-3 text-base leading-relaxed bg-white rounded-2xl border border-solid border-[color:var(--Neutrals-20,#D6DDEB)] text-slate-800 w-[180px]"
+                aria-label="Select date range"
+                onClick={() => setShowDatePicker((prev) => !prev)}
               >
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="border border-gray-300 rounded px-2 py-1"
-                  aria-label="Start date"
+                <span className="self-stretch my-auto text-slate-800">
+                  {formatRange(startDate, endDate)}
+                </span>
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets/673e1fe91fa1413d9a4985e3f88c2e3d/324e14ea9c25eb7964c35162952a0c39afe25fa1?placeholderIfAbsent=true"
+                  className="object-contain shrink-0 self-stretch my-auto w-5 aspect-square"
+                  alt="Calendar icon"
                 />
-                <span className="self-center">-</span>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="border border-gray-300 rounded px-2 py-1"
-                  aria-label="End date"
-                />
-              </div>
-            )}
-          </header>
+              </button>
+
+              {showDatePicker && (
+                <div
+                  ref={datePickerRef}
+                  className="absolute top-[160px] bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 flex gap-2"
+                >
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1"
+                    aria-label="Start date"
+                  />
+                  <span className="self-center">-</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1"
+                    aria-label="End date"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
 
           {savedJobs.length === 0 ? (
             <p>You have no saved jobs.</p>

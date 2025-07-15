@@ -36,6 +36,7 @@ import ProfilePage from "./pages/settings/ProfilePage";
 import AccountPage from "./pages/settings/AccountPage";
 import OverviewPage from "./pages/settings/OverviewPage";
 import SavedJobs from "./pages/settings/SavedJobsPage";
+import AnnouncedJobs from "./pages/settings/AnnouncedJobsPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -87,6 +88,7 @@ const App = () => (
             <Route path="/applications" element={<AccountPage />} />
             <Route path="/overview" element={<OverviewPage />} />
             <Route path="/saved-jobs" element={<SavedJobs />} />
+            <Route path="/announced-jobs" element={<AnnouncedJobs />} />
           </Route>
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />

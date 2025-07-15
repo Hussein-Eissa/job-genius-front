@@ -60,7 +60,7 @@ const OverviewPage = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-4xl font-bold">Overview</h1>
             <Button variant="outline" className="bg-white" asChild>
-              <a href="/">Back to homepage</a>
+              <Link to="/">Back to homepage</Link>
             </Button>
           </div>
           

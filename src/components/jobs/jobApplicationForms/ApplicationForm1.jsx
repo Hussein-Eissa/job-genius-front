@@ -51,7 +51,7 @@ const ApplicationForm1 = ({ onNext }) => {
           sx={{ width: { xs: "100%", lg: "40%" } }}
         >
           <div>
-            <label className="block font-medium py-2">{`Full Name (Required)`}</label>
+            <label className="block font-medium py-2">{`Full Name`}</label>
             <Input
               {...register("fullname", { required: true })}
               placeholder="Enter your Full Name"
@@ -62,7 +62,7 @@ const ApplicationForm1 = ({ onNext }) => {
           </div>
 
           <div>
-            <label className="block font-medium py-2 !text-blue-900">{`Email Address (Required)`}</label>
+            <label className="block font-medium py-2 !text-blue-900">{`Email Address`}</label>
             <Input
               {...register("email", {
                 required: true,
@@ -79,18 +79,18 @@ const ApplicationForm1 = ({ onNext }) => {
           </div>
 
           <div>
-            <label className="block font-medium py-2">{`Phone Number (Required)`}</label>
+            <label className="block font-medium py-2">{`Phone Number`}</label>
             <Input
               {...register("phone", {
                 required: "Phone number is required",
                 pattern: {
-                  value: /^01[2|5|1][0-9]{8}$/, 
+                  value: /^01[2|0|1][0-9]{8}$/, 
                   message: "Phone number must be 11 digits and start with 01",
                 },
               })}
             />
             {errors.phone && (
-              <p className="text-red-500 text-sm">{errors.phone.message}</p>
+              <p className="text-red-500 mt-1 text-sm">{errors.phone.message}</p>
             )}
           </div>
         </Stack>

@@ -8,6 +8,7 @@ import ProfileSettings from "@/components/settings/ProfileSettings";
 import LoginSettings from "@/components/settings/LoginSettings";
 import NotificationSettings from "@/components/settings/NotificationSettings";
 import DeleteAccountModal from "@/components/settings/DeleteAccountModal";
+import { Link } from "react-router-dom";
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -21,7 +22,7 @@ const SettingsPage = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-4xl font-bold">Settings</h1>
             <Button variant="outline" className="bg-white" asChild>
-              <a href="/">Back to homepage</a>
+              <Link to="/">Back to homepage</Link>
             </Button>
           </div>
           
