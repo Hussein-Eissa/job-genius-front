@@ -37,7 +37,7 @@ import AccountPage from "./pages/settings/AccountPage";
 import OverviewPage from "./pages/settings/OverviewPage";
 import SavedJobs from "./pages/settings/SavedJobsPage";
 import AnnouncedJobs from "./pages/settings/AnnouncedJobsPage";
-
+import OverViewTaps from "./pages/settings/AnnoncedJops/OverViewJobTabs/OverViewSection";
 import ProtectedRoute from "./ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -60,6 +60,7 @@ const App = () => (
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           {/* Trial Route */}
           <Route path="/application-form" element={<ApplivcationForm />} />
+          <Route path="/announced-jobs/tab1" element={<OverViewTaps />} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>

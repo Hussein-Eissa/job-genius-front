@@ -7,15 +7,15 @@ interface JobBenefit {
 }
 
 interface Category {
-  name?: string; // Adjust if API provides more details
+  name?: string; 
 }
 
 interface Skill {
-  name?: string; // Adjust if API provides more details
+  name?: string; 
 }
 
 interface JobApplication {
-  id?: number; // Adjust if API provides more details
+  id?: number;
 }
 
 export interface JobListing {

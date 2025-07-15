@@ -84,7 +84,7 @@ const ApplicationForm1 = ({ onNext }) => {
               {...register("phone", {
                 required: "Phone number is required",
                 pattern: {
-                  value: /^01[2|0|1][0-9]{8}$/, 
+                  value: /^01[2|0|1|5][0-9]{8}$/, 
                   message: "Phone number must be 11 digits and start with 01",
                 },
               })}
