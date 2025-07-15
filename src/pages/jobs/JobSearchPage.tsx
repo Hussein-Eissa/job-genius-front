@@ -101,11 +101,6 @@ const JobSearchPage = () => {
                     <circle cx="12" cy="10" r="3" />
                   </svg>
                 </span>
-                <span className="absolute right-3 top-3 text-gray-400">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                </span>
               </div>
               
               <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition flex items-center justify-center min-w-[100px]" onClick={SearchHandler} disabled={searchLoading}>

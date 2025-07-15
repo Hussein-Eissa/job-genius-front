@@ -20,13 +20,13 @@ const DeleteAccountModal = ({ open, onOpenChange }) => {
         <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
           <Button 
             variant="outline" 
-            className="flex-1 border-jobblue text-jobblue hover:bg-jobblue/10" 
+            className="flex-1 border-jobblue text-jobblue"
             onClick={() => onOpenChange(false)}
           >
             No, Cancel
           </Button>
           <Button 
-            className="flex-1 bg-red-600 hover:bg-red-700" 
+            className="flex-1 bg-red-600 text-red-600 hover:bg-red-50"
             onClick={() => onOpenChange(false)}
           >
             Yes, Delete

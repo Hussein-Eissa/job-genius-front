@@ -1,91 +1,164 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useNotificationStore } from "@/reducers/NotificationReducerStore";
+import { toast } from "@/components/ui/sonner";
 import { Button } from "../ui/button";
 
 const NotificationSettings = () => {
-  const {updateNotificationSettings } = useNotificationStore();
   const [notifications, setNotifications] = useState({
     applicationsOn: true,
     jobsOn: true,
     recommendationsOn: false,
-});
-const handleCheckboxChange = (name: string, checked: boolean) => {
-  if (typeof checked !== "boolean") return;
-  setNotifications((prev) => ({
-    ...prev,
-    [name]: checked,
-  }));
-};
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  // Fetch from API on mount
+  useEffect(() => {
+    const fetchNotificationSettings = async () => {
+      try {
+        const res = await axios.get("https://jobgenius.bsite.net/api/Notification/Settings", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        if (res?.data) {
+          setNotifications(res.data);
+        }
+      } catch (error) {
+        toast.error("Failed to load notification settings", {
+          description: "Please try again later.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotificationSettings();
+  }, []);
+
+  const handleCheckboxChange = (name: keyof typeof notifications, checked: boolean) => {
+    if (typeof checked !== "boolean") return;
+    setNotifications((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
+  // const handleSave = async () => {
+  //   try {
+  //     const res = await axios.put(
+  //       "https://jobgenius.bsite.net/api/Notification/Settings",
+  //       notifications,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (res?.data?.success) {
+  //       toast.success("Saved", {
+  //         description: "Your notification preferences were updated.",
+  //       });
+  //     } else {
+  //       throw new Error("Update failed");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error", {
+  //       description: "Failed to save settings. Please try again.",
+  //     });
+  //   }
+  // };
+
+  const handleSave = async () => {
+    try {
+      await axios.put(
+        "https://jobgenius.bsite.net/api/Notification/Settings",
+        notifications,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      toast.success("Saved", {
+        description: "Your notification preferences were updated.",
+      });
+    } catch (error) {
+      toast.error("Error", {
+        description: "Failed to save settings. Please try again.",
+      });
+    }
+  };
+
 
   return (
     <div>
       <div className="mb-6">
         <h2 className="text-xl font-bold mb-2">Basic Information</h2>
-        <p className="text-gray-600">This is notifications preferences that you can update anytime.</p>
+        <p className="text-gray-600">
+          This is notifications preferences that you can update anytime.
+        </p>
       </div>
-      
-      <div className="mb-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h3 className="text-lg font-medium mb-2">Notifications</h3>
-            <p className="text-gray-600">
-              Customize your preferred notification settings
-            </p>
+
+      {loading ? (
+        <p className="text-gray-600">Loading settings...</p>
+      ) : (
+        <div className="mb-8">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h3 className="text-lg font-medium mb-2">Notifications</h3>
+              <p className="text-gray-600">Customize your preferred notification settings</p>
+            </div>
           </div>
+
+          <div className="space-y-6">
+            {[
+              {
+                key: "applicationsOn",
+                label: "Applications",
+                description: "Notifications for jobs you have applied to",
+              },
+              {
+                key: "jobsOn",
+                label: "Jobs",
+                description: "Notifications for job openings that suit your profile",
+              },
+              {
+                key: "recommendationsOn",
+                label: "Recommendations",
+                description: "Personalized recommendations from recruiters",
+              },
+            ].map(({ key, label, description }) => (
+              <div key={key} className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id={key}
+                      name={key}
+                      checked={notifications[key as keyof typeof notifications]}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange(key as keyof typeof notifications, checked)
+                      }
+                    />
+                    <Label htmlFor={key} className="font-medium">
+                      {label}
+                    </Label>
+                  </div>
+                  <p className="text-gray-600 text-sm ml-6 mt-1">{description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Button className="mt-6" onClick={handleSave}>
+            Save
+          </Button>
         </div>
-        
-        <div className="space-y-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="applications" 
-                defaultChecked 
-                name="applicationsOn" 
-                checked={notifications.applicationsOn}
-                onCheckedChange={(checked) => handleCheckboxChange("applicationsOn", checked)}/>
-                <Label htmlFor="applications" className="font-medium">Applications</Label>
-              </div>
-              <p className="text-gray-600 text-sm ml-6 mt-1">
-                These are notifications for jobs that you have applied to
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="jobs"  name="jobsOn" checked={notifications.jobsOn}
-  onCheckedChange={(checked) => handleCheckboxChange("jobsOn", checked)} />
-                <Label htmlFor="jobs" className="font-medium">Jobs</Label>
-              </div>
-              <p className="text-gray-600 text-sm ml-6 mt-1">
-                These are notifications for job openings that suit your profile
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="recommendations" name="recommendationsOn" 
-                checked={notifications.recommendationsOn}
-  onCheckedChange={(checked) => handleCheckboxChange("recommendationsOn", checked)} />
-                <Label htmlFor="recommendations" className="font-medium">Recommendations</Label>
-              </div>
-              <p className="text-gray-600 text-sm ml-6 mt-1">
-                These are notifications for personalized recommendations from our recruiters
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <Button className="w-25" onClick={() => {
-        updateNotificationSettings(notifications);
-        console.log(notifications);
-      }}>Save</Button>
+      )}
     </div>
   );
 };

@@ -444,34 +444,18 @@ const ProfilePage = () => {
                     <h2 className="text-2xl font-bold mr-2">
                       {profile?.fullname || "Loading..."}
                     </h2>
-                    <Button
+                    {/* <Button
                       variant="ghost"
                       size="sm"
                       className="p-1 h-auto"
                       onClick={() => setShowEditBasicInfoModal(true)}
                     >
                       <Pencil size={16} />
-                    </Button>
+                    </Button> */}
                   </div>
                   <p className="text-gray-700 mb-2">{profile?.jobTitle || "N/A"}</p>
                   <div className="flex items-center text-gray-600 text-sm">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M12 22C16 18 20 14.4183 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 14.4183 8 18 12 22Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="ml-1">Cairo, Egypt</span>
+                    <span className="ml-1">{profile?.type}</span>
                   </div>
                 </div>
                 <Button
@@ -849,9 +833,9 @@ const ProfilePage = () => {
       <Dialog open={showProfileSetupModal} onOpenChange={setShowProfileSetupModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="text-center">
-            <div className="mx-auto mb-2">
+            <div className="mx-auto mb-2 flex flex-col items-center justify-center">
               <LogoIcon className="h-10 w-10" />
-              <span className="ml-2 text-xl font-semibold">JobGenius</span>
+              <span className="text-xl font-semibold">JobGenius</span>
             </div>
             <DialogTitle className="text-2xl">You must Continue your profile setup</DialogTitle>
             <DialogDescription className="text-base">
@@ -861,7 +845,10 @@ const ProfilePage = () => {
           <DialogFooter className="sm:justify-center mt-4">
             <Button
               className="bg-jobblue hover:bg-jobblue-dark w-full sm:w-auto"
-              onClick={() => setShowProfileSetupModal(false)}
+              onClick={() => {
+                setShowProfileSetupModal(false);
+                setShowEditBasicInfoModal(true);
+              }}
             >
               OK, Let's Go
             </Button>

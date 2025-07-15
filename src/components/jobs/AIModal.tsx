@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { DialogContent } from "@/components/ui/dialog";
+import LogoIcon from "@/components/common/LogoIcon";
 
 interface AIModalProps {
   loading?: boolean;
@@ -13,9 +14,7 @@ export const AIInfoModal = ({ onSubmit, onClose }: AIModalProps) => {
     <DialogContent className="max-w-md p-6">
       <div className="mb-6 mt-2">
         <div className="flex justify-center mb-4">
-          <div className="h-12 w-12 bg-[#193549] rounded-md flex items-center justify-center text-white font-bold">
-            JG
-          </div>
+          <LogoIcon className="h-15 w-15" />
         </div>
         <h2 className="text-xl font-semibold text-gray-800 text-center">AI-Powered Job Suggestions by JobGenius</h2>
         
@@ -45,9 +44,7 @@ export const AILoadingModal = () => {
     <DialogContent className="max-w-md p-6 text-center">
       <div className="mb-6 mt-8">
         <div className="flex justify-center mb-6">
-          <div className="h-12 w-12 bg-[#193549] rounded-md flex items-center justify-center text-white font-bold">
-            JG
-          </div>
+          <LogoIcon className="h-15 w-15" />
         </div>
         <h2 className="text-xl font-semibold text-gray-800">Analyzing your profile,</h2>
         <p className="text-jobblue mt-1">Finding the best jobs for you!</p>

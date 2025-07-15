@@ -91,19 +91,21 @@ const JobCard = ({
           </div>
         </div>
       </div>
-      <div className="flex gap-2 w-full sm:w-auto">
-        <Button variant="outline" size="sm" className="rounded-md px-3" onClick={() => handleSaveJob(id)}>
-          <Bookmark className="h-4 w-4" style={{ color: isJobSaved ? "gold" : "black" }} />
-        </Button>
-        <Link to={`/jobs/${id}`} className="w-full sm:w-auto">
-          <Button size="sm" className="rounded-md w-full">Apply</Button>
-        </Link>
-      </div>
-      {applicationSent !== undefined && capacity !== undefined && (
-        <div className="text-xs text-gray-500 mt-1 sm:mt-0 sm:ml-auto">
-          {applicationSent} applied of {capacity} capacity
+      <div className="flex flex-col gap-2 w-full sm:w-auto">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="sm" className="rounded-md px-3" onClick={() => handleSaveJob(id)}>
+            <Bookmark className="h-4 w-4" style={{ color: isJobSaved ? "gold" : "black" }} />
+          </Button>
+          <Link to={`/jobs/${id}`} className="w-full sm:w-auto">
+            <Button size="sm" className="rounded-md w-full">Apply</Button>
+          </Link>
         </div>
-      )}
+        {applicationSent !== undefined && capacity !== undefined && (
+          <div className="text-xs text-gray-500 mt-1 sm:mt-0 sm:ml-auto">
+            {applicationSent} applied of {capacity} capacity
+          </div>
+        )}
+      </div>
     </div>
   );
 };
