@@ -194,7 +194,7 @@ export default function ApplicantTable() {
   ];
 
   return (
-    <Box sx={{ overflow: "hidden", p: 2, width: "90vw", m: "auto" }}>
+    <Box sx={{ overflow: "hidden", p: 2, width: "100%", m: "auto" }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
         Applicant List
       </Typography>
