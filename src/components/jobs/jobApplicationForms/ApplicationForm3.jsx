@@ -35,7 +35,7 @@ const ApplicationForm3 = () => {
     Array.isArray(formData.skills)
       ? formData.skills
       : typeof formData.skills === "string"
-      ? formData.skills.split(",").filter((item) => typeof item === "string" && item.trim())
+      ? formData.skills.split(".").filter((item) => typeof item === "string" && item.trim())
       : []
   );
   const [skillInput, setSkillInput] = React.useState("");
@@ -44,7 +44,7 @@ const ApplicationForm3 = () => {
     Array.isArray(formData.categories)
       ? formData.categories
       : typeof formData.categories === "string"
-      ? formData.categories.split(",").filter((item) => typeof item === "string" && item.trim())
+      ? formData.categories.split(".").filter((item) => typeof item === "string" && item.trim())
       : []
   );
   const [categoryInput, setCategoryInput] = React.useState("");
@@ -53,7 +53,7 @@ const ApplicationForm3 = () => {
     Array.isArray(formData.responsibilities)
       ? formData.responsibilities
       : typeof formData.responsibilities === "string"
-      ? formData.responsibilities.split(",").filter((item) => typeof item === "string" && item.trim())
+      ? formData.responsibilities.split(".").filter((item) => typeof item === "string" && item.trim())
       : []
   );
   const [responsibilityInput, setResponsibilityInput] = React.useState("");
@@ -62,7 +62,7 @@ const ApplicationForm3 = () => {
     Array.isArray(formData.whoYouAre)
       ? formData.whoYouAre
       : typeof formData.whoYouAre === "string"
-      ? formData.whoYouAre.split(",").filter((item) => typeof item === "string" && item.trim())
+      ? formData.whoYouAre.split(".").filter((item) => typeof item === "string" && item.trim())
       : []
   );
   const [whoYouAreInput, setWhoYouAreInput] = React.useState("");
@@ -71,7 +71,7 @@ const ApplicationForm3 = () => {
     Array.isArray(formData.niceToHaves)
       ? formData.niceToHaves
       : typeof formData.niceToHaves === "string"
-      ? formData.niceToHaves.split(",").filter((item) => typeof item === "string" && item.trim())
+      ? formData.niceToHaves.split(".").filter((item) => typeof item === "string" && item.trim())
       : []
   );
   const [niceToHavesInput, setNiceToHavesInput] = React.useState("");
@@ -180,9 +180,9 @@ const ApplicationForm3 = () => {
       country: data.country || "",
       type: data.type || "",
       description: plainDescription,
-      responsibilities: responsibilities.length > 0 ? responsibilities.join(",") : "",
-      whoYouAre: whoYouAre.length > 0 ? whoYouAre.join(",") : "",
-      niceToHaves: niceToHaves.length > 0 ? niceToHaves.join(",") : "",
+      responsibilities: responsibilities.length > 0 ? responsibilities.join(".") : "",
+      whoYouAre: whoYouAre.length > 0 ? whoYouAre.join(".") : "",
+      niceToHaves: niceToHaves.length > 0 ? niceToHaves.join(".") : "",
       capacity: Number(data.capacity) || 0,
       applyBefore: formattedApplyBefore,
       salaryFrom: Number(data.salaryFrom) || 0,
