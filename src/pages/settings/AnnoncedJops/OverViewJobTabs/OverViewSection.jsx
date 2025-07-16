@@ -35,7 +35,7 @@ export default function Tab1({ jobdeails }) {
 
       {/* <ApplicantTable /> */}
 
-      <Box
+      {/* <Box
         sx={{
           width: "100%",
           display: "flex",
@@ -74,7 +74,7 @@ export default function Tab1({ jobdeails }) {
             Save
           </Button>
         </Box>
-      </Box>
+      </Box> */}
 
       {/* Pagination */}
       <Pagination

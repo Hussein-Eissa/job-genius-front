@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
@@ -26,12 +26,17 @@ import "react-quill/dist/quill.snow.css";
 
 const Tab3 = ({ job }) => {
   const { updateForm, formData } = useJobForm();
+  const isInitialized = useRef(false); // Prevent multiple initializations
 
   // Helper function to ensure array initialization
   const toArray = (data, separator = ".") => {
-    if (Array.isArray(data)) return data;
+    if (Array.isArray(data))
+      return data.filter((item) => typeof item === "string" && item.trim());
     if (typeof data === "string" && data)
-      return data.split(separator).filter((item) => item.trim());
+      return data
+        .split(separator)
+        .map((item) => item.trim())
+        .filter((item) => item);
     return [];
   };
 
@@ -41,28 +46,23 @@ const Tab3 = ({ job }) => {
       toArray(job?.skills?.$values || job?.skills, ",")
   );
   const [skillInput, setSkillInput] = React.useState("");
-
   const [categories, setCategories] = React.useState(
     toArray(formData.categories, ",") ||
       toArray(job?.categories?.$values || job?.categories, ",")
   );
   const [categoryInput, setCategoryInput] = React.useState("");
-
   const [responsibilities, setResponsibilities] = React.useState(
     toArray(formData.responsibilities) || toArray(job?.responsibilities)
   );
   const [responsibilityInput, setResponsibilityInput] = React.useState("");
-
   const [whoYouAre, setWhoYouAre] = React.useState(
     toArray(formData.whoYouAre) || toArray(job?.whoYouAre)
   );
   const [whoYouAreInput, setWhoYouAreInput] = React.useState("");
-
   const [niceToHaves, setNiceToHaves] = React.useState(
     toArray(formData.niceToHaves) || toArray(job?.niceToHaves)
   );
   const [niceToHavesInput, setNiceToHavesInput] = React.useState("");
-
   const [benefits, setBenefits] = React.useState(
     Array.isArray(formData.jobBenefits)
       ? formData.jobBenefits
@@ -85,83 +85,108 @@ const Tab3 = ({ job }) => {
 
   // Initialize formData with job data or localStorage on mount
   useEffect(() => {
+    if (isInitialized.current) return; // Prevent re-running
+    isInitialized.current = true;
+
     console.log("job prop on render:", job);
     const savedData = localStorage.getItem("formData3");
     const initialFormData = savedData ? JSON.parse(savedData) : {};
 
-    if (job && !formData.title && !formData.company) {
-      const jobFormData = {
-        title: job.title || "",
-        company: job.company || "",
-        city: job.city || "",
-        country: job.country || "",
-        type: job.type || "",
-        description: job.description || "",
-        responsibilities:
-          typeof job.responsibilities === "string" ? job.responsibilities : "",
-        whoYouAre: typeof job.whoYouAre === "string" ? job.whoYouAre : "",
-        niceToHaves: typeof job.niceToHaves === "string" ? job.niceToHaves : "",
-        capacity: job.capacity || 0,
-        applyBefore: job.applyBefore ? job.applyBefore.split("T")[0] : "",
-        salaryFrom: job.salaryFrom || 0,
-        salaryTo: job.salaryTo || 0,
-        companyWebsite: job.companyWebsite || "",
-        keywords: job.keywords || "",
-        additionalInformation: job.additionalInformation || "",
-        companyPapers: job.companyPapers || "",
-        categories: Array.isArray(job.categories?.$values)
-          ? job.categories.$values
-          : toArray(job?.categories, ","),
-        skills: Array.isArray(job.skills?.$values)
-          ? job.skills.$values
-          : toArray(job?.skills, ","),
-        jobBenefits: Array.isArray(job.jobBenefits?.$values)
-          ? job.jobBenefits.$values
-          : typeof job.jobBenefits === "string"
-          ? JSON.parse(job.jobBenefits || "[]")
-          : [],
-        fullname: formData.fullname || "",
-        email: formData.email || "",
-        phone: formData.phone || "",
-      };
-      updateForm(jobFormData);
-      setResponsibilities(toArray(jobFormData.responsibilities));
-      setWhoYouAre(toArray(jobFormData.whoYouAre));
-      setNiceToHaves(toArray(jobFormData.niceToHaves));
-      setSkills(toArray(jobFormData.skills, ","));
-      setCategories(toArray(jobFormData.categories, ","));
-      setBenefits(
-        Array.isArray(jobFormData.jobBenefits) ? jobFormData.jobBenefits : []
-      );
-      console.log("Initialized formData with job data:", jobFormData);
-    } else if (savedData && !formData.title && !formData.company) {
-      updateForm({
-        ...initialFormData,
-        fullname: formData.fullname || "",
-        email: formData.email || "",
-        phone: formData.phone || "",
-      });
-      setResponsibilities(toArray(initialFormData.responsibilities));
-      setWhoYouAre(toArray(initialFormData.whoYouAre));
-      setNiceToHaves(toArray(initialFormData.niceToHaves));
-      setSkills(toArray(initialFormData.skills, ","));
-      setCategories(toArray(initialFormData.categories, ","));
-      setBenefits(
-        Array.isArray(initialFormData.jobBenefits)
-          ? initialFormData.jobBenefits
-          : []
-      );
-      console.log("Initialized formData with localStorage:", initialFormData);
-    }
-  }, [
-    job,
-    updateForm,
-    formData.title,
-    formData.company,
-    formData.fullname,
-    formData.email,
-    formData.phone,
-  ]);
+    const jobFormData = {
+      title: initialFormData.title || job?.title || formData.title || "",
+      company:
+        initialFormData.company || job?.company || formData.company || "",
+      city: initialFormData.city || job?.city || formData.city || "",
+      country:
+        initialFormData.country || job?.country || formData.country || "",
+      type: initialFormData.type || job?.type || formData.type || "",
+      description:
+        initialFormData.description ||
+        job?.description ||
+        formData.description ||
+        "",
+      responsibilities:
+        toArray(initialFormData.responsibilities) ||
+        toArray(formData.responsibilities) ||
+        toArray(job?.responsibilities) ||
+        [],
+      whoYouAre:
+        toArray(initialFormData.whoYouAre) ||
+        toArray(formData.whoYouAre) ||
+        toArray(job?.whoYouAre) ||
+        [],
+      niceToHaves:
+        toArray(initialFormData.niceToHaves) ||
+        toArray(formData.niceToHaves) ||
+        toArray(job?.niceToHaves) ||
+        [],
+      capacity:
+        initialFormData.capacity || job?.capacity || formData.capacity || 0,
+      applyBefore:
+        initialFormData.applyBefore ||
+        (job?.applyBefore ? job.applyBefore.split("T")[0] : "") ||
+        formData.applyBefore ||
+        "",
+      salaryFrom:
+        initialFormData.salaryFrom ||
+        job?.salaryFrom ||
+        formData.salaryFrom ||
+        0,
+      salaryTo:
+        initialFormData.salaryTo || job?.salaryTo || formData.salaryTo || 0,
+      companyWebsite:
+        initialFormData.companyWebsite ||
+        job?.companyWebsite ||
+        formData.companyWebsite ||
+        "",
+      keywords:
+        initialFormData.keywords || job?.keywords || formData.keywords || "",
+      additionalInformation:
+        initialFormData.additionalInformation ||
+        job?.additionalInformation ||
+        formData.additionalInformation ||
+        "",
+      companyPapers:
+        initialFormData.companyPapers ||
+        job?.companyPapers ||
+        formData.companyPapers ||
+        "",
+      categories:
+        toArray(initialFormData.categories, ",") ||
+        toArray(formData.categories, ",") ||
+        toArray(job?.categories?.$values || job?.categories, ",") ||
+        [],
+      skills:
+        toArray(initialFormData.skills, ",") ||
+        toArray(formData.skills, ",") ||
+        toArray(job?.skills?.$values || job?.skills, ",") ||
+        [],
+      jobBenefits: Array.isArray(initialFormData.jobBenefits)
+        ? initialFormData.jobBenefits
+        : Array.isArray(formData.jobBenefits)
+        ? formData.jobBenefits
+        : Array.isArray(job?.jobBenefits?.$values)
+        ? job.jobBenefits.$values
+        : typeof job?.jobBenefits === "string" && job.jobBenefits
+        ? JSON.parse(job.jobBenefits || "[]")
+        : [],
+      fullname:
+        initialFormData.fullname || job?.fullname || formData.fullname || "",
+      email: initialFormData.email || job?.email || formData.email || "",
+      phone: initialFormData.phone || job?.phone || formData.phone || "",
+    };
+    updateForm(jobFormData);
+    setResponsibilities(toArray(jobFormData.responsibilities));
+    setWhoYouAre(toArray(jobFormData.whoYouAre));
+    setNiceToHaves(toArray(jobFormData.niceToHaves));
+    setSkills(toArray(jobFormData.skills, ","));
+    setCategories(toArray(jobFormData.categories, ","));
+    setBenefits(
+      Array.isArray(jobFormData.jobBenefits) ? jobFormData.jobBenefits : []
+    );
+    localStorage.setItem("formData3", JSON.stringify(jobFormData));
+    console.log("Initialized formData:", jobFormData);
+  }, [job, updateForm]); // Removed formData from dependencies
 
   // Log formData changes for debugging
   useEffect(() => {
@@ -174,6 +199,7 @@ const Tab3 = ({ job }) => {
     control,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -269,9 +295,9 @@ const Tab3 = ({ job }) => {
 
     const cleanedData = {
       title: data.title || "",
-      company: data.company || "",
-      city: data.city || "",
-      country: data.country || "",
+      company: formData.company || job?.company || "",
+      city: formData.city || job?.city || "",
+      country: formData.country || job?.country || "",
       type: data.type || "",
       description: plainDescription,
       responsibilities:
@@ -282,7 +308,7 @@ const Tab3 = ({ job }) => {
       applyBefore: formattedApplyBefore,
       salaryFrom: Number(data.salaryFrom) || 0,
       salaryTo: Number(data.salaryTo) || 0,
-      companyWebsite: data.companyWebsite || "",
+      companyWebsite: formData.companyWebsite || job?.companyWebsite || "",
       keywords: data.keywords || "",
       additionalInformation: data.additionalInformation || "",
       companyPapers: data.companyPapers || "",
@@ -291,27 +317,71 @@ const Tab3 = ({ job }) => {
       jobBenefits: benefits.filter(
         (b) => b.title.trim() || b.description.trim()
       ),
-      fullname: formData.fullname || "",
-      email: formData.email || "",
-      phone: formData.phone || "",
+      fullname: formData.fullname || job?.fullname || "",
+      email: formData.email || job?.email || "",
+      phone: formData.phone || job?.phone || "",
     };
 
     console.log("Payload sent to server:", cleanedData);
-    updateForm({
-      ...cleanedData,
-      categories: cleanedData.categories.join(","),
-      skills: cleanedData.skills.join(","),
-    });
-    localStorage.setItem(
-      "formData3",
-      JSON.stringify({
-        ...cleanedData,
-        categories: cleanedData.categories.join(","),
-        skills: cleanedData.skills.join(","),
-      })
-    );
+    updateForm(cleanedData);
+    localStorage.setItem("formData3", JSON.stringify(cleanedData));
     console.log("Submitted Data:", cleanedData);
     handleFinalSubmit(cleanedData);
+  };
+
+  const handleClearForm = () => {
+    reset({
+      title: "",
+      type: "",
+      description: "",
+      responsibilities: [],
+      whoYouAre: [],
+      niceToHaves: [],
+      capacity: 0,
+      applyBefore: "",
+      salaryFrom: 0,
+      salaryTo: 0,
+      keywords: "",
+      additionalInformation: "",
+      companyPapers: "",
+      categories: [],
+      skills: [],
+      jobBenefits: [],
+    });
+    setSkills([]);
+    setCategories([]);
+    setResponsibilities([]);
+    setWhoYouAre([]);
+    setNiceToHaves([]);
+    setBenefits([]);
+    setSkillInput("");
+    setCategoryInput("");
+    setResponsibilityInput("");
+    setWhoYouAreInput("");
+    setNiceToHavesInput("");
+    setBenefitInput({ title: "", description: "" });
+    const clearedData = {
+      ...formData,
+      title: "",
+      type: "",
+      description: "",
+      responsibilities: "",
+      whoYouAre: "",
+      niceToHaves: "",
+      capacity: 0,
+      applyBefore: "",
+      salaryFrom: 0,
+      salaryTo: 0,
+      keywords: "",
+      additionalInformation: "",
+      companyPapers: "",
+      categories: [],
+      skills: [],
+      jobBenefits: [],
+    };
+    updateForm(clearedData);
+    localStorage.setItem("formData3", JSON.stringify(clearedData));
+    console.log("Tab3 Form cleared:", clearedData);
   };
 
   const handleFinalSubmit = async (data) => {
@@ -365,38 +435,76 @@ const Tab3 = ({ job }) => {
   };
 
   return (
-    <Stack direction="column" className="w-full">
-      <Box className="w-[98%] ml-auto my-5 border-b border-gray-300">
-        <Typography variant="h5" className="font-bold text-[#25324B] py-2.5">
+    <Stack direction="column" sx={{ width: "100%" }}>
+      <Box
+        sx={{
+          width: "98%",
+          marginLeft: "auto",
+          marginTop: "20px",
+          marginBottom: "20px",
+          borderBottom: "1px solid #7C8493",
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: "bold", color: "#25324B", padding: "10px 0" }}
+        >
           Job Info
         </Typography>
       </Box>
 
-      <Box className="space-y-4 w-full">
+      <Box sx={{ width: "100%", padding: "0 12px" }}>
         <Stack
           direction={{ xs: "column", lg: "row" }}
-          className="p-3 w-full flex justify-evenly gap-4"
+          sx={{
+            padding: "12px",
+            width: "100%",
+            justifyContent: "space-evenly",
+            gap: "16px",
+          }}
         >
           {/* Left Side */}
-          <Stack direction="column" className="lg:w-[40%] space-y-4">
+          <Stack direction="column" sx={{ width: { lg: "40%" }, gap: "16px" }}>
             {/* Job Title */}
             <Box>
-              <label className="block font-medium py-2 text-[#244F6F]">
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Job Title (required)
               </label>
               <Input
                 {...register("title", { required: true })}
                 placeholder="Job title"
-                className="w-full"
+                style={{ width: "100%" }}
               />
               {errors.title && (
-                <p className="text-red-500 text-sm">Job title is required</p>
+                <p
+                  style={{
+                    color: "#EF4444",
+                    fontSize: "14px",
+                    marginTop: "4px",
+                  }}
+                >
+                  Job title is required
+                </p>
               )}
             </Box>
 
             {/* Job Type */}
             <Box>
-              <label className="block font-medium py-2 text-[#244F6F]">
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Job Type (required)
               </label>
               <Controller
@@ -405,7 +513,7 @@ const Tab3 = ({ job }) => {
                 rules={{ required: true }}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger style={{ width: "100%" }}>
                       <SelectValue placeholder={job?.type || "Job Type"} />
                     </SelectTrigger>
                     <SelectContent>
@@ -419,13 +527,28 @@ const Tab3 = ({ job }) => {
                 )}
               />
               {errors.type && (
-                <p className="text-red-500 text-sm">Job type is required</p>
+                <p
+                  style={{
+                    color: "#EF4444",
+                    fontSize: "14px",
+                    marginTop: "4px",
+                  }}
+                >
+                  Job type is required
+                </p>
               )}
             </Box>
 
             {/* Job Description */}
             <Box>
-              <label className="block font-medium py-2 text-[#244F6F]">
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Job Description (required)
               </label>
               <Controller
@@ -450,16 +573,28 @@ const Tab3 = ({ job }) => {
                       onChange={field.onChange}
                       modules={modules}
                       placeholder={job?.description || "Job description"}
-                      className="h-44 mb-10"
+                      style={{ height: "176px", marginBottom: "40px" }}
                     />
-                    <Box className="text-sm text-gray-500 text-right">
+                    <Box
+                      style={{
+                        fontSize: "14px",
+                        color: "#6B7280",
+                        textAlign: "right",
+                      }}
+                    >
                       {description.replace(/<[^>]+>/g, "").length} / 550
                     </Box>
                   </Box>
                 )}
               />
               {errors.description && (
-                <p className="text-red-500 text-sm">
+                <p
+                  style={{
+                    color: "#EF4444",
+                    fontSize: "14px",
+                    marginTop: "4px",
+                  }}
+                >
                   {errors.description.message}
                 </p>
               )}
@@ -467,16 +602,23 @@ const Tab3 = ({ job }) => {
 
             {/* Job Responsibilities */}
             <Box>
-              <label className="block font-medium py-2 text-[#244F6F]">
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Job Responsibilities (required)
               </label>
-              <Stack direction="row" className="w-full">
+              <Stack direction="row" sx={{ width: "100%" }}>
                 <Input
                   type="text"
                   value={responsibilityInput}
                   onChange={(e) => setResponsibilityInput(e.target.value)}
                   placeholder="Enter Responsibilities"
-                  className="w-full"
+                  style={{ width: "100%" }}
                 />
                 <IconButton
                   color="primary"
@@ -487,7 +629,7 @@ const Tab3 = ({ job }) => {
                       setResponsibilityInput
                     )
                   }
-                  className="flex items-end"
+                  sx={{ display: "flex", alignItems: "flex-end" }}
                 >
                   <AddIcon />
                 </IconButton>
@@ -499,11 +641,11 @@ const Tab3 = ({ job }) => {
                       maxHeight: "150px",
                       width: "95%",
                       overflowY: "auto",
-                      mt: 2,
-                      border: "1px solid #ccc",
+                      marginTop: "8px",
+                      border: "1px solid #D1D5DB",
                       borderRadius: "8px",
-                      padding: 1,
-                      background: "#f9f9f9",
+                      padding: "4px",
+                      backgroundColor: "#F9FAFB",
                     }}
                     direction="column"
                   >
@@ -513,19 +655,20 @@ const Tab3 = ({ job }) => {
                           <Paper
                             key={index}
                             sx={{
-                              p: 1,
-                              m: 1,
-                              borderRadius: "5px",
                               position: "relative",
+                              marginBottom: "4px",
+                              padding: "12px",
+                              width: "100%",
                             }}
                           >
                             <CloseOutlinedIcon
                               sx={{
-                                position: "absolute",
-                                top: 0,
-                                right: 0,
-                                fontSize: "12px",
                                 cursor: "pointer",
+                                position: "absolute",
+                                top: "0",
+                                right: "0",
+                                fontSize: "16px",
+                                color: "#6B7280",
                               }}
                               onClick={() =>
                                 handleRemoveItemFromArray(
@@ -535,7 +678,7 @@ const Tab3 = ({ job }) => {
                                 )
                               }
                             />
-                            <Typography className="font-bold">
+                            <Typography sx={{ fontWeight: "bold" }}>
                               {item.trim()}
                             </Typography>
                           </Paper>
@@ -547,12 +690,34 @@ const Tab3 = ({ job }) => {
 
             {/* Job Benefits */}
             <Box>
-              <label className="block font-medium py-2 text-[#244F6F]">
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Job Benefits
               </label>
-              <Stack direction="row" className="w-full items-center mb-5 gap-2">
+              <Stack
+                direction="row"
+                sx={{
+                  width: "100%",
+                  alignItems: "center",
+                  marginBottom: "20px",
+                  gap: "8px",
+                }}
+              >
                 <Box sx={{ width: "50%" }}>
-                  <label className="block text-sm py-1 text-[#244F6F]">
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "14px",
+                      padding: "4px 0",
+                      color: "#244F6F",
+                    }}
+                  >
                     Title
                   </label>
                   <Input
@@ -565,11 +730,18 @@ const Tab3 = ({ job }) => {
                       })
                     }
                     placeholder="Benefit title"
-                    className="w-full"
+                    style={{ width: "100%" }}
                   />
                 </Box>
                 <Box sx={{ width: "50%" }}>
-                  <label className="block text-sm py-1 text-[#244F6F]">
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "14px",
+                      padding: "4px 0",
+                      color: "#244F6F",
+                    }}
+                  >
                     Description
                   </label>
                   <Input
@@ -582,7 +754,7 @@ const Tab3 = ({ job }) => {
                       })
                     }
                     placeholder="Benefit description"
-                    className="w-full"
+                    style={{ width: "100%" }}
                   />
                 </Box>
                 <IconButton
@@ -590,7 +762,7 @@ const Tab3 = ({ job }) => {
                   onClick={() =>
                     handleAddtoList(benefitInput, setBenefits, setBenefitInput)
                   }
-                  className="flex items-end"
+                  sx={{ display: "flex", alignItems: "flex-end" }}
                 >
                   <AddIcon />
                 </IconButton>
@@ -600,12 +772,13 @@ const Tab3 = ({ job }) => {
                   sx={{
                     maxHeight: "150px",
                     width: "95%",
+                    // marginTop: "4px",
                     overflowY: "auto",
-                    mt: 2,
-                    border: "1px solid #ccc",
+                    marginTop: "8px",
+                    border: "1px solid #D1D5DB",
                     borderRadius: "8px",
-                    padding: 1,
-                    background: "#f9f9f9",
+                    padding: "4px",
+                    backgroundColor: "#F9FAFB",
                   }}
                   direction="column"
                 >
@@ -615,19 +788,20 @@ const Tab3 = ({ job }) => {
                         <Paper
                           key={index}
                           sx={{
-                            p: 1,
-                            m: 1,
-                            borderRadius: "5px",
                             position: "relative",
+                            marginBottom: "4px",
+                            padding: "12px",
+                            width: "100%",
                           }}
                         >
                           <CloseOutlinedIcon
                             sx={{
-                              position: "absolute",
-                              top: 0,
-                              right: 0,
-                              fontSize: "12px",
                               cursor: "pointer",
+                              position: "absolute",
+                              top: "0",
+                              right: "0",
+                              fontSize: "16px",
+                              color: "#6B7280",
                             }}
                             onClick={() =>
                               handleRemoveItemFromArray(
@@ -638,12 +812,12 @@ const Tab3 = ({ job }) => {
                             }
                           />
                           {item.title && (
-                            <Typography className="font-bold">
+                            <Typography sx={{ fontWeight: "bold" }}>
                               {item.title}
                             </Typography>
                           )}
                           {item.description && (
-                            <Typography className="text-sm">
+                            <Typography sx={{ fontSize: "14px" }}>
                               {item.description}
                             </Typography>
                           )}
@@ -658,20 +832,31 @@ const Tab3 = ({ job }) => {
           {/* Right Side */}
           <Stack
             direction={{ xs: "column-reverse", lg: "column" }}
-            sx={{ width: { xs: "100%", lg: "50%" } }}
+            sx={{
+              width: { lg: "45%", xs: "100%" },
+              margin: "0 auto",
+              gap: "16px",
+            }}
           >
             {/* Job Nice to Have */}
             <Box>
-              <label className="block font-medium py-2 text-[#244F6F]">
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Job Nice to Have
               </label>
-              <Stack direction="row" className="w-full">
+              <Stack direction="row" sx={{ width: "100%" }}>
                 <Input
                   type="text"
                   value={niceToHavesInput}
                   onChange={(e) => setNiceToHavesInput(e.target.value)}
                   placeholder="Nice to have"
-                  className="w-full"
+                  style={{ width: "100%" }}
                 />
                 <IconButton
                   color="primary"
@@ -682,7 +867,7 @@ const Tab3 = ({ job }) => {
                       setNiceToHavesInput
                     )
                   }
-                  className="flex items-end"
+                  sx={{ display: "flex", alignItems: "flex-end" }}
                 >
                   <AddIcon />
                 </IconButton>
@@ -693,11 +878,11 @@ const Tab3 = ({ job }) => {
                     maxHeight: "150px",
                     width: "95%",
                     overflowY: "auto",
-                    mt: 2,
-                    border: "1px solid #ccc",
+                    marginTop: "8px",
+                    border: "1px solid #D1D5DB",
                     borderRadius: "8px",
-                    padding: 1,
-                    background: "#f9f9f9",
+                    padding: "4px",
+                    backgroundColor: "#F9FAFB",
                   }}
                   direction="column"
                 >
@@ -707,19 +892,20 @@ const Tab3 = ({ job }) => {
                         <Paper
                           key={index}
                           sx={{
-                            p: 1,
-                            m: 1,
-                            borderRadius: "5px",
                             position: "relative",
+                            marginBottom: "4px",
+                            padding: "12px",
+                            width: "100%",
                           }}
                         >
                           <CloseOutlinedIcon
                             sx={{
-                              position: "absolute",
-                              top: 0,
-                              right: 0,
-                              fontSize: "12px",
                               cursor: "pointer",
+                              position: "absolute",
+                              top: "0",
+                              right: "0",
+                              fontSize: "16px",
+                              color: "#6B7280",
                             }}
                             onClick={() =>
                               handleRemoveItemFromArray(
@@ -729,8 +915,7 @@ const Tab3 = ({ job }) => {
                               )
                             }
                           />
-
-                          <Typography className="font-bold">
+                          <Typography sx={{ fontWeight: "bold" }}>
                             {item.trim()}
                           </Typography>
                         </Paper>
@@ -742,16 +927,23 @@ const Tab3 = ({ job }) => {
 
             {/* Job Categories */}
             <Box>
-              <label className="block font-medium py-2 text-[#244F6F]">
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Job Categories
               </label>
-              <Stack direction="row" className="w-full">
+              <Stack direction="row" sx={{ width: "100%" }}>
                 <Input
                   type="text"
                   value={categoryInput}
                   onChange={(e) => setCategoryInput(e.target.value)}
                   placeholder="Category"
-                  className="w-full"
+                  style={{ width: "100%" }}
                 />
                 <IconButton
                   color="primary"
@@ -762,7 +954,7 @@ const Tab3 = ({ job }) => {
                       setCategoryInput
                     )
                   }
-                  className="flex items-end"
+                  sx={{ display: "flex", alignItems: "flex-end" }}
                 >
                   <AddIcon />
                 </IconButton>
@@ -770,15 +962,14 @@ const Tab3 = ({ job }) => {
               {Array.isArray(categories) && categories.length > 0 && (
                 <Stack
                   sx={{
-                    flexWrap: "wrap",
                     maxHeight: "150px",
                     width: "95%",
                     overflowY: "auto",
-                    mt: 2,
-                    border: "1px solid #ccc",
+                    marginTop: "8px",
+                    border: "1px solid #D1D5DB",
                     borderRadius: "8px",
-                    padding: 1,
-                    background: "#f9f9f9",
+                    padding: "4px",
+                    backgroundColor: "#F9FAFB",
                   }}
                   direction="row"
                 >
@@ -788,19 +979,20 @@ const Tab3 = ({ job }) => {
                         <Paper
                           key={index}
                           sx={{
-                            p: 1,
-                            m: 1,
-                            borderRadius: "5px",
                             position: "relative",
+                            margin: "2px 4px",
+                            padding: "12px",
+                            width: "fit-content",
                           }}
                         >
                           <CloseOutlinedIcon
                             sx={{
-                              position: "absolute",
-                              top: 0,
-                              right: 0,
-                              fontSize: "12px",
                               cursor: "pointer",
+                              position: "absolute",
+                              top: "0",
+                              right: "0",
+                              fontSize: "16px",
+                              color: "#6B7280",
                             }}
                             onClick={() =>
                               handleRemoveItemFromArray(
@@ -810,7 +1002,7 @@ const Tab3 = ({ job }) => {
                               )
                             }
                           />
-                          <Typography className="font-bold">
+                          <Typography sx={{ fontWeight: "bold" }}>
                             {item.trim()}
                           </Typography>
                         </Paper>
@@ -822,23 +1014,30 @@ const Tab3 = ({ job }) => {
 
             {/* Job Skills */}
             <Box>
-              <label className="block font-medium py-2 text-[#244F6F]">
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Job Skills
               </label>
-              <Stack direction="row" className="w-full">
+              <Stack direction="row" sx={{ width: "100%" }}>
                 <Input
                   type="text"
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
                   placeholder="Skill"
-                  className="w-full"
+                  style={{ width: "100%" }}
                 />
                 <IconButton
                   color="primary"
                   onClick={() =>
                     handleAddtoList(skillInput, setSkills, setSkillInput)
                   }
-                  className="flex items-end"
+                  sx={{ display: "flex", alignItems: "flex-end" }}
                 >
                   <AddIcon />
                 </IconButton>
@@ -846,15 +1045,14 @@ const Tab3 = ({ job }) => {
               {Array.isArray(skills) && skills.length > 0 && (
                 <Stack
                   sx={{
-                    flexWrap: "wrap",
                     maxHeight: "150px",
                     width: "95%",
                     overflowY: "auto",
-                    mt: 2,
-                    border: "1px solid #ccc",
+                    marginTop: "8px",
+                    border: "1px solid #D1D5DB",
                     borderRadius: "8px",
-                    padding: 1,
-                    background: "#f9f9f9",
+                    padding: "4px",
+                    backgroundColor: "#F9FAFB",
                   }}
                   direction="row"
                 >
@@ -864,19 +1062,20 @@ const Tab3 = ({ job }) => {
                         <Paper
                           key={index}
                           sx={{
-                            p: 1,
-                            m: 1,
-                            borderRadius: "5px",
                             position: "relative",
+                            margin: " 2px 4px",
+                            padding: "12px",
+                            width: "fit-content",
                           }}
                         >
                           <CloseOutlinedIcon
                             sx={{
-                              position: "absolute",
-                              top: 0,
-                              right: 0,
-                              fontSize: "12px",
                               cursor: "pointer",
+                              position: "absolute",
+                              top: "0",
+                              right: "0",
+                              fontSize: "16px",
+                              color: "#6B7280",
                             }}
                             onClick={() =>
                               handleRemoveItemFromArray(
@@ -886,7 +1085,7 @@ const Tab3 = ({ job }) => {
                               )
                             }
                           />
-                          <Typography className="font-bold">
+                          <Typography sx={{ fontWeight: "bold" }}>
                             {item.trim()}
                           </Typography>
                         </Paper>
@@ -898,16 +1097,23 @@ const Tab3 = ({ job }) => {
 
             {/* Job Who You Are */}
             <Box>
-              <label className="block font-medium py-2 text-[#244F6F]">
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Job Who You Are
               </label>
-              <Stack direction="row" className="w-full">
+              <Stack direction="row" sx={{ width: "100%" }}>
                 <Input
                   type="text"
                   value={whoYouAreInput}
                   onChange={(e) => setWhoYouAreInput(e.target.value)}
                   placeholder="Who you are"
-                  className="w-full"
+                  style={{ width: "100%" }}
                 />
                 <IconButton
                   color="primary"
@@ -918,7 +1124,7 @@ const Tab3 = ({ job }) => {
                       setWhoYouAreInput
                     )
                   }
-                  className="flex items-end"
+                  sx={{ display: "flex", alignItems: "flex-end" }}
                 >
                   <AddIcon />
                 </IconButton>
@@ -929,11 +1135,11 @@ const Tab3 = ({ job }) => {
                     maxHeight: "150px",
                     width: "95%",
                     overflowY: "auto",
-                    mt: 2,
-                    border: "1px solid #ccc",
+                    marginTop: "8px",
+                    border: "1px solid #D1D5DB",
                     borderRadius: "8px",
-                    padding: 1,
-                    background: "#f9f9f9",
+                    padding: "4px",
+                    backgroundColor: "#F9FAFB",
                   }}
                   direction="column"
                 >
@@ -943,19 +1149,20 @@ const Tab3 = ({ job }) => {
                         <Paper
                           key={index}
                           sx={{
-                            p: 1,
-                            m: 1,
-                            borderRadius: "5px",
                             position: "relative",
+                            marginBottom: "4px",
+                            padding: "12px",
+                            width: "100%",
                           }}
                         >
                           <CloseOutlinedIcon
                             sx={{
-                              position: "absolute",
-                              top: 0,
-                              right: 0,
-                              fontSize: "12px",
                               cursor: "pointer",
+                              position: "absolute",
+                              top: "0",
+                              right: "0",
+                              fontSize: "16px",
+                              color: "#6B7280",
                             }}
                             onClick={() =>
                               handleRemoveItemFromArray(
@@ -965,7 +1172,7 @@ const Tab3 = ({ job }) => {
                               )
                             }
                           />
-                          <Typography className="font-bold">
+                          <Typography sx={{ fontWeight: "bold" }}>
                             {item.trim()}
                           </Typography>
                         </Paper>
@@ -976,13 +1183,36 @@ const Tab3 = ({ job }) => {
             </Box>
 
             {/* Salary */}
-            <Box>
-              <label className="block font-medium mt-1 py-2 text-[#244F6F]">
+            <Box sx={{ width: "100%" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  marginTop: "4px",
+                  padding: "8px 0",
+                  color: "#244F6F",
+                }}
+              >
                 Salary
               </label>
-              <Stack direction="row" className="w-full items-center mb-5 gap-2">
+              <Stack
+                direction="row"
+                sx={{
+                  width: "100%",
+                  alignItems: "center",
+                  marginBottom: "20px",
+                  gap: "8px",
+                }}
+              >
                 <Box sx={{ width: "50%" }}>
-                  <label className="block text-sm py-1 text-[#244F6F]">
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "14px",
+                      padding: "4px 0",
+                      color: "#244F6F",
+                    }}
+                  >
                     From
                   </label>
                   <Input
@@ -992,16 +1222,29 @@ const Tab3 = ({ job }) => {
                     })}
                     type="number"
                     placeholder="Salary From"
-                    className="w-full"
+                    style={{ width: "100%" }}
                   />
                   {errors.salaryFrom && (
-                    <p className="text-red-500 text-sm">
+                    <p
+                      style={{
+                        color: "#EF4444",
+                        fontSize: "14px",
+                        marginTop: "4px",
+                      }}
+                    >
                       Salary From must be at least 100
                     </p>
                   )}
                 </Box>
                 <Box sx={{ width: "50%" }}>
-                  <label className="block text-sm py-1 text-[#244F6F]">
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "14px",
+                      padding: "4px 0",
+                      color: "#244F6F",
+                    }}
+                  >
                     To
                   </label>
                   <Input
@@ -1014,10 +1257,16 @@ const Tab3 = ({ job }) => {
                     })}
                     type="number"
                     placeholder="Salary To"
-                    className="w-full"
+                    style={{ width: "100%" }}
                   />
                   {errors.salaryTo && (
-                    <p className="text-red-500 text-sm">
+                    <p
+                      style={{
+                        color: "#EF4444",
+                        fontSize: "14px",
+                        marginTop: "4px",
+                      }}
+                    >
                       {errors.salaryTo.message}
                     </p>
                   )}
@@ -1026,25 +1275,52 @@ const Tab3 = ({ job }) => {
             </Box>
 
             {/* Apply Before & Capacity */}
-            <Box sx={{ width: "100%" }}>
-              <Stack direction="row"  className="w-full items-center mb-5 gap-2">
-                <Box sx={{ width: "48%"  }}>
-                  <label className="block font-medium py-2 text-[#244F6F]">
+            <Box>
+              <Stack
+                direction="row"
+                sx={{
+                  width: "100%",
+                  alignItems: "center",
+                  marginBottom: "20px",
+                  gap: "8px",
+                }}
+              >
+                <Box sx={{ width: "50%" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontWeight: "500",
+                      padding: "4px 0",
+                      color: "#244F6F",
+                    }}
+                  >
                     Apply Before
                   </label>
                   <Input
                     type="date"
                     {...register("applyBefore", { required: true })}
-                    
+                    style={{ width: "100%" }}
                   />
                   {errors.applyBefore && (
-                    <p className="text-red-500 text-sm">
+                    <p
+                      style={{
+                        color: "#EF4444",
+                        fontSize: "14px",
+                        marginTop: "4px",
+                      }}
+                    >
                       Application deadline is required
                     </p>
                   )}
                 </Box>
-                <Box sx={{ width: "48%" }}>
-                  <label className="block font-medium py-2 text-[#244F6F]">
+                <Box sx={{ width: "50%" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      padding: "4px 0",
+                      color: "#244F6F",
+                    }}
+                  >
                     Capacity
                   </label>
                   <Input
@@ -1055,10 +1331,16 @@ const Tab3 = ({ job }) => {
                     })}
                     type="number"
                     placeholder="Capacity"
-                    className="w-full"
+                    style={{ width: "100%" }}
                   />
                   {errors.capacity && (
-                    <p className="text-red-500 text-sm">
+                    <p
+                      style={{
+                        color: "#EF4444",
+                        fontSize: "14px",
+                        marginTop: "4px",
+                      }}
+                    >
                       Capacity must be at least 10
                     </p>
                   )}
@@ -1068,16 +1350,51 @@ const Tab3 = ({ job }) => {
           </Stack>
         </Stack>
 
-        {/* Submit Button */}
-        <Box className="mt-4">
-          <Button
-            type="button"
-            onClick={handleSubmit(onSubmit)}
-            variant="contained"
-            sx={{ backgroundColor: "#244F6F", color: "white" }}
+        {/* Submit and Clear Buttons */}
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            my: "20px",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: { xs: "100%", lg: "30%" },
+              mx: "5%",
+            }}
           >
-            Submit
-          </Button>
+              <Button
+                type="button"
+                variant="outlined"
+                 sx={{
+                    width: "45%",
+                    color: "#333",
+                    border: "1px solid #333",
+                    borderRadius: "10px",
+                  }}
+                onClick={handleClearForm}
+              >
+                Clear
+              </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit(onSubmit)}
+              variant="contained"
+               sx={{
+                  width: "45%",
+                  color: "#fff",
+                  backgroundColor: "#244F6F",
+                  border: "1px solid #333",
+                  borderRadius: "10px",
+                }}
+            >
+              Submit
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Stack>
