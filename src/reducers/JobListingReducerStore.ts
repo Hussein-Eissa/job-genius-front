@@ -57,10 +57,12 @@ export interface JobListingState {
   userJobs: JobListing[];
   categoriesWithCount: CategoryJobCount[];
   savedJobs: JobListing[];
+  totalJobs: number; // Add this new field
   success: boolean | null;
   error?: string;
   isLoading?: boolean;
-  fetchJobs: () => Promise<void>;
+  fetchJobs: (skip?: number) => Promise<void>;
+  calculateTotalJobsCount: () => Promise<number>; // Add this new method
   getJobById: (jobId: number) => Promise<JobListing>;
   createJob: (jobData: JobListing) => Promise<void>;
   updateJob: (jobId: number, jobData: JobListing) => Promise<void>;
@@ -86,23 +88,66 @@ export const useJobStore = create<JobListingState>((set, get) => ({
   userJobs: [],
   categoriesWithCount: [],
   savedJobs: [],
+  totalJobs: 0, // Initialize totalJobs
   success: null,
   error: undefined,
 
-  fetchJobs: async () => {
+  // New method to calculate and store total jobs count
+  calculateTotalJobsCount: async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://jobgenius.bsite.net/api/JobListing", {
+      if (!token) throw new Error("No token found");
+
+      const res = await axios.get("https://jobgenius.bsite.net/api/JobListing?skip=0&limit=300", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      set({ jobs: res.data, success: true, error: undefined });
-      console.log("Fetched jobs:", res.data.$values);
-      return res.data.$values;
+
+      const allJobs = res.data?.$values || res.data || [];
+      const totalCount = allJobs.length;
+      
+      set({ totalJobs: totalCount });
+      console.log("Total jobs count calculated:", totalCount);
+      return totalCount;
+    } catch (error: any) {
+      console.error("Error calculating total jobs count:", error.response?.data || error.message);
+      set({ totalJobs: 0 });
+      return 0;
+    }
+  },
+
+  // Updated fetchJobs - only fetches 10 jobs with skip parameter
+  fetchJobs: async (skip = 0) => {
+    try {
+      set({ isLoading: true });
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      const res = await axios.get(`https://jobgenius.bsite.net/api/JobListing?skip=${skip.toString()}&limit=10`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const jobsData = res.data?.$values || res.data || [];
+      set({ 
+        jobs: jobsData, 
+        success: true, 
+        error: undefined,
+        isLoading: false 
+      });
+      
+      console.log(`Fetched ${jobsData.length} jobs with skip=${skip}`);
+      return jobsData;
     } catch (error: any) {
       console.error("Error fetching jobs:", error.response?.data || error.message);
-      set({ success: false, error: error.response?.data?.message || "Failed to fetch jobs." });
+      set({ 
+        success: false, 
+        error: error.response?.data?.message || "Failed to fetch jobs.",
+        isLoading: false 
+      });
+      throw error;
     }
   },
 
@@ -198,9 +243,11 @@ export const useJobStore = create<JobListingState>((set, get) => ({
     if (!token) throw new Error("Token not found");
 
     const params = new URLSearchParams();
+    params.append("skip", "0");
+    params.append("limit", "10");
     if (keyword) params.append("keyword", keyword);
-    if (country) params.append("country", country);
     if (city) params.append("city", city);
+    if (country) params.append("country", country);
 
     const response = await axios.get(
       `https://jobgenius.bsite.net/api/JobListing/search?${params.toString()}`,

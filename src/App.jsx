@@ -15,7 +15,6 @@ import NotFound from "./pages/NotFound";
 import AddJobPage from "./pages/jobs/AddJobPage";
 import JobListingPage from "./pages/jobs/JobListingPage";
 import JobDetailPage from "./pages/jobs/JobDetailPage";
-import JobSearchPage from "./pages/jobs/JobSearchPage";
 import JobFinancePage from "./pages/jobs/JobFinancePage";
 
 import ResumePage from "./pages/resume/ResumePage";
@@ -64,7 +63,6 @@ const App = () => (
             <Route path="/jobs" element={<JobListingPage />} />
             <Route path="/jobs/:id" element={<JobDetailPage />} />
             <Route path="/jobs/addjob" element={<AddJobPage />} />
-            <Route path="/jobs/search" element={<JobSearchPage />} />
             <Route path="/jobs/finance" element={<JobFinancePage />} />
             <Route path="/jobs/category/:categoryName" element={<JobListingPage />} />
 

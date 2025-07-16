@@ -6,6 +6,8 @@ import {useJobStore} from '@/reducers/JobListingReducerStore';
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import JobAI from "./JobSearchPage";
 
 const JobListingPage = () => {
   const navigate = useNavigate();
@@ -18,7 +20,11 @@ const JobListingPage = () => {
     keyword: ''
   })
   const handleTryNow = () => {
-    navigate("/jobs/search", { state: { triggerAI: true } });
+    // navigate("/jobs/search", { state: { triggerAI: true } });
+    setIsAI(false);
+    setTimeout(() => {
+      setIsAI(true);
+    }, 1000);
   };
 
   const employmentTypes = [
@@ -69,6 +75,8 @@ const JobListingPage = () => {
     setSearchLoading(false);
   }
 
+  const [isAI, setIsAI] = useState(false);
+
   const inputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm({ ...searchTerm, [e.target.name]: e.target.value });
   }
@@ -99,10 +107,10 @@ const JobListingPage = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50 ">
       <Header />
       <main className="flex-grow bg-white">
-        <div className="bg-gray-50 py-16">
+        <div className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">
               Your Next Job, Just a <span className="text-jobblue">Click Away</span>
@@ -155,14 +163,24 @@ const JobListingPage = () => {
             <div className="mt-8 text-center">
               <p className="text-gray-600 mb-4">or</p>
               <h2 className="text-2xl font-bold mb-4">Let <span className="text-jobblue">JobGenius</span> AI Find Your Perfect Job Fit</h2>
-              <button className="bg-jobblue text-white px-6 py-2.5 rounded-md hover:bg-blue-700 transition" onClick={handleTryNow}>
-                Try Now
-              </button>
+              <div className="flex justify-center space-x-4 text-center">
+                <button className="mb-4  bg-jobblue border-2 border-jobblue px-4 py-2 rounded-md hover:text-jobblue hover:bg-white text-white transition" onClick={handleTryNow}>
+                  Try Now
+                </button>
+                {isAI ? (
+                  <button 
+                    onClick={()=>setIsAI(false)}
+                    className="mb-4 text-jobblue border-2 border-jobblue px-4 py-2 rounded-md  hover:underline transition"
+                  >
+                    Back to jobs
+                  </button>) : null}
+              </div>
             </div>
           </div>
         </div>
         
-        <div className="container mx-auto px-4 py-8">
+        {!isAI ? (
+          <div className="container bg-white w-full mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row gap-8">
             <div className="md:w-1/4">
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
@@ -183,6 +201,11 @@ const JobListingPage = () => {
             </div>
           </div>
         </div>
+        ) : (
+          <JobAI />
+        )}
+        
+        
       </main>
       <Footer />
     </div>

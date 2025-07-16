@@ -21,18 +21,18 @@ interface JobListProps {
 const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobListProps) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [currentPage, setCurrentPage] = useState(1);
-  const { fetchJobs, jobs } = useJobStore();
-  const [slicedJobs, setSlicedJobs] = useState<any>([]);
+  const { fetchJobs, jobs, totalJobs, calculateTotalJobsCount, isLoading } = useJobStore();
   const [allAIJobs, setAllAIJobs] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [aiJobsLoading, setAiJobsLoading] = useState(false);
   
   const ITEMS_PER_PAGE = 10;
-  const [totalPages, setTotalPages] = useState(1);
+  const totalPages = Math.ceil(totalJobs / ITEMS_PER_PAGE);
 
   const token = localStorage.getItem("token");
 
   const fetchAIJobs = async () => {
     try {
+      setAiJobsLoading(true);
       const response = await fetch("https://jobgenius.bsite.net/api/JobListing/Recommend", {
         method: "POST",
         headers: {
@@ -45,7 +45,7 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
       if (!response.ok) throw new Error("Failed to fetch AI jobs");
 
       const data = await response.json();
-      const jobs = data?.$values;
+      const jobs = data?.$values || data || [];
 
       if (Array.isArray(jobs)) {
         setAllAIJobs(jobs);
@@ -56,43 +56,32 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
     } catch (error) {
       console.error("Error fetching AI jobs:", error);
       setAllAIJobs([]);
+    } finally {
+      setAiJobsLoading(false);
     }
   };
 
+  // Load jobs and total count on component mount or type change
   useEffect(() => {
     const loadJobs = async () => {
-      setIsLoading(true);
       if (type === 'ai') {
         await fetchAIJobs();
       } else {
-        await fetchJobs();
+        // Calculate total count first, then fetch first page
+        await calculateTotalJobsCount();
+        await fetchJobs(0); // Start with skip=0 (first page)
       }
-      setIsLoading(false);
     };
     loadJobs();
   }, [type]);
 
+  // Fetch jobs when page changes (only for regular jobs, not AI)
   useEffect(() => {
-    let totalItems = 0;
-    let sourceJobs: any[] = [];
-
-    if (type === 'ai') {
-      sourceJobs = allAIJobs;
-    } else if (Array.isArray(jobs)) {
-      sourceJobs = jobs;
-    } else if (jobs?.$values && Array.isArray(jobs.$values)) {
-      sourceJobs = jobs.$values;
+    if (type !== 'ai') {
+      const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+      fetchJobs(skip);
     }
-
-    totalItems = sourceJobs.length;
-    const pages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-    setTotalPages(pages > 0 ? pages : 1);
-
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-
-    setSlicedJobs(sourceJobs.slice(startIndex, endIndex));
-  }, [jobs, allAIJobs, currentPage, type]);
+  }, [currentPage, type]);
 
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -151,6 +140,41 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
     return pages;
   };
 
+  // Get current jobs to display
+  const getCurrentJobs = () => {
+    if (type === 'ai') {
+      // For AI jobs, use client-side pagination
+      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIndex = startIndex + ITEMS_PER_PAGE;
+      return allAIJobs.slice(startIndex, endIndex);
+    } else {
+      // For regular jobs, use server-side pagination
+      return Array.isArray(jobs) ? jobs : (jobs?.$values || []);
+    }
+  };
+
+  // Get total count for display
+  const getTotalCount = () => {
+    if (type === 'ai') {
+      return allAIJobs.length;
+    } else {
+      return totalJobs;
+    }
+  };
+
+  // Get current total pages
+  const getCurrentTotalPages = () => {
+    if (type === 'ai') {
+      return Math.ceil(allAIJobs.length / ITEMS_PER_PAGE);
+    } else {
+      return totalPages;
+    }
+  };
+
+  const currentJobs = getCurrentJobs();
+  const isCurrentlyLoading = type === 'ai' ? aiJobsLoading : isLoading;
+  const currentTotalPages = getCurrentTotalPages();
+
   return (
     <section className="py-8">
       <div className="container mx-auto px-4">
@@ -158,7 +182,7 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
           <h2 className="text-2xl font-bold text-gray-800">
             {title}
             <span className="text-sm font-normal text-gray-500 ml-2">
-              Showing {slicedJobs.length} results
+              Showing {currentJobs.length} of {getTotalCount()} results
             </span>
           </h2>
           
@@ -198,7 +222,18 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
           )}
         </div>
 
-        {isLoading ? (
+        {!isCurrentlyLoading && currentTotalPages >= 1 ? (
+          <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-1'}`}>
+            {currentJobs.map((job) => (
+              <JobCard 
+                key={job.jobID || job.id} 
+                {...job} 
+                id={job.jobID || job.id} 
+                categories={job.categories?.$values || job.categories || []} 
+              />
+            ))}
+          </div>
+        ) : (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="typewriter">
               <div className="slide"><i></i></div>
@@ -207,15 +242,9 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
             </div>
             <p className="mt-4 text-lg text-gray-600 font-medium">Loading Jobs...</p>
           </div>
-        ) : (
-          <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-1'}`}>
-            {slicedJobs.map((job) => (
-              <JobCard key={job.jobID || job.id} {...job} id={job.jobID || job.id} categories={job.categories?.$values || job.categories || []} />
-            ))}
-          </div>
         )}
 
-        {totalPages > 1 && !isLoading && (
+        {currentTotalPages > 1  && (
           <div className="flex justify-center mt-10">
             <div className="flex items-center space-x-2">
               <Button 
@@ -247,7 +276,7 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
                 variant="outline" 
                 size="icon" 
                 onClick={goToNextPage} 
-                disabled={currentPage === totalPages}
+                disabled={currentPage === currentTotalPages}
               >
                 <ArrowRight className="h-4 w-4" />
               </Button>
