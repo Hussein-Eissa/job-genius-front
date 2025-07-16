@@ -6,7 +6,23 @@ import CategorySection from "@/components/home/CategorySection";
 import ResumeSection from "@/components/home/ResumeSection";
 import InterviewSection from "@/components/home/InterviewSection";
 
+import { useJobStore } from "@/reducers/JobListingReducerStore";
+import { useEffect } from "react";
+
+
+
 const Index = () => {
+  const { calculateTotalJobsCount } = useJobStore();
+  
+  useEffect(() => { 
+    const calcjobs = async () => {
+      await calculateTotalJobsCount() 
+      console.log("Total jobs count calculated in Index page");
+    }
+    calcjobs();
+    console.log("Index page loaded");
+  }, []);
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Header />

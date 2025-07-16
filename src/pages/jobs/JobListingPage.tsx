@@ -1,7 +1,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import JobList from "@/components/jobs/JobList";
-import { CheckSquare } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckSquare } from "lucide-react";
 import {useJobStore} from '@/reducers/JobListingReducerStore';
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,7 @@ const JobListingPage = () => {
     { id: 'range3', label: '$1500 - $2000', count: 10 },
     { id: 'range4', label: '$3000 or above', count: 4 },
   ];
-
+   const { fetchJobs, totalJobs, calculateTotalJobsCount, isLoading } = useJobStore();
   const {searchJobs , filterJobs , jobs , categoriesWithCount ,fetchCategoriesWithCount} = useJobStore();
   const [searchTerm, setSearchTerm] = useState({keyword: "", location: ""});
   const [searchLoading, setSearchLoading] = useState(false);
@@ -105,6 +105,79 @@ const JobListingPage = () => {
       </div>
     </div>
   );
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+  const totalPages = Math.ceil(totalJobs / ITEMS_PER_PAGE);
+  const [allAIJobs, setAllAIJobs] = useState<any[]>([]);
+  
+  // Get current total pages
+  const getCurrentTotalPages = () => {
+    if (isAI) {
+      return Math.ceil(allAIJobs.length / ITEMS_PER_PAGE);
+    } else {
+      return totalPages;
+    }
+  };
+  
+  const currentTotalPages = getCurrentTotalPages();
+  
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (currentPage <= 3) {
+        for (let i = 2; i <= 5; i++) {
+          pages.push(i);
+        }
+        if (totalPages > 6) {
+          pages.push(-1);
+          pages.push(totalPages);
+        } else if (totalPages === 6) {
+          pages.push(6);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(-1);
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(-1);
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push(-1);
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 ">
@@ -179,8 +252,8 @@ const JobListingPage = () => {
           </div>
         </div>
         
-        {!isAI ? (
-          <div className="container bg-white w-full mx-auto px-4 py-8">
+        
+        <div className="container bg-white w-full mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row gap-8">
             <div className="md:w-1/4">
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
@@ -195,15 +268,57 @@ const JobListingPage = () => {
                 <Button className="mt-2" onClick={()=>{navigate("/jobs/addjob");}}>Add Your Job</Button>
               </div>
             </div>
-            
             <div className="md:w-3/4">
-              <JobList />
+              {!isAI ? (
+                <JobList currentPage={currentPage} />
+              ) : (
+                <JobAI />
+              )}
+              
+              {currentTotalPages > 1  && (
+                <div className="flex justify-center mt-10">
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={goToPreviousPage} 
+                      disabled={currentPage === 1}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    {getPageNumbers().map((pageNum, index) => 
+                      pageNum === -1 ? (
+                        <span key={`ellipsis-${index}`} className="px-2">...</span>
+                      ) : (
+                        <Button 
+                          key={`page-${pageNum}`}
+                          variant={currentPage === pageNum ? "default" : "outline"} 
+                          size="sm" 
+                          className="w-8 h-8 p-0"
+                          onClick={() => goToPage(pageNum)}
+                        >
+                          {pageNum}
+                        </Button>
+                      )
+                    )}
+                    
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={goToNextPage} 
+                      disabled={currentPage === currentTotalPages}
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
             </div>
           </div>
         </div>
-        ) : (
-          <JobAI />
-        )}
+        
         
         
       </main>

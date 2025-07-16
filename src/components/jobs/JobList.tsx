@@ -16,17 +16,17 @@ interface JobListProps {
   type?: 'all' | 'ai' | 'finance';
   title?: string;
   showFilter?: boolean;
+  currentPage?: number;
 }
 
-const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobListProps) => {
+const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true, currentPage = 0 }: JobListProps) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
-  const [currentPage, setCurrentPage] = useState(1);
+
   const { fetchJobs, jobs, totalJobs, calculateTotalJobsCount, isLoading } = useJobStore();
   const [allAIJobs, setAllAIJobs] = useState<any[]>([]);
   const [aiJobsLoading, setAiJobsLoading] = useState(false);
   
   const ITEMS_PER_PAGE = 10;
-  const totalPages = Math.ceil(totalJobs / ITEMS_PER_PAGE);
 
   const token = localStorage.getItem("token");
 
@@ -63,16 +63,17 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
 
   // Load jobs and total count on component mount or type change
   useEffect(() => {
-    const loadJobs = async () => {
-      if (type === 'ai') {
-        await fetchAIJobs();
-      } else {
-        // Calculate total count first, then fetch first page
-        await calculateTotalJobsCount();
-        await fetchJobs(0); // Start with skip=0 (first page)
-      }
-    };
-    loadJobs();
+    if (!totalJobs) {
+      const loadJobs = async () => {
+        if (type === 'ai') {
+          await fetchAIJobs();
+        } else {
+          // Calculate total count first, then fetch first page
+          await calculateTotalJobsCount();
+        }
+      };
+      loadJobs();
+    }
   }, [type]);
 
   // Fetch jobs when page changes (only for regular jobs, not AI)
@@ -83,62 +84,7 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
     }
   }, [currentPage, type]);
 
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
 
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1);
-    }
-  };
-
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
-    }
-  };
-
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-
-      if (currentPage <= 3) {
-        for (let i = 2; i <= 5; i++) {
-          pages.push(i);
-        }
-        if (totalPages > 6) {
-          pages.push(-1);
-          pages.push(totalPages);
-        } else if (totalPages === 6) {
-          pages.push(6);
-        }
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(-1);
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(-1);
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push(-1);
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
 
   // Get current jobs to display
   const getCurrentJobs = () => {
@@ -162,18 +108,9 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
     }
   };
 
-  // Get current total pages
-  const getCurrentTotalPages = () => {
-    if (type === 'ai') {
-      return Math.ceil(allAIJobs.length / ITEMS_PER_PAGE);
-    } else {
-      return totalPages;
-    }
-  };
-
+  
   const currentJobs = getCurrentJobs();
   const isCurrentlyLoading = type === 'ai' ? aiJobsLoading : isLoading;
-  const currentTotalPages = getCurrentTotalPages();
 
   return (
     <section className="py-8">
@@ -222,7 +159,7 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
           )}
         </div>
 
-        {!isCurrentlyLoading && currentTotalPages >= 1 ? (
+        {!isCurrentlyLoading && totalJobs > 0 ? (
           <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-1'}`}>
             {currentJobs.map((job) => (
               <JobCard 
@@ -244,45 +181,6 @@ const JobList = ({ type = 'all', title = 'All Jobs', showFilter = true }: JobLis
           </div>
         )}
 
-        {currentTotalPages > 1  && (
-          <div className="flex justify-center mt-10">
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={goToPreviousPage} 
-                disabled={currentPage === 1}
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              
-              {getPageNumbers().map((pageNum, index) => 
-                pageNum === -1 ? (
-                  <span key={`ellipsis-${index}`} className="px-2">...</span>
-                ) : (
-                  <Button 
-                    key={`page-${pageNum}`}
-                    variant={currentPage === pageNum ? "default" : "outline"} 
-                    size="sm" 
-                    className="w-8 h-8 p-0"
-                    onClick={() => goToPage(pageNum)}
-                  >
-                    {pageNum}
-                  </Button>
-                )
-              )}
-              
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={goToNextPage} 
-                disabled={currentPage === currentTotalPages}
-              >
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
