@@ -40,7 +40,7 @@ import AnnouncedJobDetails from "./pages/settings/AnnouncedJobdetails";
 import ProtectedRoute from "./ProtectedRoute";
 
 const queryClient = new QueryClient();
-// import ApplivcationForm from './components/jobs/jobApplicationForms/ApplicationForm3'
+import ApplicationForm from './components/jobs/jobApplicationForms/ApllicationForm4';
 import { JobFormProvider } from "./context/jobApplicationFormContext";
 
 const App = () => (
@@ -58,7 +58,6 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
-
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/jobs" element={<JobListingPage />} />
@@ -87,6 +86,7 @@ const App = () => (
             <Route path="/saved-jobs" element={<SavedJobs />} />
             <Route path="/announced-jobs" element={<AnnouncedJobs />} />
             <Route path="/announced-jobs/:id" element={<AnnouncedJobDetails />} />
+            <Route path = '/jobs/:jobId/questions' element={<ApplicationForm />} />
           </Route>
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />

@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import ApplicationForm1 from "@/components/jobs/jobApplicationForms/ApplicationForm1";
 import ApplicationForm2 from "@/components/jobs/jobApplicationForms/ApplicationForm2";
 import ApplicationForm3 from "@/components/jobs/jobApplicationForms/ApplicationForm3";
+import ApplicationForm4 from "@/components/jobs/jobApplicationForms/ApllicationForm4";
 
 const AddJobPage = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -14,6 +15,7 @@ const AddJobPage = () => {
             setCurrentStep(currentStep + 1);
         } else {
             handleFinalSubmit();
+            
         }
     };
 

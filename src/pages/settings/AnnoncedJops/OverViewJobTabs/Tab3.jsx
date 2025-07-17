@@ -561,8 +561,8 @@ const Tab3 = ({ job }) => {
                     message: "Job description must be at least 20 characters",
                   },
                   maxLength: {
-                    value: 550,
-                    message: "Job description must not exceed 550 characters",
+                    value: 1050,
+                    message: "Job description must not exceed 1050 characters",
                   },
                 }}
                 render={({ field }) => (
@@ -582,7 +582,7 @@ const Tab3 = ({ job }) => {
                         textAlign: "right",
                       }}
                     >
-                      {description.replace(/<[^>]+>/g, "").length} / 550
+                      {description.replace(/<[^>]+>/g, "").length} / 1000
                     </Box>
                   </Box>
                 )}

@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState } from "react";
 
+
 const JobFormContext = createContext();
 
 export const JobFormProvider = ({ children }) => {
   const [formData, setFormData] = useState({
     // Temporary not required in backEnd
-    fullname : "",
+    fullname: "",
     email: "",
     phone: "",
     // /////////////////////////////////
@@ -32,6 +33,14 @@ export const JobFormProvider = ({ children }) => {
       {
         title: "",
         description: "",
+      },
+    ],
+    questions: [
+      {
+        title: "",
+        type: "",
+        answers: "Not defined yet",
+        correct: "In Progress",
       },
     ],
   });
