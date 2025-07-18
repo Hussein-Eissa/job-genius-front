@@ -12,189 +12,131 @@ import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { format } from "date-fns";
+
 // import { useModal } from "../Context/ModalContext";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select.tsx";
 
-const rows = [
-  {
-    id: 1,
-    IDnumber: 1,
-    name: "Aymen Khalil ",
-    DateOfApply: "AymenKhalil123@gmail.com",
-    TimeOfApply: "30",
-    Role: "123-456-7890",
-    Access: "Admin",
-  },
-  {
-    id: 2,
-    IDnumber: 2,
-    name: "Data Grid Pro",
-    DateOfApply: "the Pro version",
-    TimeOfApply: "30",
-    Role: "123-456-7890",
-    Access: "Admin",
-  },
-  {
-    id: 3,
-    IDnumber: 3,
-    name: "Data Grid Premium",
-    DateOfApply: "the Premium version",
-    TimeOfApply: "30",
-    Role: "123-456-7890",
-    Access: "User",
-  },
-  {
-    id: 4,
-    IDnumber: 4,
-    name: "Data Grid Premium",
-    DateOfApply: "the Premium version",
-    TimeOfApply: "30",
-    Role: "123-456-7890",
-    Access: "User",
-  },
-  {
-    id: 5,
-    IDnumber: 5,
-    name: "Data Grid Premium",
-    DateOfApply: "the Premium version",
-    TimeOfApply: "30",
-    Role: "123-456-7890",
-    Access: "Manager",
-  },
-];
-
-export default function ApplicantTable() {
+export default function ApplicantTable({ job }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-//   const { showModal } = useModal();
+  //   const { showModal } = useModal();
   const MyColumns = [
     {
       field: "IDnumber",
       headerName: "ID",
-      width: isMobile ? 70 : 90, 
+      width: isMobile ? 70 : 90,
       align: "center",
       headerAlign: "center",
     },
     {
       field: "name",
       headerName: "Name",
-      width: isMobile ? 150 : 200, 
+      width: isMobile ? 150 : 200,
       align: "center",
       headerAlign: "center",
     },
     {
-      field: "DateOfApply",
-      headerName: "Date Of Apply",
+      field: "Email",
+      headerName: "Email",
       width: isMobile ? 150 : 200,
       align: "center",
       headerAlign: "center",
       hide: isMobile,
     },
     {
-      field: "TimeOfApply",
-      headerName: "TimeOfApply",
+      field: "Phone",
+      headerName: "Phone",
+      width: 120,
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "DateOfApply",
+      headerName: "Date Of Apply",
       width: 150,
       align: "center",
       headerAlign: "center",
+      renderCell: (params) =>
+        format(new Date(params.row.DateOfApply), "MMMM d, yyyy"),
     },
     {
-      field: "Role",
-      headerName: "Role",
+      field: "Linkedin",
+      headerName: "Linkedin",
       width: isMobile ? 120 : 150,
       align: "center",
       headerAlign: "center",
-      hide: isMobile,
+      renderCell: (params) => {
+        return <a style={{ color: "blue" }} target="_blank" href={params.row.Linkedin}>linkedIn</a>;
+      },
     },
-    {
-      field: "Access",
-      headerName: "Access",
+     {
+      field: "Portfolio",
+      headerName: "Portfolio",
       width: 120,
+
       align: "center",
       headerAlign: "center",
-      renderCell: ({ row: { Access } }) => {
-        return (
-          <Box
-            sx={{
-              maxWidth: "80%",
-              mx: "auto",
-              my: "8px",
-              color: "white",
-              display: "flex",
-              textAlign: "center",
-              justifyContent: "space-evenly",
-              alignItems: "center",
-              p: "5px",
-              borderRadius: "5px",
-              backgroundColor:
-                Access === "Admin"
-                  ? theme.palette.success.main
-                  : Access === "ManTimeOfApplyr"
-                  ? theme.palette.warning.dark
-                  : theme.palette.secondary.dark,
-            }}
-          >
-            {Access === "Admin" ? (
-              <AdminPanelSettingsOutlinedIcon sx={{ fontSize: "small" }} />
-            ) : Access === "User" ? (
-              <LockOpenOutlinedIcon sx={{ fontSize: "small" }} />
-            ) : (
-              <SecurityOutlinedIcon sx={{ fontSize: "small" }} />
-            )}
-            <Typography sx={{ fontSize: "14px" }}>{Access}</Typography>
-          </Box>
-        );
+      renderCell: (params) => {
+        return <a href={params.row.Portfolio} target="_blank" style={{ color: "purple" }}>Portfolio</a>;
       },
     },
     {
-      field: "Actions",
-      headerName: "Actions",
+      field: "CV",
+      headerName: "CV",
       width: 120,
+      align: "center",
+      headerAlign: "center",
+      renderCell: ( params) => {
+        return <a href={"#"}>CV</a>;
+      },
+    },
+   
+    {
+      field: "Status",
+      headerName: "Status",
+      width: 150,
       align: "center",
       headerAlign: "center",
       renderCell: () => {
         return (
-          <Box sx={{ display: "flex", justifyContent: "center", gap: "5px" }}>
-            <Button
-              sx={{
-                my: "7px",
-                border: `1px solid ${theme.palette.secondary.main}`,
-                color: theme.palette.secondary.main,
-                width: "40px",
-                height: "30px",
-                minWidth: "30px",
-              }}
-              onClick={() =>
-                console.log("EditTeam")
-                // showModal("Edit Applicant", () => {
-                // })
-              }
-            >
-              <EditOutlinedIcon sx={{ fontSize: "small" }} />
-            </Button>
-            <Button
-              onClick={() =>
-                console.log("DeleteApplicant")
-                // showModal("You Sure wants to delete this Applicant", () => {
-                // })
-              }
-              sx={{
-                m: "7px",
-                border: `1px solid ${theme.palette.error.dark}`,
-                color: theme.palette.error.dark,
-                width: "43px",
-                height: "30px",
-                minWidth: "30px",
-              }}
-            >
-              <DeleteOutlineOutlinedIcon sx={{ fontSize: "small" }} />
-            </Button>
+          <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Accepted">Accepted</SelectItem>
+                <SelectItem value="Rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
           </Box>
         );
       },
-    }
+    },
   ];
+  const rows = job.jobApplications.$values.map((app) => ({
+    id: app.applicationID,
+    IDnumber: app.userID,
+    name: app.fullname,
+    Email: app.email,
+    Phone: app.phone,
+    DateOfApply: app.appliedDate,
+    Linkedin: app.linkedInLink,
+    Portfolio: app.portfolioLink,
+    Status: app.status,
+    CV: app.resumeFile,
+  }));
 
   return (
-    <Box sx={{ overflow: "hidden", p: 2, width: "100%", m: "auto" }}>
+    <Box sx={{ overflow: "hidden", p: 2, width: "100%" }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
         Applicant List
       </Typography>

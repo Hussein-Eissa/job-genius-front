@@ -154,10 +154,11 @@ const JobDetailPage = () => {
         <Dialog open={isApplicationOpen} onOpenChange={setIsApplicationOpen}>
           <div className=" max-h-[90vh] overflow-y-auto">
             <JobApplicationForm 
-              jobTitle={job.title}
-              companyName={job.company}
-              location={job.location}
-              type={job.type}
+              jobId={jobData.jobID}
+              jobTitle={jobData.title}
+              companyName={jobData.company}
+              location={`${jobData.city}, ${jobData.country}`}
+              type={jobData.type}
               onSubmit={handleApplicationSubmit}
             />
           </div>
