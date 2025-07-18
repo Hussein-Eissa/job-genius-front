@@ -16,6 +16,9 @@ interface JobDescriptionProps {
   skills?: string[];
   applyBefore?: string;
   catigories?: string[];
+  fullName?: string;
+  email?: string;
+  phone?: string;
 }
 
 const JobDescription = ({
@@ -32,6 +35,9 @@ const JobDescription = ({
   jobType,
   skills,
   catigories,
+  fullName,
+  email,
+  phone
 }: JobDescriptionProps) => {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -42,41 +48,43 @@ const JobDescription = ({
             <p className="text-gray-600 leading-relaxed">{description}</p>
           </section>
 
-          <section className="mb-8">
+      { responsibilities &&   <section className="mb-8">
             <h2 className="text-xl font-bold mb-4 text-gray-800">Responsibilities</h2>
             <ul className="space-y-3">
+              
               {Array.isArray(responsibilities)? responsibilities.map((item, index) => (
                 <li key={index} className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-600">{item}</span>
+                  
                 </li>
               )): (<p>{responsibilities}</p>)}
             </ul>
-          </section>
+          </section>}
 
-          <section className="mb-8">
+         {requirements && <section className="mb-8">
             <h2 className="text-xl font-bold mb-4 text-gray-800">Who You Are</h2>
             <ul className="space-y-3">
-              {Array.isArray(requirements)? requirements.map((item, index) => (
+              {  Array.isArray(requirements)? requirements.map((item, index) => (
                 <li key={index} className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-600">{item}</span>
                 </li>
               )): (<p>{requirements}</p>)}
             </ul>
-          </section>
+          </section>}
 
-          <section>
+        { niceTohaves && <section>
             <h2 className="text-xl font-bold mb-4 text-gray-800">Nice-To-Haves</h2>
             <ul className="space-y-3">
-              {Array.isArray(niceTohaves)? niceTohaves.map((item, index) => (
+              { Array.isArray(niceTohaves)? niceTohaves.map((item, index) => (
                 <li key={index} className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-600">{item}</span>
                 </li>
               )): (<p>{niceTohaves}</p>)}
             </ul>
-          </section>
+          </section>}
         </div>
 
         <div>
@@ -156,6 +164,13 @@ const JobDescription = ({
 
               
             </div>
+
+           { fullName && <div className="mt-6">
+              <h4 className="text-lg font-semibold mb-3">Recruiter Info</h4>
+              <p className="text-gray-600">{`Name :${fullName} `}</p>
+              {phone && <p className="text-gray-600">{`Phone :${phone}`}</p>}
+              {email && <p className="text-gray-600">{`Email :${email}`}</p>}
+            </div>}
           </div>
         </div>
       </div>

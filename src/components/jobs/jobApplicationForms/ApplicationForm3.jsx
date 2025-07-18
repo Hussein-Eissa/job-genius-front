@@ -72,6 +72,7 @@ const ApplicationForm3 = () => {
       : typeof formData.responsibilities === "string"
       ? formData.responsibilities
           .split(".")
+          .slice(0, -1)
           .filter((item) => typeof item === "string" && item.trim())
       : []
   );
@@ -83,6 +84,7 @@ const ApplicationForm3 = () => {
       : typeof formData.whoYouAre === "string"
       ? formData.whoYouAre
           .split(".")
+          .slice(0, -1)
           .filter((item) => typeof item === "string" && item.trim())
       : []
   );
@@ -94,6 +96,7 @@ const ApplicationForm3 = () => {
       : typeof formData.niceToHaves === "string"
       ? formData.niceToHaves
           .split(".")
+          .slice(0, -1)
           .filter((item) => typeof item === "string" && item.trim())
       : []
   );
@@ -199,7 +202,7 @@ const ApplicationForm3 = () => {
 
     // const formattedApplyBefore = new Date(data.applyBefore).toISOString();
     const formattedApplyBefore = data.applyBefore.split("T")[0];
-
+    
     const cleanedData = {
       title: data.title || "",
       company: data.company || "",
@@ -208,9 +211,9 @@ const ApplicationForm3 = () => {
       type: data.type || "",
       description: plainDescription,
       responsibilities:
-        responsibilities.length > 0 ? responsibilities.join(".") : "",
-      whoYouAre: whoYouAre.length > 0 ? whoYouAre.join(".") : "",
-      niceToHaves: niceToHaves.length > 0 ? niceToHaves.join(".") : "",
+        responsibilities.length > 0 ? responsibilities.join(".")+"." : "",
+      whoYouAre: whoYouAre.length > 0 ? whoYouAre.join(".")+"." : "",
+      niceToHaves: niceToHaves.length > 0 ? niceToHaves.join(".")+"." : "",
       capacity: Number(data.capacity) || 0,
       applyBefore: formattedApplyBefore,
       salaryFrom: Number(data.salaryFrom) || 0,
@@ -361,10 +364,6 @@ const ApplicationForm3 = () => {
                     value: 20,
                     message: "Job description must be at least 20 characters",
                   },
-                  maxLength: {
-                    value: 1050,
-                    message: "Job description must not exceed 1000 characters",
-                  },
                 }}
                 render={({ field }) => (
                   <>
@@ -377,7 +376,7 @@ const ApplicationForm3 = () => {
                       style={{ height: "180px", marginBottom: "40px" }}
                     />
                     <div className="text-sm text-gray-500 text-right">
-                      {description.replace(/<[^>]+>/g, "").length} / 1000
+                      {description.replace(/<[^>]+>/g, "").length} characters
                     </div>
                   </>
                 )}

@@ -119,9 +119,22 @@ const JobDetailPage = () => {
         <JobDescription 
           applyBefore={format(new Date(jobData.applyBefore), "MMMM d, yyyy")}
           description={jobData.description}
-          responsibilities={jobData.responsibilities.split(".").slice(0, -1)}
-          requirements={jobData.whoYouAre.split(".").slice(0, -1)} // jobData.whoyouare isn't an array  so do nice to have and responsibilites
-          niceTohaves={jobData.niceToHaves.split(".").slice(0, -1)}
+          responsibilities={
+            typeof jobData.responsibilities === "string" && jobData.responsibilities.includes(".")
+              ? jobData.responsibilities.split(".").slice(0, -1)
+              : jobData.responsibilities
+}
+
+          requirements={
+            typeof jobData.whoYouAre === "string" && jobData.whoYouAre.includes(".")
+              ? jobData.whoYouAre.split(".").slice(0, -1)
+              : jobData.whoYouAre
+          }
+          niceTohaves={
+            typeof jobData.niceToHaves === "string" && jobData.niceToHaves.includes(".")
+              ? jobData.niceToHaves.split(".").slice(0, -1)
+              : jobData.niceToHaves
+          }
           datePosted={format(new Date(jobData.jobPostedOn), "MMMM d, yyyy")}
           salary={` from ${jobData.salaryFrom} to ${jobData.salaryTo}`}
           jobType={jobData.type}
@@ -129,9 +142,12 @@ const JobDetailPage = () => {
           skills={jobData.skills.$values}
           appliedCount={jobData.applicationSent}
           capacity={jobData.capacity}
+          fullName={jobData.fullname}
+          email={jobData.email}
+          phone={jobData.phone}
         />
         
-        <JobBenefits   />
+        <JobBenefits benefits={jobData.jobBenefits.$values} />
         
         <SimilarJobs />
 
