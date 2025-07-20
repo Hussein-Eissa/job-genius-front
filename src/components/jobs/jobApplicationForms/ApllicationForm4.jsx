@@ -35,14 +35,16 @@ const ApplicationForm4 = () => {
           ? formData.questions.map((q) => ({
               ...q,
               answers:
-                q.type === "Multiple Choice" && typeof q.answers === "string"
-                  ? q.answers.split(".").filter((opt) => opt)
-                  : q.type === "True/False"
+                q.type === "select_one" && typeof q.answers === "string"
+                  ? JSON.parse(q.answers)
+                  : q.type === "true_false"
                   ? ["True", "False"]
+                  : q.type === "short_text" || q.type === "long_text"
+                  ? null
                   : [],
-              correct: q.correct || "",
+              correct: q.correct || null,
             }))
-          : [{ title: "", type: "", answers: [], correct: "" }],
+          : [{ title: "", type: "", answers: null, correct: null }],
     },
   });
 
@@ -52,10 +54,10 @@ const ApplicationForm4 = () => {
   });
 
   const QuestionTypes = [
-    { value: "Short Answer", label: "Short Answer" },
-    { value: "Long Answer", label: "Long Answer" },
-    { value: "Multiple Choice", label: "Multiple Choice" },
-    { value: "True/False", label: "True/False" },
+    { value: "short_text", label: "Short Answer" },
+    { value: "long_text", label: "Long Answer" },
+    { value: "select_one", label: "Multiple Choice" },
+    { value: "true_false", label: "True / False" },
   ];
 
   const onSubmit = async (data) => {
@@ -80,34 +82,27 @@ const ApplicationForm4 = () => {
       return;
     }
 
-    const processedData = {
-      questions: data.questions.map((question) => ({
-        title: question.title,
-        type: question.type,
-        answers:
-          question.type === "Multiple Choice" && Array.isArray(question.answers)
-            ? question.answers
-                .filter((opt) => opt && opt.trim())
-                .map((opt) => opt.trim())
-                .join(".")
-            : question.type === "True/False"
-            ? "True.False"
-            : "",
-        correct: "In Progress",
-      })),
-    };
+    const processedData = data.questions.map((question) => ({
+      title: question.title,
+      type: question.type,
+      answers:
+        question.type === "select_one" || question.type === "true_false"
+          ? JSON.stringify(
+              question.type === "true_false" ? ["True", "False"] : question.answers
+            )
+          : null,
+      correct: question.correct || null,
+    }));
+
     console.log("Submitted Form Data:", JSON.stringify(processedData, null, 2));
-    updateForm(processedData);
+    updateForm({ questions: processedData });
     localStorage.setItem("formData4", JSON.stringify(processedData));
 
     try {
-      console.log(
-        "Sending request with token:",
-        token.substring(0, 10) + "..."
-      );
+      console.log("Sending request with token:", token.substring(0, 10) + "...");
       const response = await axios.post(
-        `https://jobgenius.bsite.net/api/JobListing/${jobId}/questions`,
-        processedData.questions, // Send questions array directly
+        `https://jobgenius.bsite.net/api/JobListing/${jobId}/questions/bulk`,
+        processedData,
         {
           headers: {
             "Content-Type": "application/json",
@@ -122,6 +117,7 @@ const ApplicationForm4 = () => {
         console.error("Submission failed:", response.status);
         toast({
           title: "Failed to Submit Job Questions",
+          description: `Unexpected status code: ${response.status}`,
           variant: "destructive",
         });
       }
@@ -130,9 +126,16 @@ const ApplicationForm4 = () => {
         "Error submitting job Questions:",
         error.response?.data || error
       );
+      console.log(
+        "Detailed server errors:",
+        JSON.stringify(error.response?.data?.errors, null, 2)
+      );
       toast({
         title: "Error Submitting Job Questions",
-        description: error.response?.data?.message || "An error occurred",
+        description:
+          error.response?.data?.errors
+            ? JSON.stringify(error.response.data.errors, null, 2)
+            : error.response?.data?.message || "An error occurred",
         variant: "destructive",
       });
     }
@@ -140,13 +143,23 @@ const ApplicationForm4 = () => {
 
   const renderQuestionInput = (index, field) => {
     switch (field.type) {
-      case "Short Answer":
+      case "short_text":
+      case "long_text":
         return (
           <>
             <Input
               {...register(`questions.${index}.title`, {
                 required: "Question is required",
-                maxLength: 200,
+                minLength: {
+                  value: 1,
+                  message: "Question title must be at least 1 character",
+                },
+                maxLength: {
+                  value: field.type === "short_text" ? 200 : 1000,
+                  message: `Question title cannot exceed ${
+                    field.type === "short_text" ? 200 : 1000
+                  } characters`,
+                },
               })}
               placeholder="Enter question"
               className="w-full"
@@ -158,30 +171,20 @@ const ApplicationForm4 = () => {
             )}
           </>
         );
-      case "Long Answer":
-        return (
-          <>
-            <Input
-              {...register(`questions.${index}.title`, {
-                required: "Question is required",
-                maxLength: 1000,
-              })}
-              placeholder="Enter question"
-              className="w-full"
-            />
-            {errors?.questions?.[index]?.title && (
-              <p className="text-red-500">
-                {errors?.questions?.[index]?.title?.message}
-              </p>
-            )}
-          </>
-        );
-      case "Multiple Choice":
+      case "select_one":
         return (
           <Stack spacing={2}>
             <Input
               {...register(`questions.${index}.title`, {
                 required: "Question is required",
+                minLength: {
+                  value: 1,
+                  message: "Question title must be at least 1 character",
+                },
+                maxLength: {
+                  value: 200,
+                  message: "Question title cannot exceed 200 characters",
+                },
               })}
               placeholder="Enter question"
               className="w-full"
@@ -191,37 +194,38 @@ const ApplicationForm4 = () => {
               control={control}
               rules={{
                 validate: (value) =>
-                  (Array.isArray(value) && value.some((opt) => opt.trim())) ||
-                  "At least one option is required",
+                  (Array.isArray(value) &&
+                    value.length >= 2 &&
+                    value.every((opt) => opt.trim())) ||
+                  "At least two non-empty options are required",
               }}
               render={({ field: { onChange, value } }) => (
                 <Stack spacing={1} sx={{ maxHeight: 150, overflow: "auto" }}>
-                  {(Array.isArray(value) ? value : []).map(
-                    (option, optIndex) => (
-                      <Stack key={optIndex} direction="row" spacing={1}>
-                        <Input
-                          placeholder={`Option ${optIndex + 1}`}
-                          onChange={(e) => {
-                            const newAnswers = [...value];
-                            newAnswers[optIndex] = e.target.value;
-                            onChange(newAnswers);
-                          }}
-                          value={option || ""}
-                        />
-                        <Button
-                          type="button"
-                          size="icon"
-                          onClick={() => {
-                            const newAnswers = [...value];
-                            newAnswers.splice(optIndex, 1);
-                            onChange(newAnswers);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </Stack>
-                    )
-                  )}
+                  {(Array.isArray(value) ? value : []).map((option, optIndex) => (
+                    <Stack key={optIndex} direction="row" spacing={1}>
+                      <Input
+                        placeholder={`Option ${optIndex + 1}`}
+                        onChange={(e) => {
+                          const newAnswers = [...value];
+                          newAnswers[optIndex] = e.target.value;
+                          onChange(newAnswers);
+                        }}
+                        value={option || ""}
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        onClick={() => {
+                          const newAnswers = [...value];
+                          newAnswers.splice(optIndex, 1);
+                          onChange(newAnswers);
+                        }}
+                        disabled={value.length <= 2}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </Stack>
+                  ))}
                   <Button
                     type="button"
                     variant="outline"
@@ -232,10 +236,9 @@ const ApplicationForm4 = () => {
                 </Stack>
               )}
             />
-
-            {errors?.questions?.[index]?.correct && (
+            {errors?.questions?.[index]?.title && (
               <p className="text-red-500">
-                {errors?.questions?.[index]?.correct?.message}
+                {errors?.questions?.[index]?.title?.message}
               </p>
             )}
             {errors?.questions?.[index]?.answers && (
@@ -245,30 +248,23 @@ const ApplicationForm4 = () => {
             )}
           </Stack>
         );
-      case "True/False":
+      case "true_false":
         return (
           <>
             <Input
               {...register(`questions.${index}.title`, {
                 required: "Question is required",
+                minLength: {
+                  value: 1,
+                  message: "Question title must be at least 1 character",
+                },
+                maxLength: {
+                  value: 200,
+                  message: "Question title cannot exceed 200 characters",
+                },
               })}
               placeholder="Enter question"
               className="w-full"
-            />
-            <Controller
-              name={`questions.${index}.correct`}
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <Select onValueChange={onChange} value={value}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select correct answer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="True">True</SelectItem>
-                    <SelectItem value="False">False</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
             />
             {errors?.questions?.[index]?.title && (
               <p className="text-red-500">
@@ -302,7 +298,7 @@ const ApplicationForm4 = () => {
           sx={{ width: { xs: "100%", lg: "70%" } }}
         >
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-           Job Questions
+            Job Questions
           </Typography>
           <Typography variant="body1">
             Add questions to your job application form
@@ -330,13 +326,15 @@ const ApplicationForm4 = () => {
                         field.onChange(value);
                         setValue(
                           `questions.${index}.answers`,
-                          value === "Multiple Choice"
-                            ? [""]
-                            : value === "True/False"
+                          value === "select_one"
+                            ? ["", ""]
+                            : value === "true_false"
                             ? ["True", "False"]
+                            : value === "short_text" || value === "long_text"
+                            ? null
                             : []
                         );
-                        setValue(`questions.${index}.correct`, "");
+                        setValue(`questions.${index}.correct`, null);
                       }}
                       value={field.value}
                     >
@@ -378,7 +376,7 @@ const ApplicationForm4 = () => {
           <Button
             type="button"
             onClick={() =>
-              append({ title: "", type: "", answers: [], correct: "" })
+              append({ title: "", type: "", answers: null, correct: null })
             }
           >
             Add Question
@@ -422,30 +420,3 @@ const ApplicationForm4 = () => {
 };
 
 export default ApplicationForm4;
-
-// <Controller
-//   name={`questions.${index}.correct`}
-//   control={control}
-//   rules={{
-//     validate: (value) =>
-//       !value ||
-//       (Array.isArray(field.answers) && field.answers.includes(value)) ||
-//       "Correct answer must be one of the options",
-//   }}
-//   render={({ field: { onChange, value } }) => (
-//     <Select onValueChange={onChange} value={value}>
-//       <SelectTrigger className="w-full">
-//         <SelectValue placeholder="Select correct answer" />
-//       </SelectTrigger>
-//       <SelectContent>
-//         {(Array.isArray(field.answers) ? field.answers : [])
-//           .filter((opt) => opt.trim())
-//           .map((option, optIndex) => (
-//             <SelectItem key={optIndex} value={option}>
-//               {option}
-//             </SelectItem>
-//           ))}
-//       </SelectContent>
-//     </Select>
-//   )}
-// />

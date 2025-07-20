@@ -5,6 +5,7 @@ import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import Tab2 from "./Tab2";
 import Tab from "./Tab1";
 import Tab3 from "./Tab3";
+import Tab4 from "./Tab4";
 
 export default function Tab1({ jobdeails }) {
   const [page, setPage] = React.useState(1);
@@ -21,6 +22,8 @@ export default function Tab1({ jobdeails }) {
         return <Tab2 onNext={() => setPage(3)} job={jobdeails} />;
       case 3:
         return <Tab3 job={jobdeails} />;
+      case 4:
+        return <Tab4 job={jobdeails} />;  
       default:
         return null;
     }
@@ -78,7 +81,7 @@ export default function Tab1({ jobdeails }) {
 
       {/* Pagination */}
       <Pagination
-        count={3}
+        count={4}
         shape="rounded"
         color="primary"
         page={page}

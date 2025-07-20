@@ -39,7 +39,7 @@ export const JobFormProvider = ({ children }) => {
       {
         title: "",
         type: "",
-        answers: "Not defined yet",
+        answers: [] || "",
         correct: "In Progress",
       },
     ],
