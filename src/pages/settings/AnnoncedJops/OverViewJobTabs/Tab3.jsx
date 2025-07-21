@@ -419,6 +419,7 @@ const Tab3 = ({ job }) => {
       );
       console.log("Server response:", response.data);
       if (response.status === 200) {
+        window.history.back();
         console.log("Job Application Updated Successfully");
         toast({ title: "Job Application Updated Successfully" });
       }

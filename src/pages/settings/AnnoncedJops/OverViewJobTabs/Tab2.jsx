@@ -39,81 +39,43 @@ const Tab2 = ({ onNext, job }) => {
     ],
   };
 
-  // Initialize formData with job data or localStorage on mount
+  // Initialize formData with job data or localStorage only once on mount
   useEffect(() => {
-    console.log("job prop on render:", job);
-    const savedData = localStorage.getItem("formData2");
-    const initialFormData = savedData ? JSON.parse(savedData) : {};
+    if (!formData.company && !formData.city && !formData.country && !formData.companyWebsite && !formData.description) {
+      const savedData = localStorage.getItem("formData2");
+      const initialFormData = savedData ? JSON.parse(savedData) : {};
 
-    // Only initialize if formData is empty or job data differs
-    const needsUpdate =
-      !formData.company ||
-      !formData.city ||
-      !formData.country ||
-      !formData.description ||
-      (job &&
-        (job.company !== formData.company ||
-          job.city !== formData.city ||
-          job.country !== formData.country ||
-          job.description !== formData.description ||
-          job.companyWebsite !== formData.companyWebsite));
-
-    if (needsUpdate) {
       const jobFormData = {
-        company: initialFormData.company || job?.company || formData.company || "",
-        city: initialFormData.city || job?.city || formData.city || "",
-        country: initialFormData.country || job?.country || formData.country || "",
-        companyWebsite:
-          initialFormData.companyWebsite || job?.companyWebsite || formData.companyWebsite || "",
-        description:
-          initialFormData.description || job?.description || formData.description || "",
+        company: job?.company || initialFormData.company || formData.company || "",
+        city: job?.city || initialFormData.city || formData.city || "",
+        country: job?.country || initialFormData.country || formData.country || "",
+        companyWebsite: job?.companyWebsite || initialFormData.companyWebsite || formData.companyWebsite || "",
+        description: job?.description || initialFormData.description || formData.description || "",
         // Preserve Tab1 and Tab3 fields
-        title: formData.title || job?.title || "",
-        type: formData.type || job?.type || "",
-        responsibilities: formData.responsibilities || job?.responsibilities || "",
-        whoYouAre: formData.whoYouAre || job?.whoYouAre || "",
-        niceToHaves: formData.niceToHaves || job?.niceToHaves || "",
-        capacity: formData.capacity || job?.capacity || 0,
-        applyBefore:
-          formData.applyBefore ||
-          (job?.applyBefore ? job.applyBefore.split("T")[0] : "") ||
-          "",
-        salaryFrom: formData.salaryFrom || job?.salaryFrom || 0,
-        salaryTo: formData.salaryTo || job?.salaryTo || 0,
-        keywords: formData.keywords || job?.keywords || "",
-        additionalInformation:
-          formData.additionalInformation || job?.additionalInformation || "",
-        companyPapers: formData.companyPapers || job?.companyPapers || "",
-        categories:
-          formData.categories ||
-          (Array.isArray(job?.categories?.$values)
-            ? job.categories.$values
-            : toArray(job?.categories, ",")) ||
-          [],
-        skills:
-          formData.skills ||
-          (Array.isArray(job?.skills?.$values)
-            ? job.skills.$values
-            : toArray(job?.skills, ",")) ||
-          [],
-        jobBenefits:
-          formData.jobBenefits ||
-          (Array.isArray(job?.jobBenefits?.$values)
-            ? job.jobBenefits.$values
-            : typeof job?.jobBenefits === "string"
-            ? JSON.parse(job.jobBenefits || "[]")
-            : []) ||
-          [],
-        fullname: formData.fullname || job?.fullname || "",
-        email: formData.email || job?.email || "",
-        phone: formData.phone || job?.phone || "",
+        title: job?.title || initialFormData.title || formData.title || "",
+        type: job?.type || initialFormData.type || formData.type || "",
+        responsibilities: job?.responsibilities || initialFormData.responsibilities || formData.responsibilities || "",
+        whoYouAre: job?.whoYouAre || initialFormData.whoYouAre || formData.whoYouAre || "",
+        niceToHaves: job?.niceToHaves || initialFormData.niceToHaves || formData.niceToHaves || "",
+        capacity: job?.capacity || initialFormData.capacity || formData.capacity || 0,
+        applyBefore: job?.applyBefore ? job.applyBefore.split("T")[0] : initialFormData.applyBefore || formData.applyBefore || "",
+        salaryFrom: job?.salaryFrom || initialFormData.salaryFrom || formData.salaryFrom || 0,
+        salaryTo: job?.salaryTo || initialFormData.salaryTo || formData.salaryTo || 0,
+        keywords: job?.keywords || initialFormData.keywords || formData.keywords || "",
+        additionalInformation: job?.additionalInformation || initialFormData.additionalInformation || formData.additionalInformation || "",
+        companyPapers: job?.companyPapers || initialFormData.companyPapers || formData.companyPapers || "",
+        categories: Array.isArray(job?.categories?.$values) ? job.categories.$values : toArray(job?.categories || initialFormData.categories || formData.categories, ",") || [],
+        skills: Array.isArray(job?.skills?.$values) ? job.skills.$values : toArray(job?.skills || initialFormData.skills || formData.skills, ",") || [],
+        jobBenefits: Array.isArray(job?.jobBenefits?.$values) ? job.jobBenefits.$values : typeof job?.jobBenefits === "string" ? JSON.parse(job.jobBenefits || "[]") : initialFormData.jobBenefits || formData.jobBenefits || [],
+        fullname: job?.fullname || initialFormData.fullname || formData.fullname || "",
+        email: job?.email || initialFormData.email || formData.email || "",
+        phone: job?.phone || initialFormData.phone || formData.phone || "",
       };
       updateForm(jobFormData);
       localStorage.setItem("formData2", JSON.stringify(jobFormData));
       console.log("Initialized formData:", jobFormData);
     }
-  }, [job, updateForm, formData]); 
-  // Include formData to check for changes
+  }, [job, updateForm]); // Only re-run if job or updateForm changes
 
   // Helper function to ensure array initialization
   const toArray = (data, separator = ",") => {
@@ -121,11 +83,6 @@ const Tab2 = ({ onNext, job }) => {
     if (typeof data === "string" && data) return data.split(separator).map(item => item.trim()).filter(item => item);
     return [];
   };
-
-  // Log formData changes for debugging
-  // useEffect(() => {
-  //   console.log("Updated formData:", formData);
-  // }, [formData]);
 
   const onSubmit = (data) => {
     const cleanedData = {
@@ -140,36 +97,15 @@ const Tab2 = ({ onNext, job }) => {
       whoYouAre: formData.whoYouAre || job?.whoYouAre || "",
       niceToHaves: formData.niceToHaves || job?.niceToHaves || "",
       capacity: formData.capacity || job?.capacity || 0,
-      applyBefore:
-        formData.applyBefore ||
-        (job?.applyBefore ? job.applyBefore.split("T")[0] : "") ||
-        "",
+      applyBefore: formData.applyBefore || (job?.applyBefore ? job.applyBefore.split("T")[0] : "") || "",
       salaryFrom: formData.salaryFrom || job?.salaryFrom || 0,
       salaryTo: formData.salaryTo || job?.salaryTo || 0,
       keywords: formData.keywords || job?.keywords || "",
-      additionalInformation:
-        formData.additionalInformation || job?.additionalInformation || "",
+      additionalInformation: formData.additionalInformation || job?.additionalInformation || "",
       companyPapers: formData.companyPapers || job?.companyPapers || "",
-      categories:
-        formData.categories ||
-        (Array.isArray(job?.categories?.$values)
-          ? job.categories.$values
-          : toArray(job?.categories, ",")) ||
-        [],
-      skills:
-        formData.skills ||
-        (Array.isArray(job?.skills?.$values)
-          ? job.skills.$values
-          : toArray(job?.skills, ",")) ||
-        [],
-      jobBenefits:
-        formData.jobBenefits ||
-        (Array.isArray(job?.jobBenefits?.$values)
-          ? job.jobBenefits.$values
-          : typeof job?.jobBenefits === "string"
-          ? JSON.parse(job.jobBenefits || "[]")
-          : []) ||
-        [],
+      categories: formData.categories || (Array.isArray(job?.categories?.$values) ? job.categories.$values : toArray(job?.categories, ",")) || [],
+      skills: formData.skills || (Array.isArray(job?.skills?.$values) ? job.skills.$values : toArray(job?.skills, ",")) || [],
+      jobBenefits: formData.jobBenefits || (Array.isArray(job?.jobBenefits?.$values) ? job.jobBenefits.$values : typeof job?.jobBenefits === "string" ? JSON.parse(job.jobBenefits || "[]") : []) || [],
       fullname: formData.fullname || job?.fullname || "",
       email: formData.email || job?.email || "",
       phone: formData.phone || job?.phone || "",
@@ -195,7 +131,6 @@ const Tab2 = ({ onNext, job }) => {
       city: "",
       country: "",
       companyWebsite: "",
-
     };
     updateForm(clearedData);
     localStorage.setItem("formData2", JSON.stringify(clearedData));
@@ -370,8 +305,6 @@ const Tab2 = ({ onNext, job }) => {
                   </Stack>
                 </Stack>
               </div>
-
-
             </Stack>
           </Stack>
 

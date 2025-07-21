@@ -23,7 +23,9 @@ export default function Tab1({ jobdeails }) {
       case 3:
         return <Tab3 job={jobdeails} />;
       case 4:
-        return <Tab4 job={jobdeails} />;  
+        return (
+          jobdeails?.questions?.$values?.length > 0 ?<Tab4 job={jobdeails} />: window.history.back()
+        );
       default:
         return null;
     }
@@ -31,8 +33,6 @@ export default function Tab1({ jobdeails }) {
 
   return (
     <Stack direction={"column"}>
-      
-
       {/* Render dynamic tab */}
       {renderCurrentTab()}
 
@@ -81,7 +81,7 @@ export default function Tab1({ jobdeails }) {
 
       {/* Pagination */}
       <Pagination
-        count={4}
+        count={jobdeails?.questions?.$values?.length > 0 ? 4 : 3}
         shape="rounded"
         color="primary"
         page={page}

@@ -40,7 +40,7 @@ const UpdateQuestionsForm = ({ job }) => {
           ? job.questions.$values.map((q) => ({
               questionId: q.questionId,
               title: q.title || "",
-              type: q.type || "",
+              type: q.type || "short_text", // Default to short_text for initial render
               answers:
                 q.type === "select_one" && typeof q.answers === "string"
                   ? JSON.parse(q.answers)
@@ -78,7 +78,7 @@ const UpdateQuestionsForm = ({ job }) => {
         ? job.questions.$values.map((q) => ({
             questionId: q.questionId,
             title: q.title || "",
-            type: q.type || "",
+            type: q.type || "short_text", // Default to short_text for initial render
             answers:
               q.type === "select_one" && typeof q.answers === "string"
                 ? JSON.parse(q.answers)
@@ -102,40 +102,44 @@ const UpdateQuestionsForm = ({ job }) => {
 
   const handleDeleteQuestion = async (questionId) => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      toast({
-        title: "Authentication Error",
-        description: "No token found. Please log in again.",
-        variant: "destructive",
-      });
-      return;
-    }
+    const indexToRemove = fields.findIndex((field) => field.questionId === questionId);
 
-    try {
-      await axios.delete(
-        `https://jobgenius.bsite.net/api/JobListing/${job.jobID}/questions/${questionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      // Remove the question from the form state after successful deletion
-      const indexToRemove = fields.findIndex(
-        (field) => field.questionId === questionId
-      );
-      if (indexToRemove !== -1) {
-        remove(indexToRemove);
+    if (indexToRemove === -1) return;
+
+    if (questionId === null) {
+      // Recently added question, remove from state without API call
+      remove(indexToRemove);
+      toast({ title: "Question Removed Successfully" });
+    } else {
+      // Stored question, delete via API
+      if (!token) {
+        toast({
+          title: "Authentication Error",
+          description: "No token found. Please log in again.",
+          variant: "destructive",
+        });
+        return;
       }
-      toast({ title: "Question Deleted Successfully" });
-    } catch (error) {
-      console.error("Error deleting question:", error.response?.data || error);
-      toast({
-        title: "Error Deleting Question",
-        description:
-          error.response?.data?.message || "Failed to delete question",
-        variant: "destructive",
-      });
+
+      try {
+        await axios.delete(
+          `https://jobgenius.bsite.net/api/JobListing/questions/${questionId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        remove(indexToRemove);
+        toast({ title: "Question Deleted Successfully" });
+      } catch (error) {
+        console.error("Error deleting question:", error.response?.data || error);
+        toast({
+          title: "Error Deleting Question",
+          description: error.response?.data?.message || "Failed to delete question",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -143,7 +147,7 @@ const UpdateQuestionsForm = ({ job }) => {
     append({
       questionId: null,
       title: "",
-      type: "short_text", // Set default type to show text field immediately
+      type: "short_text", // Default type to ensure input shows immediately
       answers: null,
       correct: null,
     });
@@ -170,33 +174,24 @@ const UpdateQuestionsForm = ({ job }) => {
       });
       return;
     }
-    const processedQuestions = data.questions.map((question) => ({
-      questionId: question.questionId,
-      title: question.title,
-      type: question.type,
-      answers:
-        question.type === "select_one" || question.type === "true_false"
-          ? JSON.stringify(
-              question.type === "true_false"
-                ? ["True", "False"]
-                : question.answers
-            )
-          : null,
-      correct: question.correct || null,
-    }));
 
-    console.log("Processed Questions:", processedQuestions);
     setIsSubmitting(true);
     try {
-      // Placeholder for adding new questions - replace with actual POST endpoint if available
-      const newQuestions = processedQuestions.filter((q) => !q.questionId);
-      if (newQuestions.length > 0) {
-        console.warn(
-          "Adding new questions is not implemented. Provide POST endpoint."
-        );
-       await axios.post(`https://jobgenius.bsite.net/api/JobListing/${job.jobID}/questions`, newQuestions[0], { headers: { Authorization: `Bearer ${token}` } });
-      }
+      const processedQuestions = data.questions.map((question) => ({
+        questionId: question.questionId,
+        title: question.title,
+        type: question.type,
+        answers:
+          question.type === "select_one" || question.type === "true_false"
+            ? JSON.stringify(
+                question.type === "true_false" ? ["True", "False"] : question.answers
+              )
+            : null,
+        correct: question.correct || null,
+      }));
 
+      // Collect all questions (existing, edited, new) into one array
+      console.log("All Processed Questions:", processedQuestions);
       const response = await axios.put(
         `https://jobgenius.bsite.net/api/JobListing/${job.jobID}/questions/bulk`,
         processedQuestions,
@@ -210,6 +205,7 @@ const UpdateQuestionsForm = ({ job }) => {
 
       if (response.status === 200) {
         console.log("Job Questions Updated Successfully");
+        window.history.back();
         toast({ title: "Job Questions Updated Successfully" });
         updateForm({ questions: data.questions });
         localStorage.setItem(
@@ -220,19 +216,14 @@ const UpdateQuestionsForm = ({ job }) => {
         throw new Error(`Failed to update questions: ${response.status}`);
       }
     } catch (error) {
-      console.error(
-        "Error updating job questions:",
-        error.response?.data || error
-      );
-      console.log(
-        "Detailed server errors:",
-        JSON.stringify(error.response?.data?.errors, null, 2)
-      );
+      console.error("Error updating job questions:", error.response?.data || error);
+      console.log("Detailed server errors:", JSON.stringify(error.response?.data?.errors, null, 2));
       toast({
         title: "Error Updating Job Questions",
-        description: error.response?.data?.errors
-          ? JSON.stringify(error.response.data.errors, null, 2)
-          : error.message || "An error occurred",
+        description:
+          error.response?.data?.errors
+            ? JSON.stringify(error.response.data.errors, null, 2)
+            : error.message || "An error occurred",
         variant: "destructive",
       });
     } finally {
@@ -264,9 +255,7 @@ const UpdateQuestionsForm = ({ job }) => {
               style={{ width: "100%" }}
             />
             {errors?.questions?.[index]?.title && (
-              <p
-                style={{ color: "#EF4444", fontSize: "14px", marginTop: "4px" }}
-              >
+              <p style={{ color: "#EF4444", fontSize: "14px", marginTop: "4px" }}>
                 {errors.questions[index].title.message}
               </p>
             )}
@@ -302,32 +291,30 @@ const UpdateQuestionsForm = ({ job }) => {
               }}
               render={({ field: { onChange, value } }) => (
                 <Stack spacing={1} sx={{ maxHeight: 150, overflowY: "auto" }}>
-                  {(Array.isArray(value) ? value : []).map(
-                    (option, optIndex) => (
-                      <Stack key={optIndex} direction="row" spacing={1}>
-                        <Input
-                          placeholder={`Option ${optIndex + 1}`}
-                          onChange={(e) => {
-                            const newAnswers = [...value];
-                            newAnswers[optIndex] = e.target.value;
-                            onChange(newAnswers);
-                          }}
-                          value={option || ""}
-                        />
-                        <IconButton
-                          onClick={() => {
-                            const newAnswers = [...value];
-                            newAnswers.splice(optIndex, 1);
-                            onChange(newAnswers);
-                          }}
-                          disabled={value.length <= 2}
-                          sx={{ color: "#EF4444" }}
-                        >
-                          <CloseOutlinedIcon />
-                        </IconButton>
-                      </Stack>
-                    )
-                  )}
+                  {(Array.isArray(value) ? value : []).map((option, optIndex) => (
+                    <Stack key={optIndex} direction="row" spacing={1}>
+                      <Input
+                        placeholder={`Option ${optIndex + 1}`}
+                        onChange={(e) => {
+                          const newAnswers = [...value];
+                          newAnswers[optIndex] = e.target.value;
+                          onChange(newAnswers);
+                        }}
+                        value={option || ""}
+                      />
+                      <IconButton
+                        onClick={() => {
+                          const newAnswers = [...value];
+                          newAnswers.splice(optIndex, 1);
+                          onChange(newAnswers);
+                        }}
+                        disabled={value.length <= 2}
+                        sx={{ color: "#EF4444" }}
+                      >
+                        <CloseOutlinedIcon />
+                      </IconButton>
+                    </Stack>
+                  ))}
                   <Button
                     variant="outlined"
                     onClick={() => onChange([...(value || []), ""])}
@@ -339,16 +326,12 @@ const UpdateQuestionsForm = ({ job }) => {
               )}
             />
             {errors?.questions?.[index]?.title && (
-              <p
-                style={{ color: "#EF4444", fontSize: "14px", marginTop: "4px" }}
-              >
+              <p style={{ color: "#EF4444", fontSize: "14px", marginTop: "4px" }}>
                 {errors.questions[index].title.message}
               </p>
             )}
             {errors?.questions?.[index]?.answers && (
-              <p
-                style={{ color: "#EF4444", fontSize: "14px", marginTop: "4px" }}
-              >
+              <p style={{ color: "#EF4444", fontSize: "14px", marginTop: "4px" }}>
                 {errors.questions[index].answers.message}
               </p>
             )}
@@ -373,9 +356,7 @@ const UpdateQuestionsForm = ({ job }) => {
               style={{ width: "100%" }}
             />
             {errors?.questions?.[index]?.title && (
-              <p
-                style={{ color: "#EF4444", fontSize: "14px", marginTop: "4px" }}
-              >
+              <p style={{ color: "#EF4444", fontSize: "14px", marginTop: "4px" }}>
                 {errors.questions[index].title.message}
               </p>
             )}
@@ -466,14 +447,13 @@ const UpdateQuestionsForm = ({ job }) => {
                                 ? ["", ""]
                                 : value === "true_false"
                                 ? ["True", "False"]
-                                : value === "short_text" ||
-                                  value === "long_text"
+                                : value === "short_text" || value === "long_text"
                                 ? null
                                 : []
                             );
                             setValue(`questions.${index}.correct`, null);
                           }}
-                          value={field.value}
+                          value={field.value || "short_text"} // Default to short_text if undefined
                         >
                           <SelectTrigger style={{ width: "100%" }}>
                             <SelectValue placeholder="Select question type" />
@@ -536,8 +516,7 @@ const UpdateQuestionsForm = ({ job }) => {
                 Job Questions Tips
               </Typography>
               <Typography sx={{ fontSize: "14px", color: "#6B7280" }}>
-                Edit, delete, or add questions as needed. Provide a POST
-                endpoint for new questions if required.
+                Edit, delete, or add questions as needed.
               </Typography>
             </Paper>
           </Stack>
